@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/date_names.dart';
 
 /// نوار تاریخ شمسی: یک هفته (شنبه تا جمعه) با رفتن به هفته‌ی قبل/بعد.
 /// روزهای آینده غیرفعال‌اند.
@@ -46,7 +47,7 @@ class DateStrip extends StatelessWidget {
           Expanded(
             child: _Day(
               key: Key('day-${dayKey(d)}'),
-              label: shortWeekday(d),
+              label: t.weekdayShort(d),
               number: toPersianDigits('${jalaliDay(d)}'),
               selected: d == selected,
               isToday: d == today,

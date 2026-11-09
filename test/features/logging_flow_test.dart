@@ -4,6 +4,8 @@ import 'package:calorie_lens/data/db/app_database.dart';
 import 'package:calorie_lens/data/foods/food_repository.dart';
 import 'package:calorie_lens/data/logs/food_log_repository.dart';
 import 'package:calorie_lens/data/profile/profile_repository.dart';
+import 'package:calorie_lens/l10n/app_localizations_fa.dart';
+import 'package:calorie_lens/l10n/date_names.dart';
 import 'package:calorie_lens/core/nutrition/serving.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -66,15 +68,18 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('ثبت یک غذای اخیر از جستجو با ۳ لمس', (tester) async {
+  testWidgets('منوی «ثبت غذا»: غذای اخیر با ۳ لمس', (tester) async {
     await seedProfile(tester);
     await seedLog(tester, yesterday, 'chelo');
     await pumpApp(tester, db, onboardingDone: true);
 
     taps = 0;
     await tap(tester, find.byKey(const Key('fab-log')));
+    // منو: عکس/گالری/صوتی هنوز «به‌زودی»، جستجو فعال، و غذاهای اخیر.
+    expect(find.text('به‌زودی'), findsNWidgets(3));
+    expect(find.byKey(const Key('action-search')), findsOneWidget);
     expect(find.text('اخیر'), findsOneWidget);
-    await tap(tester, find.byKey(const Key('food-chelo')).first);
+    await tap(tester, find.byKey(const Key('sheet-food-chelo')));
     await tap(tester, find.byKey(const Key('save-log')));
     expect(taps, lessThanOrEqualTo(3));
 
@@ -94,6 +99,8 @@ void main() {
     await pumpApp(tester, db, onboardingDone: true);
 
     await tester.tap(find.byKey(const Key('fab-log')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('action-search')));
     await settle(tester);
     await tester.enterText(find.byKey(const Key('search-field')), 'قرمه سبزي');
     await settle(tester);
@@ -128,6 +135,34 @@ void main() {
     await disposeApp(tester);
   });
 
+  testWidgets('ثبت با جستجو از «+» وعده: ۳ لمس (به‌جز تایپ)', (tester) async {
+    await seedProfile(tester);
+    await pumpApp(tester, db, onboardingDone: true);
+
+    taps = 0;
+    await tap(tester, find.byKey(const Key('add-dinner')));
+    await tester.enterText(find.byKey(const Key('search-field')), 'دوغ');
+    await settle(tester);
+    await tap(tester, find.byKey(const Key('food-doogh')));
+    expect(find.text('ثبت در شام'), findsOneWidget);
+    await tap(tester, find.byKey(const Key('save-log')));
+    expect(taps, 3);
+    final log = (await logsOf(tester, today)).single;
+    expect(log.foodId, 'doogh');
+    expect(log.mealType, MealType.dinner);
+    await disposeApp(tester);
+  });
+
+  testWidgets('منو بدون سابقه: بخش «اخیر» نیست', (tester) async {
+    await seedProfile(tester);
+    await pumpApp(tester, db, onboardingDone: true);
+    await tester.tap(find.byKey(const Key('fab-log')));
+    await settle(tester);
+    expect(find.text('اخیر'), findsNothing);
+    expect(find.byKey(const Key('action-search')), findsOneWidget);
+    await disposeApp(tester);
+  });
+
   testWidgets('رفتن به روز قبل و دیدن ثبت‌های آن', (tester) async {
     await seedProfile(tester);
     await seedLog(tester, yesterday, 'doogh');
@@ -142,7 +177,10 @@ void main() {
     await tester.tap(find.byKey(Key('day-${dayKey(yesterday)}')));
     await settle(tester);
     expect(find.text('دوغ'), findsOneWidget);
-    expect(find.text(formatJalaliWithWeekday(yesterday)), findsOneWidget);
+    expect(
+      find.text(AppLocalizationsFa().formatDateWithWeekday(yesterday)),
+      findsOneWidget,
+    );
 
     // «برو به امروز»
     await tester.tap(find.text('برو به امروز'));
@@ -192,6 +230,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('fab-log')));
     await settle(tester);
+    await tester.tap(find.byKey(const Key('action-search')));
+    await settle(tester);
     expect(find.text('علاقه‌مندی‌ها'), findsNothing);
     await tester.enterText(find.byKey(const Key('search-field')), 'پنیر');
     await settle(tester);
@@ -224,6 +264,8 @@ void main() {
     );
 
     await tester.tap(find.byKey(const Key('fab-log')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('action-search')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('food-test_rice')));
     await settle(tester);

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
-import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/date_names.dart';
 
 /// چرخ انتخاب یک مقدار از فهرست، با برچسب فارسی.
 class ValueWheel<T> extends StatefulWidget {
@@ -164,7 +165,7 @@ class JalaliDateWheel extends StatelessWidget {
           child: ValueWheel<int>(
             values: [for (var m = 1; m <= 12; m++) m],
             value: j.month,
-            label: jalaliMonthName,
+            label: AppLocalizations.of(context).monthName,
             onChanged: (m) => emit(year, m, day),
           ),
         ),

@@ -5,12 +5,12 @@ import 'package:shamsi_date/shamsi_date.dart';
 
 import '../../app/providers.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
-import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/wheel_pickers.dart';
 import 'profile_draft.dart';
 import 'profile_labels.dart';
+import '../../l10n/date_names.dart';
 
 /// ویرایش پروفایل و هدف با پیش‌نمایش زنده‌ی کالری؛ ذخیره = هدف جدید در تاریخچه.
 class ProfileEditScreen extends ConsumerStatefulWidget {
@@ -123,7 +123,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           ListTile(
             title: Text(t.profileBirthDate),
             trailing: Text(
-              '${formatJalaliLong(d.birthDate)} '
+              '${t.formatDateLong(d.birthDate)} '
               '(${t.ageYears(toPersianDigits('${d.age(_now)}'))})',
             ),
             onTap: () async {

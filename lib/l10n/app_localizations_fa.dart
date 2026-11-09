@@ -537,4 +537,109 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get uSlice => 'برش';
+
+  @override
+  String get month1 => 'فروردین';
+
+  @override
+  String get month2 => 'اردیبهشت';
+
+  @override
+  String get month3 => 'خرداد';
+
+  @override
+  String get month4 => 'تیر';
+
+  @override
+  String get month5 => 'مرداد';
+
+  @override
+  String get month6 => 'شهریور';
+
+  @override
+  String get month7 => 'مهر';
+
+  @override
+  String get month8 => 'آبان';
+
+  @override
+  String get month9 => 'آذر';
+
+  @override
+  String get month10 => 'دی';
+
+  @override
+  String get month11 => 'بهمن';
+
+  @override
+  String get month12 => 'اسفند';
+
+  @override
+  String get weekdaySat => 'شنبه';
+
+  @override
+  String get weekdayShortSat => 'ش';
+
+  @override
+  String get weekdaySun => 'یکشنبه';
+
+  @override
+  String get weekdayShortSun => 'ی';
+
+  @override
+  String get weekdayMon => 'دوشنبه';
+
+  @override
+  String get weekdayShortMon => 'د';
+
+  @override
+  String get weekdayTue => 'سه‌شنبه';
+
+  @override
+  String get weekdayShortTue => 'س';
+
+  @override
+  String get weekdayWed => 'چهارشنبه';
+
+  @override
+  String get weekdayShortWed => 'چ';
+
+  @override
+  String get weekdayThu => 'پنجشنبه';
+
+  @override
+  String get weekdayShortThu => 'پ';
+
+  @override
+  String get weekdayFri => 'جمعه';
+
+  @override
+  String get weekdayShortFri => 'ج';
+
+  @override
+  String dateLong(String day, String month, String year) {
+    return '$day $month $year';
+  }
+
+  @override
+  String dateWithWeekday(String weekday, String date) {
+    return '$weekday $date';
+  }
+
+  @override
+  String logSheetTitle(String meal) {
+    return 'ثبت در $meal';
+  }
+
+  @override
+  String get actionCamera => 'عکس';
+
+  @override
+  String get actionGallery => 'گالری';
+
+  @override
+  String get actionSearch => 'جستجو';
+
+  @override
+  String get actionVoice => 'صوتی';
 }

@@ -1041,6 +1041,204 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'برش'**
   String get uSlice;
+
+  /// No description provided for @month1.
+  ///
+  /// In fa, this message translates to:
+  /// **'فروردین'**
+  String get month1;
+
+  /// No description provided for @month2.
+  ///
+  /// In fa, this message translates to:
+  /// **'اردیبهشت'**
+  String get month2;
+
+  /// No description provided for @month3.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرداد'**
+  String get month3;
+
+  /// No description provided for @month4.
+  ///
+  /// In fa, this message translates to:
+  /// **'تیر'**
+  String get month4;
+
+  /// No description provided for @month5.
+  ///
+  /// In fa, this message translates to:
+  /// **'مرداد'**
+  String get month5;
+
+  /// No description provided for @month6.
+  ///
+  /// In fa, this message translates to:
+  /// **'شهریور'**
+  String get month6;
+
+  /// No description provided for @month7.
+  ///
+  /// In fa, this message translates to:
+  /// **'مهر'**
+  String get month7;
+
+  /// No description provided for @month8.
+  ///
+  /// In fa, this message translates to:
+  /// **'آبان'**
+  String get month8;
+
+  /// No description provided for @month9.
+  ///
+  /// In fa, this message translates to:
+  /// **'آذر'**
+  String get month9;
+
+  /// No description provided for @month10.
+  ///
+  /// In fa, this message translates to:
+  /// **'دی'**
+  String get month10;
+
+  /// No description provided for @month11.
+  ///
+  /// In fa, this message translates to:
+  /// **'بهمن'**
+  String get month11;
+
+  /// No description provided for @month12.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسفند'**
+  String get month12;
+
+  /// No description provided for @weekdaySat.
+  ///
+  /// In fa, this message translates to:
+  /// **'شنبه'**
+  String get weekdaySat;
+
+  /// No description provided for @weekdayShortSat.
+  ///
+  /// In fa, this message translates to:
+  /// **'ش'**
+  String get weekdayShortSat;
+
+  /// No description provided for @weekdaySun.
+  ///
+  /// In fa, this message translates to:
+  /// **'یکشنبه'**
+  String get weekdaySun;
+
+  /// No description provided for @weekdayShortSun.
+  ///
+  /// In fa, this message translates to:
+  /// **'ی'**
+  String get weekdayShortSun;
+
+  /// No description provided for @weekdayMon.
+  ///
+  /// In fa, this message translates to:
+  /// **'دوشنبه'**
+  String get weekdayMon;
+
+  /// No description provided for @weekdayShortMon.
+  ///
+  /// In fa, this message translates to:
+  /// **'د'**
+  String get weekdayShortMon;
+
+  /// No description provided for @weekdayTue.
+  ///
+  /// In fa, this message translates to:
+  /// **'سه‌شنبه'**
+  String get weekdayTue;
+
+  /// No description provided for @weekdayShortTue.
+  ///
+  /// In fa, this message translates to:
+  /// **'س'**
+  String get weekdayShortTue;
+
+  /// No description provided for @weekdayWed.
+  ///
+  /// In fa, this message translates to:
+  /// **'چهارشنبه'**
+  String get weekdayWed;
+
+  /// No description provided for @weekdayShortWed.
+  ///
+  /// In fa, this message translates to:
+  /// **'چ'**
+  String get weekdayShortWed;
+
+  /// No description provided for @weekdayThu.
+  ///
+  /// In fa, this message translates to:
+  /// **'پنجشنبه'**
+  String get weekdayThu;
+
+  /// No description provided for @weekdayShortThu.
+  ///
+  /// In fa, this message translates to:
+  /// **'پ'**
+  String get weekdayShortThu;
+
+  /// No description provided for @weekdayFri.
+  ///
+  /// In fa, this message translates to:
+  /// **'جمعه'**
+  String get weekdayFri;
+
+  /// No description provided for @weekdayShortFri.
+  ///
+  /// In fa, this message translates to:
+  /// **'ج'**
+  String get weekdayShortFri;
+
+  /// ترتیب اجزای تاریخ؛ در زبان‌های دیگر قابل تغییر
+  ///
+  /// In fa, this message translates to:
+  /// **'{day} {month} {year}'**
+  String dateLong(String day, String month, String year);
+
+  /// No description provided for @dateWithWeekday.
+  ///
+  /// In fa, this message translates to:
+  /// **'{weekday} {date}'**
+  String dateWithWeekday(String weekday, String date);
+
+  /// No description provided for @logSheetTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت در {meal}'**
+  String logSheetTitle(String meal);
+
+  /// No description provided for @actionCamera.
+  ///
+  /// In fa, this message translates to:
+  /// **'عکس'**
+  String get actionCamera;
+
+  /// No description provided for @actionGallery.
+  ///
+  /// In fa, this message translates to:
+  /// **'گالری'**
+  String get actionGallery;
+
+  /// No description provided for @actionSearch.
+  ///
+  /// In fa, this message translates to:
+  /// **'جستجو'**
+  String get actionSearch;
+
+  /// No description provided for @actionVoice.
+  ///
+  /// In fa, this message translates to:
+  /// **'صوتی'**
+  String get actionVoice;
 }
 
 class _AppLocalizationsDelegate

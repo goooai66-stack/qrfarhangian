@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
-import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../profile/profile_draft.dart';
 import '../profile/profile_labels.dart';
+import '../../l10n/date_names.dart';
 
 /// صفحه‌ی نتیجه: کالری روزانه، درشت‌مغذی‌ها، تاریخ رسیدن و نمودار پیش‌بینی.
 class PlanResultView extends StatelessWidget {
@@ -93,7 +93,7 @@ class PlanResultView extends StatelessWidget {
             title: Text(
               t.resultEta(
                 formatPersianNumber(draft.goalWeightKg, fractionDigits: 1),
-                formatJalaliLong(eta),
+                t.formatDateLong(eta),
               ),
               style: theme.textTheme.titleMedium,
             ),

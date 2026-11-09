@@ -9,11 +9,13 @@ import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/app_localizations.dart';
+import '../logging/log_food_sheet.dart';
 import 'calorie_ring.dart';
 import 'date_strip.dart';
 import 'macro_bars.dart';
 import 'meal_section.dart';
 import 'water_card.dart';
+import '../../l10n/date_names.dart';
 
 /// تب «امروز»: داشبورد روزانه (بخش ۴-۳).
 class TodayScreen extends ConsumerWidget {
@@ -34,6 +36,7 @@ class TodayScreen extends ConsumerWidget {
     ]);
     final over = goal == null ? 0 : totals.kcal.round() - goal.kcal;
 
+    // «+» هر وعده مستقیم جستجو را باز می‌کند (ثبت با جستجو = ۳ لمس).
     void openSearch(MealType meal) =>
         context.push(Routes.searchFor(meal: meal, day: day));
 
@@ -49,7 +52,7 @@ class TodayScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          day == today ? t.tabToday : formatJalaliWithWeekday(day),
+          day == today ? t.tabToday : t.formatDateWithWeekday(day),
           key: const Key('today-title'),
         ),
         actions: [
@@ -135,8 +138,12 @@ class TodayScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('fab-log'),
-        onPressed: () => openSearch(
-          day == today ? defaultMealForTime(DateTime.now()) : MealType.lunch,
+        onPressed: () => showLogFoodSheet(
+          context,
+          meal: day == today
+              ? defaultMealForTime(DateTime.now())
+              : MealType.lunch,
+          day: day,
         ),
         icon: const Icon(Icons.add),
         label: Text(t.logFood),

@@ -312,5 +312,69 @@
   "uPalm": "کف دست",
   "uPiece": "عدد",
   "uGram": "گرم",
-  "uSlice": "برش"
+  "uSlice": "برش",
+  "month1": "فروردین",
+  "month2": "اردیبهشت",
+  "month3": "خرداد",
+  "month4": "تیر",
+  "month5": "مرداد",
+  "month6": "شهریور",
+  "month7": "مهر",
+  "month8": "آبان",
+  "month9": "آذر",
+  "month10": "دی",
+  "month11": "بهمن",
+  "month12": "اسفند",
+  "weekdaySat": "شنبه",
+  "weekdayShortSat": "ش",
+  "weekdaySun": "یکشنبه",
+  "weekdayShortSun": "ی",
+  "weekdayMon": "دوشنبه",
+  "weekdayShortMon": "د",
+  "weekdayTue": "سه‌شنبه",
+  "weekdayShortTue": "س",
+  "weekdayWed": "چهارشنبه",
+  "weekdayShortWed": "چ",
+  "weekdayThu": "پنجشنبه",
+  "weekdayShortThu": "پ",
+  "weekdayFri": "جمعه",
+  "weekdayShortFri": "ج",
+  "dateLong": "{day} {month} {year}",
+  "@dateLong": {
+    "description": "ترتیب اجزای تاریخ؛ در زبان‌های دیگر قابل تغییر",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "dateWithWeekday": "{weekday} {date}",
+  "@dateWithWeekday": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "logSheetTitle": "ثبت در {meal}",
+  "@logSheetTitle": {
+    "placeholders": {
+      "meal": {
+        "type": "String"
+      }
+    }
+  },
+  "actionCamera": "عکس",
+  "actionGallery": "گالری",
+  "actionSearch": "جستجو",
+  "actionVoice": "صوتی"
 }

@@ -1,12 +1,16 @@
 import 'package:calorie_lens/core/utils/jalali_date.dart';
+import 'package:calorie_lens/l10n/app_localizations_fa.dart';
+import 'package:calorie_lens/l10n/date_names.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // ۱ فروردین ۱۴۰۵ = ۲۱ مارس ۲۰۲۶ (شنبه)
   final nowruz1405 = DateTime(2026, 3, 21);
 
-  test('قالب بلند شمسی', () {
-    expect(formatJalaliLong(nowruz1405), '۱ فروردین ۱۴۰۵');
+  final t = AppLocalizationsFa();
+
+  test('قالب بلند شمسی (نام‌ها از فایل ترجمه)', () {
+    expect(t.formatDateLong(nowruz1405), '۱ فروردین ۱۴۰۵');
   });
 
   test('قالب کوتاه شمسی', () {
@@ -14,9 +18,9 @@ void main() {
   });
 
   test('قالب با نام روز', () {
-    expect(formatJalaliWithWeekday(nowruz1405), 'شنبه ۱ فروردین ۱۴۰۵');
+    expect(t.formatDateWithWeekday(nowruz1405), 'شنبه ۱ فروردین ۱۴۰۵');
     expect(
-      formatJalaliWithWeekday(DateTime(2026, 11, 9)),
+      t.formatDateWithWeekday(DateTime(2026, 11, 9)),
       'دوشنبه ۱۸ آبان ۱۴۰۵',
     );
   });
@@ -42,7 +46,15 @@ void main() {
   });
 
   test('نام ماه‌ها', () {
-    expect(jalaliMonthName(1), 'فروردین');
-    expect(jalaliMonthName(12), 'اسفند');
+    expect(t.monthName(1), 'فروردین');
+    expect(t.monthName(12), 'اسفند');
+    expect(t.jalaliMonths, hasLength(12));
+  });
+
+  test('نام روزها از شنبه و شکل کوتاه', () {
+    expect(t.weekdays.first, 'شنبه');
+    expect(t.weekdays.last, 'جمعه');
+    expect(t.weekdayShort(DateTime(2026, 11, 10)), 'س'); // سه‌شنبه
+    expect(t.weekdaysShort, ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']);
   });
 }

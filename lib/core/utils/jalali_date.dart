@@ -1,4 +1,4 @@
-/// ابزار تاریخ شمسی.
+/// ابزار تاریخ شمسی (محاسبه و قالب عددی؛ نام‌ها در فایل ترجمه).
 ///
 /// قانون بخش ۲-۴: نمایش شمسی، ذخیره به‌صورت UTC/ISO، هفته از شنبه.
 library;
@@ -7,18 +7,12 @@ import 'package:shamsi_date/shamsi_date.dart';
 
 import 'persian_digits.dart';
 
-const _monthNames = [
-  'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', //
-  'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند',
-];
-
-/// نام روزهای هفته؛ اندیس ۰ = شنبه.
-const persianWeekDays = [
-  'شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', //
-];
-
-/// نام ماه شمسی (۱ تا ۱۲).
-String jalaliMonthName(int month) => _monthNames[month - 1];
+/// اجزای تاریخ شمسی. نام ماه‌ها و روزها در فایل ترجمه‌اند
+/// (`lib/l10n/date_names.dart`)، نه اینجا.
+({int year, int month, int day}) jalaliParts(DateTime date) {
+  final j = Jalali.fromDateTime(date.toLocal());
+  return (year: j.year, month: j.month, day: j.day);
+}
 
 /// اندیس روز هفته با شروع از شنبه: شنبه=۰ … جمعه=۶.
 int weekdayIndexFromSaturday(DateTime date) =>
@@ -28,19 +22,6 @@ int weekdayIndexFromSaturday(DateTime date) =>
 DateTime startOfWeek(DateTime date) {
   final d = DateTime(date.year, date.month, date.day);
   return d.subtract(Duration(days: weekdayIndexFromSaturday(d)));
-}
-
-/// «۱۸ آبان ۱۴۰۵»
-String formatJalaliLong(DateTime date) {
-  final j = Jalali.fromDateTime(date.toLocal());
-  return toPersianDigits('${j.day} ${jalaliMonthName(j.month)} ${j.year}');
-}
-
-/// «یکشنبه ۱۸ آبان ۱۴۰۵»
-String formatJalaliWithWeekday(DateTime date) {
-  final local = date.toLocal();
-  return '${persianWeekDays[weekdayIndexFromSaturday(local)]} '
-      '${formatJalaliLong(local)}';
 }
 
 /// «۱۴۰۵/۰۸/۱۸»
@@ -76,15 +57,5 @@ DateTime parseDayKey(String key) {
   return DateTime(p[0], p[1], p[2]);
 }
 
-/// حرف اول نام روز (ش، ی، د، س، چ، پ، ج).
-String shortWeekday(DateTime date) =>
-    persianWeekDays[weekdayIndexFromSaturday(date)].substring(0, 1);
-
 /// روز شمسی ماه (۱ تا ۳۱).
 int jalaliDay(DateTime date) => Jalali.fromDateTime(date.toLocal()).day;
-
-/// «۱۸ آبان» (بدون سال).
-String formatJalaliDayMonth(DateTime date) {
-  final j = Jalali.fromDateTime(date.toLocal());
-  return toPersianDigits('${j.day} ${jalaliMonthName(j.month)}');
-}
