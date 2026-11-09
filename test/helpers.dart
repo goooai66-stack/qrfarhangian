@@ -3,7 +3,12 @@ import 'dart:io';
 import 'package:calorie_lens/app/app.dart';
 import 'package:calorie_lens/app/providers.dart';
 import 'package:calorie_lens/data/db/app_database.dart';
+import 'package:calorie_lens/core/platform/home_widget_service.dart';
+import 'package:calorie_lens/core/platform/share_service.dart';
+import 'package:calorie_lens/core/platform/store_rating.dart';
+import 'package:calorie_lens/core/reminders/reminder_scheduler.dart';
 import 'package:calorie_lens/data/foods/food_repository.dart';
+import 'package:calorie_lens/features/home/rating_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -16,8 +21,13 @@ Future<void> pumpApp(
   required bool onboardingDone,
   List<Override> overrides = const [],
   FoodRepository? foods,
+  FakeReminderScheduler? reminders,
+  FakeHomeWidgetService? homeWidget,
+  FakeShareService? share,
+  FakeStoreRating? rating,
 }) async {
   final foodRepo = foods ?? loadAppFoods();
+  RatingPromptGate.checkedThisSession = false;
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.5;
   addTearDown(tester.view.reset);
@@ -28,6 +38,15 @@ Future<void> pumpApp(
         databaseProvider.overrideWithValue(db),
         initialOnboardingDoneProvider.overrideWithValue(onboardingDone),
         foodRepositoryProvider.overrideWith((ref) => foodRepo),
+        // سرویس‌های بومی در تست جعلی‌اند.
+        reminderSchedulerProvider.overrideWithValue(
+          reminders ?? FakeReminderScheduler(),
+        ),
+        homeWidgetServiceProvider.overrideWithValue(
+          homeWidget ?? FakeHomeWidgetService(),
+        ),
+        shareServiceProvider.overrideWithValue(share ?? FakeShareService()),
+        storeRatingProvider.overrideWithValue(rating ?? FakeStoreRating()),
         ...overrides,
       ],
       child: const CalorieLensApp(),

@@ -1,19 +1,32 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/ad_service.dart';
 import 'config.dart';
 import '../core/billing/billing_service.dart';
+import '../core/nutrition/serving.dart';
+import '../core/platform/home_widget_service.dart';
+import '../core/platform/share_service.dart';
+import '../core/platform/store_rating.dart';
+import '../core/progress/badges.dart';
+import '../core/progress/streak.dart';
+import '../core/reminders/reminder_plan.dart';
+import '../core/reminders/reminder_scheduler.dart';
+import '../core/utils/persian_digits.dart';
 import '../core/recognition/food_recognizer.dart';
 import '../core/utils/jalali_date.dart';
 import '../data/api/api_client.dart';
 import '../data/db/app_database.dart';
 import '../data/foods/food_repository.dart';
 import '../data/logs/food_log_repository.dart';
+import '../data/progress/progress_repository.dart';
 import '../data/scan/pending_scan_repository.dart';
 import '../data/scan/photo_store.dart';
 import '../features/scan/photo_source.dart';
 import '../features/scan/scan_service.dart';
+import '../l10n/app_localizations.dart';
 import '../data/profile/profile_repository.dart';
 
 /// دیتابیس محلی. در main با نمونه‌ی واقعی override می‌شود؛ در تست با حافظه.
@@ -183,3 +196,182 @@ final scanServiceProvider = Provider<ScanService>(
     pending: ref.watch(pendingScanRepositoryProvider),
   ),
 );
+
+// ---- پیشرفت، یادآورها و نگه‌داشت (مرحله‌ی ۴) ----
+
+/// «امروز» (فقط تاریخ)؛ با refresh بعد از نیمه‌شب جلو می‌رود.
+class TodayNotifier extends Notifier<DateTime> {
+  @override
+  DateTime build() => dateOnly(DateTime.now());
+
+  void refresh() {
+    final now = dateOnly(DateTime.now());
+    if (now != state) state = now;
+  }
+}
+
+final todayProvider = NotifierProvider<TodayNotifier, DateTime>(
+  TodayNotifier.new,
+);
+
+final progressRepositoryProvider = Provider<ProgressRepository>(
+  (ref) => ProgressRepository(ref.watch(databaseProvider)),
+);
+
+final weightsProvider = StreamProvider<List<WeightLog>>(
+  (ref) => ref.watch(progressRepositoryProvider).watchWeights(),
+);
+
+final loggedDaysProvider = StreamProvider<Set<String>>(
+  (ref) => ref.watch(progressRepositoryProvider).watchLoggedDays(),
+);
+
+final maxWaterProvider = StreamProvider<int>(
+  (ref) => ref.watch(progressRepositoryProvider).watchMaxWaterGlasses(),
+);
+
+/// جمع روزانه‌ی [days] روز اخیر تا امروز.
+final dailyTotalsProvider = StreamProvider.family<Map<String, DayTotals>, int>((
+  ref,
+  days,
+) {
+  final today = ref.watch(todayProvider);
+  return ref
+      .watch(progressRepositoryProvider)
+      .watchDailyTotals(
+        DateTime(today.year, today.month, today.day - days + 1),
+        today,
+      );
+});
+
+final streakProvider = Provider<({int current, int longest})>((ref) {
+  final days = ref.watch(loggedDaysProvider).value ?? const <String>{};
+  return (
+    current: currentStreak(days, ref.watch(todayProvider)),
+    longest: longestStreak(days),
+  );
+});
+
+final badgesProvider = Provider<Set<Achievement>>((ref) {
+  final profile = ref.watch(profileProvider).value;
+  final days = ref.watch(loggedDaysProvider).value ?? const <String>{};
+  return earnedBadges(
+    BadgeInputs(
+      loggedDays: days.length,
+      longestStreak: ref.watch(streakProvider).longest,
+      goalType: profile?.goalType,
+      startWeightKg: profile?.startWeightKg,
+      weightsKg: [
+        for (final w in ref.watch(weightsProvider).value ?? const <WeightLog>[])
+          w.weightKg,
+      ],
+      maxWaterGlasses: ref.watch(maxWaterProvider).value ?? 0,
+    ),
+  );
+});
+
+final reminderSchedulerProvider = Provider<ReminderScheduler>(
+  (ref) => LocalReminderScheduler(),
+);
+
+const _remindersKey = 'reminders';
+
+/// تنظیمات یادآور، ذخیره در دیتابیس. زمان‌بندی در صفحه‌ی تنظیمات اعمال می‌شود.
+class ReminderSettingsNotifier extends AsyncNotifier<ReminderSettings> {
+  @override
+  Future<ReminderSettings> build() async => ReminderSettings.decode(
+    await ref.read(databaseProvider).getSetting(_remindersKey),
+  );
+
+  Future<void> save(ReminderSettings s) async {
+    state = AsyncData(s);
+    await ref.read(databaseProvider).setSetting(_remindersKey, s.encode());
+  }
+}
+
+final reminderSettingsProvider =
+    AsyncNotifierProvider<ReminderSettingsNotifier, ReminderSettings>(
+      ReminderSettingsNotifier.new,
+    );
+
+final homeWidgetServiceProvider = Provider<HomeWidgetService>(
+  (ref) => AndroidHomeWidgetService(),
+);
+final shareServiceProvider = Provider<ShareService>(
+  (ref) => SystemShareService(),
+);
+final storeRatingProvider = Provider<StoreRating>(
+  (ref) => ChannelStoreRating(),
+);
+
+/// عکس قبل یا بعد: مسیر محلی، تاریخ و وزن همان روز.
+typedef ProgressPhoto = ({String path, DateTime date, double? weightKg});
+
+const _beforeAfterKey = 'before_after';
+
+class BeforeAfterNotifier
+    extends AsyncNotifier<({ProgressPhoto? before, ProgressPhoto? after})> {
+  @override
+  Future<({ProgressPhoto? before, ProgressPhoto? after})> build() async {
+    final raw = await ref.read(databaseProvider).getSetting(_beforeAfterKey);
+    if (raw == null) return (before: null, after: null);
+    try {
+      final j = (jsonDecode(raw) as Map).cast<String, dynamic>();
+      ProgressPhoto? p(String k) {
+        final m = (j[k] as Map?)?.cast<String, dynamic>();
+        if (m == null) return null;
+        return (
+          path: m['path'] as String,
+          date: DateTime.parse(m['date'] as String),
+          weightKg: (m['kg'] as num?)?.toDouble(),
+        );
+      }
+
+      return (before: p('before'), after: p('after'));
+    } catch (_) {
+      return (before: null, after: null);
+    }
+  }
+
+  Future<void> set({required bool before, ProgressPhoto? photo}) async {
+    final cur = state.value ?? (before: null, after: null);
+    final next = before
+        ? (before: photo, after: cur.after)
+        : (before: cur.before, after: photo);
+    state = AsyncData(next);
+    Map<String, Object?>? enc(ProgressPhoto? p) => p == null
+        ? null
+        : {'path': p.path, 'date': p.date.toIso8601String(), 'kg': p.weightKg};
+    await ref
+        .read(databaseProvider)
+        .setSetting(
+          _beforeAfterKey,
+          jsonEncode({'before': enc(next.before), 'after': enc(next.after)}),
+        );
+  }
+}
+
+final beforeAfterProvider =
+    AsyncNotifierProvider<
+      BeforeAfterNotifier,
+      ({ProgressPhoto? before, ProgressPhoto? after})
+    >(BeforeAfterNotifier.new);
+
+/// داده‌ی ویجت صفحه‌ی اصلی برای امروز (null تا هدف معلوم نیست).
+final widgetSnapshotProvider = Provider<WidgetSnapshot?>((ref) {
+  final today = ref.watch(todayProvider);
+  final goal = ref.watch(goalOnProvider(today)).value;
+  final logs = ref.watch(dayLogsProvider(today)).value;
+  if (goal == null || logs == null) return null;
+  final t = lookupAppLocalizations(const Locale('fa'));
+  final consumed = logs.fold<double>(0, (s, l) => s + (l.kcal ?? 0)).round();
+  final remaining = goal.kcal - consumed;
+  return WidgetSnapshot(
+    value: formatPersianNumber(remaining.abs()),
+    label: remaining >= 0 ? t.widgetRemaining : t.widgetOver,
+    detail: t.widgetDetail(
+      formatPersianNumber(consumed),
+      formatPersianNumber(goal.kcal),
+    ),
+  );
+});

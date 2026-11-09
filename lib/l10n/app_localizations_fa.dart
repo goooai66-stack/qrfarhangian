@@ -25,10 +25,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get tabProfile => 'پروفایل';
 
   @override
-  String get progressPlaceholder =>
-      'ثبت وزن و نمودارها در مرحله‌ی ۴ ساخته می‌شود.';
-
-  @override
   String get plansPlaceholder =>
       'برنامه‌ها و چالش‌ها در نسخه‌های بعدی می‌آیند.';
 
@@ -780,4 +776,238 @@ class AppLocalizationsFa extends AppLocalizations {
   String confidenceValue(String percent) {
     return 'اطمینان $percent٪';
   }
+
+  @override
+  String get streakTitle => 'زنجیره‌ی روزهای پیاپی';
+
+  @override
+  String streakDays(String n) {
+    return '$n روز پیاپی';
+  }
+
+  @override
+  String streakRecord(String n) {
+    return 'رکورد: $n روز';
+  }
+
+  @override
+  String get streakZero => 'امروز یک غذا ثبت کن تا زنجیره شروع شود.';
+
+  @override
+  String get weightTitle => 'وزن';
+
+  @override
+  String get logWeight => 'ثبت وزن';
+
+  @override
+  String get weightStart => 'شروع';
+
+  @override
+  String get weightCurrent => 'فعلی';
+
+  @override
+  String get weightGoalLabel => 'هدف';
+
+  @override
+  String weightChangeFromStart(String kg) {
+    return 'تغییر از شروع: $kg کیلوگرم';
+  }
+
+  @override
+  String get noWeights => 'هنوز وزنی ثبت نشده.';
+
+  @override
+  String get deleteWeightConfirm => 'این ثبت وزن حذف شود؟';
+
+  @override
+  String get caloriesTitle => 'کالری روزانه';
+
+  @override
+  String get range7 => '۷ روز';
+
+  @override
+  String get range30 => '۳۰ روز';
+
+  @override
+  String avgKcal(String kcal) {
+    return 'میانگین روزهای ثبت‌شده: $kcal کالری';
+  }
+
+  @override
+  String avgMacros(String p, String c, String f) {
+    return 'میانگین پروتئین $p، کربوهیدرات $c، چربی $f گرم';
+  }
+
+  @override
+  String get noLogsRange => 'در این بازه چیزی ثبت نشده.';
+
+  @override
+  String get badgesTitle => 'نشان‌ها';
+
+  @override
+  String get badgeFirstLog => 'اولین ثبت';
+
+  @override
+  String get badgeFirstLogDesc => 'اولین غذایت را ثبت کردی';
+
+  @override
+  String get badgeStreak3 => '۳ روز پیاپی';
+
+  @override
+  String get badgeStreak3Desc => 'سه روز پشت سر هم ثبت کردی';
+
+  @override
+  String get badgeStreak7 => '۷ روز پیاپی';
+
+  @override
+  String get badgeStreak7Desc => 'یک هفته‌ی کامل، بدون وقفه';
+
+  @override
+  String get badgeFirstKg => 'اولین کیلو';
+
+  @override
+  String get badgeFirstKgDesc => 'اولین کیلو در مسیر هدفت';
+
+  @override
+  String get badgeWater8 => '۸ لیوان آب';
+
+  @override
+  String get badgeWater8Desc => 'یک روز کامل آب کافی نوشیدی';
+
+  @override
+  String get badgeLocked => 'هنوز نه';
+
+  @override
+  String get beforeAfterTitle => 'عکس قبل و بعد';
+
+  @override
+  String get beforeAfterPrivacy =>
+      'این عکس‌ها فقط روی گوشی خودت می‌مانند و هرگز آپلود نمی‌شوند.';
+
+  @override
+  String get photoBefore => 'قبل';
+
+  @override
+  String get photoAfter => 'بعد';
+
+  @override
+  String get addPhoto => 'افزودن عکس';
+
+  @override
+  String get removePhoto => 'حذف عکس';
+
+  @override
+  String get shareCard => 'ساخت کارت اشتراک';
+
+  @override
+  String get shareStreak => 'اشتراک زنجیره';
+
+  @override
+  String get shareNow => 'اشتراک‌گذاری';
+
+  @override
+  String get cardStreak => 'روز پیاپی';
+
+  @override
+  String cardWeightChange(String kg, String days) {
+    return '$kg کیلو در $days روز';
+  }
+
+  @override
+  String get cardTagline => 'کالری شمار با عکس، برای غذای ایرانی';
+
+  @override
+  String get shareText => 'مسیرم را با کالری‌لنز ثبت می‌کنم 💪';
+
+  @override
+  String get remindersTitle => 'یادآورها';
+
+  @override
+  String get remindMeals => 'یادآور وعده‌ها';
+
+  @override
+  String get remindWater => 'یادآور آب';
+
+  @override
+  String remindWaterEvery(String n, String from, String to) {
+    return 'هر $n ساعت، از $from تا $to';
+  }
+
+  @override
+  String get remindWeight => 'یادآور ثبت وزن (هفتگی)';
+
+  @override
+  String get remindPermissionDenied =>
+      'اجازه‌ی اعلان داده نشد. از تنظیمات گوشی فعالش کن.';
+
+  @override
+  String get remindSaved => 'یادآورها تنظیم شد';
+
+  @override
+  String get notifBreakfastTitle => 'وقت صبحانه 🍳';
+
+  @override
+  String get notifBreakfastBody => 'صبحانه‌ات را با یک عکس ثبت کن.';
+
+  @override
+  String get notifLunchTitle => 'وقت ناهار 🍛';
+
+  @override
+  String get notifLunchBody => 'ناهار امروز چی بود؟ یک عکس کافی است.';
+
+  @override
+  String get notifDinnerTitle => 'وقت شام 🌙';
+
+  @override
+  String get notifDinnerBody => 'شامت را ثبت کن تا روزت کامل شود.';
+
+  @override
+  String get notifWaterTitle => 'یک لیوان آب 💧';
+
+  @override
+  String get notifWaterBody => 'بدنت از آب کافی تشکر می‌کند.';
+
+  @override
+  String get notifWeightTitle => 'ثبت وزن هفتگی ⚖️';
+
+  @override
+  String get notifWeightBody =>
+      'وزن این هفته را ثبت کن؛ هر عددی باشد، قدمی در مسیر است.';
+
+  @override
+  String get widgetRemaining => 'کالری باقی‌مانده';
+
+  @override
+  String get widgetOver => 'بیشتر از هدف امروز';
+
+  @override
+  String widgetDetail(String consumed, String goal) {
+    return '$consumed از $goal کالری';
+  }
+
+  @override
+  String get rateTitle => 'از کالری‌لنز راضی هستی؟';
+
+  @override
+  String rateBody(String store) {
+    return 'اگر کمکت کرده، با امتیاز دادن در $store به ما کمک کن تا بهتر شویم.';
+  }
+
+  @override
+  String get rateYes => 'امتیاز می‌دهم';
+
+  @override
+  String get rateLater => 'بعداً';
+
+  @override
+  String get rateNever => 'نه، ممنون';
+
+  @override
+  String get storeBazaar => 'کافه‌بازار';
+
+  @override
+  String get storeMyket => 'مایکت';
+
+  @override
+  String get storeGeneric => 'فروشگاه';
 }

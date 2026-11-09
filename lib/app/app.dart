@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/platform/home_widget_service.dart';
+import '../features/settings/reminders_screen.dart';
 import '../l10n/app_localizations.dart';
 import 'providers.dart';
 import 'router.dart';
@@ -30,12 +32,46 @@ class _CalorieLensAppState extends ConsumerState<CalorieLensApp> {
   void initState() {
     super.initState();
     // صف اسکن آفلاین: هنگام باز شدن، برگشت به اپ و هر دقیقه.
-    _lifecycle = AppLifecycleListener(onResume: _processQueue);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _processQueue());
-    _queueTimer = Timer.periodic(
-      const Duration(minutes: 1),
-      (_) => _processQueue(),
+    _lifecycle = AppLifecycleListener(onResume: _tick);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tick();
+      _reapplyReminders();
+    });
+    _queueTimer = Timer.periodic(const Duration(minutes: 1), (_) => _tick());
+    ref.listenManual(
+      widgetSnapshotProvider,
+      (prev, next) => next != prev ? _syncWidget(next) : null,
+      fireImmediately: true,
     );
+  }
+
+  /// هر دقیقه و هنگام برگشت به اپ: صف اسکن + جلو رفتن «امروز» بعد از نیمه‌شب.
+  void _tick() {
+    if (!mounted) return;
+    ref.read(todayProvider.notifier).refresh();
+    _processQueue();
+  }
+
+  /// یادآورها با منطقه‌ی زمانی فعلی گوشی دوباره زمان‌بندی می‌شوند.
+  Future<void> _reapplyReminders() async {
+    try {
+      final s = await ref.read(reminderSettingsProvider.future);
+      if (!s.anyEnabled || !mounted) return;
+      final t = lookupAppLocalizations(const Locale('fa'));
+      await ref.read(reminderSchedulerProvider).apply(s, reminderTexts(t));
+    } catch (e) {
+      debugPrint('reminders: $e');
+    }
+  }
+
+  /// ویجت صفحه‌ی اصلی با هر تغییر کالری امروز به‌روز می‌شود.
+  Future<void> _syncWidget(WidgetSnapshot? s) async {
+    if (s == null) return;
+    try {
+      await ref.read(homeWidgetServiceProvider).update(s);
+    } catch (e) {
+      debugPrint('home widget: $e');
+    }
   }
 
   Future<void> _processQueue() async {

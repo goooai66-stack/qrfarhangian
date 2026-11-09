@@ -8,7 +8,6 @@
   "tabProgress": "پیشرفت",
   "tabPlans": "برنامه‌ها",
   "tabProfile": "پروفایل",
-  "progressPlaceholder": "ثبت وزن و نمودارها در مرحله‌ی ۴ ساخته می‌شود.",
   "plansPlaceholder": "برنامه‌ها و چالش‌ها در نسخه‌های بعدی می‌آیند.",
   "comingSoon": "به‌زودی",
   "themeMode": "حالت نمایش",
@@ -452,5 +451,157 @@
         "type": "String"
       }
     }
-  }
+  },
+  "streakTitle": "زنجیره‌ی روزهای پیاپی",
+  "streakDays": "{n} روز پیاپی",
+  "@streakDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "streakRecord": "رکورد: {n} روز",
+  "@streakRecord": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "streakZero": "امروز یک غذا ثبت کن تا زنجیره شروع شود.",
+  "weightTitle": "وزن",
+  "logWeight": "ثبت وزن",
+  "weightStart": "شروع",
+  "weightCurrent": "فعلی",
+  "weightGoalLabel": "هدف",
+  "weightChangeFromStart": "تغییر از شروع: {kg} کیلوگرم",
+  "@weightChangeFromStart": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "noWeights": "هنوز وزنی ثبت نشده.",
+  "deleteWeightConfirm": "این ثبت وزن حذف شود؟",
+  "caloriesTitle": "کالری روزانه",
+  "range7": "۷ روز",
+  "range30": "۳۰ روز",
+  "avgKcal": "میانگین روزهای ثبت‌شده: {kcal} کالری",
+  "@avgKcal": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
+  "avgMacros": "میانگین پروتئین {p}، کربوهیدرات {c}، چربی {f} گرم",
+  "@avgMacros": {
+    "placeholders": {
+      "p": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      },
+      "f": {
+        "type": "String"
+      }
+    }
+  },
+  "noLogsRange": "در این بازه چیزی ثبت نشده.",
+  "badgesTitle": "نشان‌ها",
+  "badgeFirstLog": "اولین ثبت",
+  "badgeFirstLogDesc": "اولین غذایت را ثبت کردی",
+  "badgeStreak3": "۳ روز پیاپی",
+  "badgeStreak3Desc": "سه روز پشت سر هم ثبت کردی",
+  "badgeStreak7": "۷ روز پیاپی",
+  "badgeStreak7Desc": "یک هفته‌ی کامل، بدون وقفه",
+  "badgeFirstKg": "اولین کیلو",
+  "badgeFirstKgDesc": "اولین کیلو در مسیر هدفت",
+  "badgeWater8": "۸ لیوان آب",
+  "badgeWater8Desc": "یک روز کامل آب کافی نوشیدی",
+  "badgeLocked": "هنوز نه",
+  "beforeAfterTitle": "عکس قبل و بعد",
+  "beforeAfterPrivacy": "این عکس‌ها فقط روی گوشی خودت می‌مانند و هرگز آپلود نمی‌شوند.",
+  "photoBefore": "قبل",
+  "photoAfter": "بعد",
+  "addPhoto": "افزودن عکس",
+  "removePhoto": "حذف عکس",
+  "shareCard": "ساخت کارت اشتراک",
+  "shareStreak": "اشتراک زنجیره",
+  "shareNow": "اشتراک‌گذاری",
+  "cardStreak": "روز پیاپی",
+  "cardWeightChange": "{kg} کیلو در {days} روز",
+  "@cardWeightChange": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "cardTagline": "کالری شمار با عکس، برای غذای ایرانی",
+  "shareText": "مسیرم را با کالری‌لنز ثبت می‌کنم 💪",
+  "remindersTitle": "یادآورها",
+  "remindMeals": "یادآور وعده‌ها",
+  "remindWater": "یادآور آب",
+  "remindWaterEvery": "هر {n} ساعت، از {from} تا {to}",
+  "@remindWaterEvery": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "remindWeight": "یادآور ثبت وزن (هفتگی)",
+  "remindPermissionDenied": "اجازه‌ی اعلان داده نشد. از تنظیمات گوشی فعالش کن.",
+  "remindSaved": "یادآورها تنظیم شد",
+  "notifBreakfastTitle": "وقت صبحانه 🍳",
+  "notifBreakfastBody": "صبحانه‌ات را با یک عکس ثبت کن.",
+  "notifLunchTitle": "وقت ناهار 🍛",
+  "notifLunchBody": "ناهار امروز چی بود؟ یک عکس کافی است.",
+  "notifDinnerTitle": "وقت شام 🌙",
+  "notifDinnerBody": "شامت را ثبت کن تا روزت کامل شود.",
+  "notifWaterTitle": "یک لیوان آب 💧",
+  "notifWaterBody": "بدنت از آب کافی تشکر می‌کند.",
+  "notifWeightTitle": "ثبت وزن هفتگی ⚖️",
+  "notifWeightBody": "وزن این هفته را ثبت کن؛ هر عددی باشد، قدمی در مسیر است.",
+  "widgetRemaining": "کالری باقی‌مانده",
+  "widgetOver": "بیشتر از هدف امروز",
+  "widgetDetail": "{consumed} از {goal} کالری",
+  "@widgetDetail": {
+    "placeholders": {
+      "consumed": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "rateTitle": "از کالری‌لنز راضی هستی؟",
+  "rateBody": "اگر کمکت کرده، با امتیاز دادن در {store} به ما کمک کن تا بهتر شویم.",
+  "@rateBody": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "rateYes": "امتیاز می‌دهم",
+  "rateLater": "بعداً",
+  "rateNever": "نه، ممنون",
+  "storeBazaar": "کافه‌بازار",
+  "storeMyket": "مایکت",
+  "storeGeneric": "فروشگاه"
 }

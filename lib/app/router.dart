@@ -11,6 +11,7 @@ import '../features/plans/plans_screen.dart';
 import '../features/profile/profile_edit_screen.dart';
 import '../features/scan/photo_source.dart';
 import '../features/scan/scan_screen.dart';
+import '../features/settings/reminders_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/progress/progress_screen.dart';
 import 'home_shell.dart';
@@ -22,6 +23,7 @@ abstract final class Routes {
   static const plans = '/plans';
   static const profile = '/profile';
   static const profileEdit = '/profile/edit';
+  static const reminders = '/profile/reminders';
   static const search = '/search';
   static const food = '/food';
 
@@ -157,6 +159,10 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
                 GoRoute(
                   path: 'edit',
                   builder: (_, _) => const ProfileEditScreen(),
+                ),
+                GoRoute(
+                  path: 'reminders',
+                  builder: (_, _) => const RemindersScreen(),
                 ),
               ],
             ),

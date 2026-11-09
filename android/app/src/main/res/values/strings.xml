@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name از productFlavors در build.gradle.kts می‌آید. -->
+    <string name="widget_placeholder">برای شروع، اپ را باز کن</string>
+    <string name="widget_description">کالری باقی‌مانده‌ی امروز</string>
+</resources>

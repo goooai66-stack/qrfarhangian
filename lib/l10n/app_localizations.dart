@@ -124,12 +124,6 @@ abstract class AppLocalizations {
   /// **'پروفایل'**
   String get tabProfile;
 
-  /// No description provided for @progressPlaceholder.
-  ///
-  /// In fa, this message translates to:
-  /// **'ثبت وزن و نمودارها در مرحله‌ی ۴ ساخته می‌شود.'**
-  String get progressPlaceholder;
-
   /// No description provided for @plansPlaceholder.
   ///
   /// In fa, this message translates to:
@@ -1485,6 +1479,432 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'اطمینان {percent}٪'**
   String confidenceValue(String percent);
+
+  /// No description provided for @streakTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'زنجیره‌ی روزهای پیاپی'**
+  String get streakTitle;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} روز پیاپی'**
+  String streakDays(String n);
+
+  /// No description provided for @streakRecord.
+  ///
+  /// In fa, this message translates to:
+  /// **'رکورد: {n} روز'**
+  String streakRecord(String n);
+
+  /// No description provided for @streakZero.
+  ///
+  /// In fa, this message translates to:
+  /// **'امروز یک غذا ثبت کن تا زنجیره شروع شود.'**
+  String get streakZero;
+
+  /// No description provided for @weightTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'وزن'**
+  String get weightTitle;
+
+  /// No description provided for @logWeight.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت وزن'**
+  String get logWeight;
+
+  /// No description provided for @weightStart.
+  ///
+  /// In fa, this message translates to:
+  /// **'شروع'**
+  String get weightStart;
+
+  /// No description provided for @weightCurrent.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعلی'**
+  String get weightCurrent;
+
+  /// No description provided for @weightGoalLabel.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدف'**
+  String get weightGoalLabel;
+
+  /// No description provided for @weightChangeFromStart.
+  ///
+  /// In fa, this message translates to:
+  /// **'تغییر از شروع: {kg} کیلوگرم'**
+  String weightChangeFromStart(String kg);
+
+  /// No description provided for @noWeights.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز وزنی ثبت نشده.'**
+  String get noWeights;
+
+  /// No description provided for @deleteWeightConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'این ثبت وزن حذف شود؟'**
+  String get deleteWeightConfirm;
+
+  /// No description provided for @caloriesTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری روزانه'**
+  String get caloriesTitle;
+
+  /// No description provided for @range7.
+  ///
+  /// In fa, this message translates to:
+  /// **'۷ روز'**
+  String get range7;
+
+  /// No description provided for @range30.
+  ///
+  /// In fa, this message translates to:
+  /// **'۳۰ روز'**
+  String get range30;
+
+  /// No description provided for @avgKcal.
+  ///
+  /// In fa, this message translates to:
+  /// **'میانگین روزهای ثبت‌شده: {kcal} کالری'**
+  String avgKcal(String kcal);
+
+  /// No description provided for @avgMacros.
+  ///
+  /// In fa, this message translates to:
+  /// **'میانگین پروتئین {p}، کربوهیدرات {c}، چربی {f} گرم'**
+  String avgMacros(String p, String c, String f);
+
+  /// No description provided for @noLogsRange.
+  ///
+  /// In fa, this message translates to:
+  /// **'در این بازه چیزی ثبت نشده.'**
+  String get noLogsRange;
+
+  /// No description provided for @badgesTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'نشان‌ها'**
+  String get badgesTitle;
+
+  /// No description provided for @badgeFirstLog.
+  ///
+  /// In fa, this message translates to:
+  /// **'اولین ثبت'**
+  String get badgeFirstLog;
+
+  /// No description provided for @badgeFirstLogDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'اولین غذایت را ثبت کردی'**
+  String get badgeFirstLogDesc;
+
+  /// No description provided for @badgeStreak3.
+  ///
+  /// In fa, this message translates to:
+  /// **'۳ روز پیاپی'**
+  String get badgeStreak3;
+
+  /// No description provided for @badgeStreak3Desc.
+  ///
+  /// In fa, this message translates to:
+  /// **'سه روز پشت سر هم ثبت کردی'**
+  String get badgeStreak3Desc;
+
+  /// No description provided for @badgeStreak7.
+  ///
+  /// In fa, this message translates to:
+  /// **'۷ روز پیاپی'**
+  String get badgeStreak7;
+
+  /// No description provided for @badgeStreak7Desc.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک هفته‌ی کامل، بدون وقفه'**
+  String get badgeStreak7Desc;
+
+  /// No description provided for @badgeFirstKg.
+  ///
+  /// In fa, this message translates to:
+  /// **'اولین کیلو'**
+  String get badgeFirstKg;
+
+  /// No description provided for @badgeFirstKgDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'اولین کیلو در مسیر هدفت'**
+  String get badgeFirstKgDesc;
+
+  /// No description provided for @badgeWater8.
+  ///
+  /// In fa, this message translates to:
+  /// **'۸ لیوان آب'**
+  String get badgeWater8;
+
+  /// No description provided for @badgeWater8Desc.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک روز کامل آب کافی نوشیدی'**
+  String get badgeWater8Desc;
+
+  /// No description provided for @badgeLocked.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز نه'**
+  String get badgeLocked;
+
+  /// No description provided for @beforeAfterTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'عکس قبل و بعد'**
+  String get beforeAfterTitle;
+
+  /// No description provided for @beforeAfterPrivacy.
+  ///
+  /// In fa, this message translates to:
+  /// **'این عکس‌ها فقط روی گوشی خودت می‌مانند و هرگز آپلود نمی‌شوند.'**
+  String get beforeAfterPrivacy;
+
+  /// No description provided for @photoBefore.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبل'**
+  String get photoBefore;
+
+  /// No description provided for @photoAfter.
+  ///
+  /// In fa, this message translates to:
+  /// **'بعد'**
+  String get photoAfter;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن عکس'**
+  String get addPhoto;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف عکس'**
+  String get removePhoto;
+
+  /// No description provided for @shareCard.
+  ///
+  /// In fa, this message translates to:
+  /// **'ساخت کارت اشتراک'**
+  String get shareCard;
+
+  /// No description provided for @shareStreak.
+  ///
+  /// In fa, this message translates to:
+  /// **'اشتراک زنجیره'**
+  String get shareStreak;
+
+  /// No description provided for @shareNow.
+  ///
+  /// In fa, this message translates to:
+  /// **'اشتراک‌گذاری'**
+  String get shareNow;
+
+  /// No description provided for @cardStreak.
+  ///
+  /// In fa, this message translates to:
+  /// **'روز پیاپی'**
+  String get cardStreak;
+
+  /// No description provided for @cardWeightChange.
+  ///
+  /// In fa, this message translates to:
+  /// **'{kg} کیلو در {days} روز'**
+  String cardWeightChange(String kg, String days);
+
+  /// No description provided for @cardTagline.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری شمار با عکس، برای غذای ایرانی'**
+  String get cardTagline;
+
+  /// No description provided for @shareText.
+  ///
+  /// In fa, this message translates to:
+  /// **'مسیرم را با کالری‌لنز ثبت می‌کنم 💪'**
+  String get shareText;
+
+  /// No description provided for @remindersTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآورها'**
+  String get remindersTitle;
+
+  /// No description provided for @remindMeals.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآور وعده‌ها'**
+  String get remindMeals;
+
+  /// No description provided for @remindWater.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآور آب'**
+  String get remindWater;
+
+  /// No description provided for @remindWaterEvery.
+  ///
+  /// In fa, this message translates to:
+  /// **'هر {n} ساعت، از {from} تا {to}'**
+  String remindWaterEvery(String n, String from, String to);
+
+  /// No description provided for @remindWeight.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآور ثبت وزن (هفتگی)'**
+  String get remindWeight;
+
+  /// No description provided for @remindPermissionDenied.
+  ///
+  /// In fa, this message translates to:
+  /// **'اجازه‌ی اعلان داده نشد. از تنظیمات گوشی فعالش کن.'**
+  String get remindPermissionDenied;
+
+  /// No description provided for @remindSaved.
+  ///
+  /// In fa, this message translates to:
+  /// **'یادآورها تنظیم شد'**
+  String get remindSaved;
+
+  /// No description provided for @notifBreakfastTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'وقت صبحانه 🍳'**
+  String get notifBreakfastTitle;
+
+  /// No description provided for @notifBreakfastBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'صبحانه‌ات را با یک عکس ثبت کن.'**
+  String get notifBreakfastBody;
+
+  /// No description provided for @notifLunchTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'وقت ناهار 🍛'**
+  String get notifLunchTitle;
+
+  /// No description provided for @notifLunchBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'ناهار امروز چی بود؟ یک عکس کافی است.'**
+  String get notifLunchBody;
+
+  /// No description provided for @notifDinnerTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'وقت شام 🌙'**
+  String get notifDinnerTitle;
+
+  /// No description provided for @notifDinnerBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'شامت را ثبت کن تا روزت کامل شود.'**
+  String get notifDinnerBody;
+
+  /// No description provided for @notifWaterTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک لیوان آب 💧'**
+  String get notifWaterTitle;
+
+  /// No description provided for @notifWaterBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'بدنت از آب کافی تشکر می‌کند.'**
+  String get notifWaterBody;
+
+  /// No description provided for @notifWeightTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت وزن هفتگی ⚖️'**
+  String get notifWeightTitle;
+
+  /// No description provided for @notifWeightBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'وزن این هفته را ثبت کن؛ هر عددی باشد، قدمی در مسیر است.'**
+  String get notifWeightBody;
+
+  /// No description provided for @widgetRemaining.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری باقی‌مانده'**
+  String get widgetRemaining;
+
+  /// No description provided for @widgetOver.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشتر از هدف امروز'**
+  String get widgetOver;
+
+  /// No description provided for @widgetDetail.
+  ///
+  /// In fa, this message translates to:
+  /// **'{consumed} از {goal} کالری'**
+  String widgetDetail(String consumed, String goal);
+
+  /// No description provided for @rateTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'از کالری‌لنز راضی هستی؟'**
+  String get rateTitle;
+
+  /// No description provided for @rateBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'اگر کمکت کرده، با امتیاز دادن در {store} به ما کمک کن تا بهتر شویم.'**
+  String rateBody(String store);
+
+  /// No description provided for @rateYes.
+  ///
+  /// In fa, this message translates to:
+  /// **'امتیاز می‌دهم'**
+  String get rateYes;
+
+  /// No description provided for @rateLater.
+  ///
+  /// In fa, this message translates to:
+  /// **'بعداً'**
+  String get rateLater;
+
+  /// No description provided for @rateNever.
+  ///
+  /// In fa, this message translates to:
+  /// **'نه، ممنون'**
+  String get rateNever;
+
+  /// No description provided for @storeBazaar.
+  ///
+  /// In fa, this message translates to:
+  /// **'کافه‌بازار'**
+  String get storeBazaar;
+
+  /// No description provided for @storeMyket.
+  ///
+  /// In fa, this message translates to:
+  /// **'مایکت'**
+  String get storeMyket;
+
+  /// No description provided for @storeGeneric.
+  ///
+  /// In fa, this message translates to:
+  /// **'فروشگاه'**
+  String get storeGeneric;
 }
 
 class _AppLocalizationsDelegate

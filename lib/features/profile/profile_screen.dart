@@ -80,6 +80,16 @@ class ProfileScreen extends ConsumerWidget {
             icon: const Icon(Icons.edit_outlined),
             label: Text(t.profileEdit),
           ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              key: const Key('open-reminders'),
+              leading: const Icon(Icons.notifications_outlined),
+              title: Text(t.remindersTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.reminders),
+            ),
+          ),
           const SizedBox(height: 24),
           Text(t.themeMode, style: tt.titleMedium),
           const SizedBox(height: 8),
