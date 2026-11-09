@@ -55,6 +55,7 @@ import ir.hesabyar.app.ui.due.DueDatesScreen
 import ir.hesabyar.app.ui.due.DueDatesViewModel
 import ir.hesabyar.app.ui.tools.ReportsScreen
 import ir.hesabyar.app.ui.tools.ToolsScreen
+import ir.hesabyar.app.ui.tools.ToolsViewModel
 import ir.hesabyar.app.ui.transaction.AddTransactionSheet
 import ir.hesabyar.app.ui.transaction.AddTransactionViewModel
 import ir.hesabyar.app.ui.transactions.TransactionsScreen
@@ -111,6 +112,8 @@ fun MainScreen(requestedTab: Tab?, onTabRequestHandled: () -> Unit, onExit: () -
     val addVm: AddTransactionViewModel = viewModel(factory = AppViewModels.Factory)
     val txVm: TransactionsViewModel = viewModel(factory = AppViewModels.Factory)
     val dueVm: DueDatesViewModel = viewModel(factory = AppViewModels.Factory)
+    val toolsVm: ToolsViewModel = viewModel(factory = AppViewModels.Factory)
+    var openSplit by remember { mutableStateOf(false) }
     // start() resets the form synchronously, before the sheet's first frame.
     val openAdd: (DraftKind) -> Unit = { kind -> addVm.start(kind); addKind = kind }
 
@@ -185,8 +188,8 @@ fun MainScreen(requestedTab: Tab?, onTabRequestHandled: () -> Unit, onExit: () -
                 )
             }
             Tab.TRANSACTIONS -> TransactionsScreen(txVm, padding)
-            Tab.DUE -> DueDatesScreen(dueVm, padding)
-            Tab.TOOLS -> ToolsScreen(padding)
+            Tab.DUE -> DueDatesScreen(dueVm, padding, openSplit, onSplitRequestHandled = { openSplit = false })
+            Tab.TOOLS -> ToolsScreen(toolsVm, padding, onOpenSplitBill = { openSplit = true; tab = Tab.DUE })
             Tab.REPORTS -> ReportsScreen(padding)
         }
     }

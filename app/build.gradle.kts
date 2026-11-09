@@ -17,6 +17,10 @@ android {
         versionName = "0.1.0"
         // Only Persian resources ship: trims AndroidX translations from the APK.
         resourceConfigurations += listOf("fa")
+        // Live market-rate feed (docs/rates-feed.md). Set in ~/.gradle/gradle.properties or with
+        // -Phesabyar.ratesUrl=https://…  Empty = offline / manual rates only.
+        val ratesUrl = (project.findProperty("hesabyar.ratesUrl") as String?).orEmpty()
+        buildConfigField("String", "RATES_URL", "\"$ratesUrl\"")
     }
 
     buildTypes {

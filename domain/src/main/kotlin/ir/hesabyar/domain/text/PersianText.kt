@@ -62,4 +62,11 @@ object PersianText {
         }
         return sb.toString()
     }
+
+    /** "۲٫۵" / "2.5" / "2,5" / "۱۲" → BigDecimal; null when not a plain non-negative decimal. */
+    fun parseDecimal(input: String): java.math.BigDecimal? {
+        val t = toLatinDigits(input.trim()).replace('\u066B', '.').replace(',', '.').replace('/', '.')
+        if (t.isEmpty() || t.count { it == '.' } > 1 || !t.all { it.isDigit() || it == '.' } || t == ".") return null
+        return runCatching { java.math.BigDecimal(if (t.startsWith(".")) "0$t" else t) }.getOrNull()
+    }
 }

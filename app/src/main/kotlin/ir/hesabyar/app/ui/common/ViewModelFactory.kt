@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import ir.hesabyar.app.HesabyarApp
 import ir.hesabyar.app.ui.dashboard.DashboardViewModel
 import ir.hesabyar.app.ui.due.DueDatesViewModel
+import ir.hesabyar.app.ui.tools.ToolsViewModel
 import ir.hesabyar.app.ui.transaction.AddTransactionViewModel
 import ir.hesabyar.app.ui.transactions.TransactionsViewModel
 
@@ -16,5 +17,6 @@ object AppViewModels {
         initializer { AddTransactionViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
         initializer { TransactionsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
         initializer { DueDatesViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
+        initializer { ToolsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
     }
 }

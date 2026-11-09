@@ -31,6 +31,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -115,6 +116,10 @@ fun AmountInputField(
 ) {
     val focus = LocalFocusManager.current
     var expr by remember { mutableStateOf(AmountExpression.ofValue(Money.rialToToman(rial))) }
+    // Follow external changes (e.g. today's gold rate arriving after the screen opened).
+    LaunchedEffect(rial) {
+        if (Money.tomanToRial((expr.evaluate() ?: 0L).coerceAtLeast(0)) != rial) expr = AmountExpression.ofValue(Money.rialToToman(rial))
+    }
     FieldLabel(label)
     Surface(
         shape = MaterialTheme.shapes.small,
@@ -161,14 +166,32 @@ fun TextInput(
     placeholder: String = "",
     numeric: Boolean = false,
     modifier: Modifier = Modifier,
+    /** Allows one decimal separator (Persian «٫» accepted): weights in grams, percentages. */
+    decimal: Boolean = false,
 ) {
     FieldLabel(label)
     OutlinedTextField(
         value = value,
-        onValueChange = { onChange(if (numeric) PersianText.toLatinDigits(it).filter { c -> c.isDigit() } else it) },
+        onValueChange = {
+            onChange(
+                when {
+                    decimal -> {
+                        val t = PersianText.toLatinDigits(it).replace('\u066B', '.').replace(',', '.').filter { c -> c.isDigit() || c == '.' }
+                        val dot = t.indexOf('.')
+                        if (dot < 0) t else t.substring(0, dot + 1) + t.substring(dot + 1).replace(".", "")
+                    }
+                    numeric -> PersianText.toLatinDigits(it).filter { c -> c.isDigit() }
+                    else -> it
+                },
+            )
+        },
         placeholder = { if (placeholder.isNotEmpty()) Text(placeholder) },
         singleLine = true,
-        keyboardOptions = if (numeric) KeyboardOptions(keyboardType = KeyboardType.Number) else KeyboardOptions.Default,
+        keyboardOptions = when {
+            decimal -> KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            numeric -> KeyboardOptions(keyboardType = KeyboardType.Number)
+            else -> KeyboardOptions.Default
+        },
         modifier = modifier.fillMaxWidth(),
     )
 }

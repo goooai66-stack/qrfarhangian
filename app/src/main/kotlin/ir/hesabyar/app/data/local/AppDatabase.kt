@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import ir.hesabyar.app.data.local.dao.AccountDao
 import ir.hesabyar.app.data.local.dao.BankSmsDao
 import ir.hesabyar.app.data.local.dao.CategoryDao
@@ -32,7 +34,7 @@ import ir.hesabyar.app.data.local.entity.TransactionEntity
         PersonEntity::class, DebtEntity::class, SavingsGoalEntity::class, SavingsDepositEntity::class,
         RateEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -47,10 +49,18 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         const val NAME = "hesabyar.db"
 
+        /** v2: savings goals get a linked wallet account. Explicit SQL — financial data is never dropped. */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE savings_goals ADD COLUMN accountId INTEGER DEFAULT NULL")
+            }
+        }
+
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, NAME)
                 // WAL: list reads never block a write coming from the SMS receiver.
                 .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .addMigrations(MIGRATION_1_2)
                 .build()
     }
 }

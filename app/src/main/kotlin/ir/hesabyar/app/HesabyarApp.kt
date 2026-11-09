@@ -9,6 +9,7 @@ import ir.hesabyar.app.ads.PolicedAdProvider
 import ir.hesabyar.app.data.local.AppDatabase
 import ir.hesabyar.app.data.local.DatabaseSeeder
 import ir.hesabyar.app.data.prefs.AppPreferences
+import ir.hesabyar.app.data.remote.JsonRateSource
 import ir.hesabyar.app.data.repository.RatesRepository
 import ir.hesabyar.app.data.repository.TransactionRepository
 import ir.hesabyar.app.sms.SmsInboxImporter
@@ -19,6 +20,7 @@ import ir.hesabyar.app.reminders.ReminderNotifier
 import ir.hesabyar.app.reminders.ReminderScheduler
 import ir.hesabyar.app.usecase.ConfirmBankSmsUseCase
 import ir.hesabyar.app.usecase.DueUseCases
+import ir.hesabyar.app.usecase.SavingsUseCases
 import ir.hesabyar.domain.sms.BankSmsParser
 import ir.hesabyar.domain.sms.SelfTransferDetector
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +55,9 @@ class AppContainer(context: Context) {
     val prefs = AppPreferences(app)
 
     val transactions by lazy { TransactionRepository(db) }
-    val rates by lazy { RatesRepository(db.rateDao(), source = null) }
+    /** Feed URL comes from the build (gradle property `hesabyar.ratesUrl`); empty → manual rates only. */
+    val rates by lazy { RatesRepository(db.rateDao(), BuildConfig.RATES_URL.takeIf { it.startsWith("https://") }?.let { JsonRateSource(it) }) }
+    val savings by lazy { SavingsUseCases(db, transactions) }
     val confirmSms by lazy { ConfirmBankSmsUseCase(db, transactions) }
 
     val smsIngestor by lazy { SmsIngestor(db, BankSmsParser(), SelfTransferDetector()) }

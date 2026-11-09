@@ -106,6 +106,11 @@ class DashboardViewModel(private val c: AppContainer) : ViewModel() {
         }.take(5)
     }
 
+    init {
+        // Cheap and polite: at most one feed request per 30 minutes, only while the app is open.
+        viewModelScope.launch { c.rates.refreshIfStale() }
+    }
+
     fun selectLedger(id: Long) = c.prefs.setActiveLedger(id)
 
     fun confirmSms(smsId: Long, categoryId: Long?) = viewModelScope.launch { c.confirmSms.confirm(smsId, categoryId) }

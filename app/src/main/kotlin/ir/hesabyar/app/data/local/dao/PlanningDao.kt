@@ -161,10 +161,28 @@ interface PlanningDao {
     @Query("DELETE FROM debts WHERE id = :id")
     suspend fun deleteDebt(id: Long)
 
-    // ============================================================ savings goals (step 3)
+    // ============================================================ savings goals (سپر ضدتورم)
     @Insert suspend fun insertGoal(goal: SavingsGoalEntity): Long
     @Insert suspend fun insertDeposit(deposit: SavingsDepositEntity): Long
 
-    @Query("SELECT * FROM savings_goals WHERE ledgerId = :ledgerId AND isActive = 1")
+    @Query("UPDATE savings_goals SET accountId = :accountId WHERE id = :id")
+    suspend fun setGoalAccount(id: Long, accountId: Long)
+
+    @Query("SELECT * FROM savings_goals WHERE id = :id")
+    suspend fun getGoal(id: Long): SavingsGoalEntity?
+
+    @Query("SELECT * FROM savings_goals WHERE ledgerId = :ledgerId AND isActive = 1 ORDER BY createdAt")
     fun observeGoals(ledgerId: Long): Flow<List<SavingsGoalEntity>>
+
+    @Query("SELECT d.* FROM savings_deposits d JOIN savings_goals g ON g.id = d.goalId WHERE g.ledgerId = :ledgerId ORDER BY d.depositedAt")
+    fun observeDepositsByLedger(ledgerId: Long): Flow<List<SavingsDepositEntity>>
+
+    @Query("UPDATE savings_goals SET isActive = 0 WHERE id = :id")
+    suspend fun archiveGoal(id: Long)
+
+    @Query("DELETE FROM savings_deposits WHERE id = :id")
+    suspend fun deleteDeposit(id: Long)
+
+    @Query("SELECT * FROM savings_deposits WHERE id = :id")
+    suspend fun getDeposit(id: Long): SavingsDepositEntity?
 }

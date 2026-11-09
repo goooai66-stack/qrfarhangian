@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,7 +82,7 @@ fun EntryKind.color(): Color = when (this) {
  * and nothing in this screen offers one) — due dates are stressful enough.
  */
 @Composable
-fun DueDatesScreen(vm: DueDatesViewModel, contentPadding: PaddingValues) {
+fun DueDatesScreen(vm: DueDatesViewModel, contentPadding: PaddingValues, openSplitRequest: Boolean = false, onSplitRequestHandled: () -> Unit = {}) {
     val s by vm.state.collectAsStateWithLifecycle()
     var section by rememberSaveable { mutableStateOf(DueSection.CALENDAR) }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
@@ -89,6 +90,10 @@ fun DueDatesScreen(vm: DueDatesViewModel, contentPadding: PaddingValues) {
     var settling by remember { mutableStateOf<DebtRow?>(null) }
     var addMenu by remember { mutableStateOf(false) }
     val today = JalaliDate.today()
+    // «ماشین‌حساب دنگ» from the tools tab lands here with the split form open.
+    LaunchedEffect(openSplitRequest) {
+        if (openSplitRequest) { section = DueSection.DEBTS; sheet = Sheet.SPLIT; onSplitRequestHandled() }
+    }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(

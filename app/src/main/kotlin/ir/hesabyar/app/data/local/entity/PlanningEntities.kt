@@ -136,6 +136,8 @@ data class SavingsGoalEntity(
     /** Milli-units (grams×1000, dollars×1000) — integer math, no Double drift. */
     val targetMilliUnits: Long,
     val deadlineEpochDay: Long? = null,
+    /** Wallet account that holds this goal's cost basis; deposits are transfers into it (v2). */
+    val accountId: Long? = null,
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
 )

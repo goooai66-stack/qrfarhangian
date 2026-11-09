@@ -1,0 +1,12 @@
+{
+  "updatedAt": 1762675200,
+  "source": "hesabyar-feed",
+  "rates": {
+    "GOLD_18K_GRAM": { "price": 0, "unit": "toman", "change": 0.0 },
+    "COIN_EMAMI":    { "price": 0, "unit": "toman", "change": 0.0 },
+    "COIN_HALF":     { "price": 0, "unit": "toman" },
+    "COIN_QUARTER":  { "price": 0, "unit": "toman" },
+    "USD":           { "price": 0, "unit": "toman", "change": 0.0 },
+    "USDT":          { "price": 0, "unit": "toman", "change": 0.0 }
+  }
+}
