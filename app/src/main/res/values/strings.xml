@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">حساب‌یار</string>
+    <string name="channel_sms">تراکنش‌های بانکی</string>
+    <string name="channel_sms_desc">اعلان تایید تک‌لمسی تراکنش‌های پیامکی</string>
+</resources>
