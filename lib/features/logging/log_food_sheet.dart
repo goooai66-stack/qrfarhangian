@@ -6,13 +6,14 @@ import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/nutrition/nutrition_types.dart';
 import '../../l10n/app_localizations.dart';
+import '../scan/photo_source.dart';
 import 'logging_labels.dart';
 
 /// منوی «ثبت غذا» (بخش ۵-۱): عکس | گالری | جستجو | صوتی + غذاهای اخیر.
 ///
 /// غذاهای اخیر داخل همین منو هستند تا ثبت تکراری ۳ لمس بماند:
 /// «ثبت غذا» ← غذای اخیر ← «ثبت».
-/// عکس و گالری در مرحله‌ی ۳ و صوتی در مرحله‌ی ۶ فعال می‌شوند.
+/// صوتی در مرحله‌ی ۶ فعال می‌شود.
 Future<void> showLogFoodSheet(
   BuildContext context, {
   required MealType meal,
@@ -70,14 +71,30 @@ class _LogFoodSheet extends ConsumerWidget {
             Row(
               children: [
                 _Action(
+                  key: const Key('action-camera'),
                   icon: Icons.photo_camera_outlined,
                   label: t.actionCamera,
-                  soon: t.comingSoon,
+                  onTap: () => _go(
+                    context,
+                    Routes.scanFor(
+                      source: ScanSource.camera,
+                      meal: meal,
+                      day: day,
+                    ),
+                  ),
                 ),
                 _Action(
+                  key: const Key('action-gallery'),
                   icon: Icons.photo_library_outlined,
                   label: t.actionGallery,
-                  soon: t.comingSoon,
+                  onTap: () => _go(
+                    context,
+                    Routes.scanFor(
+                      source: ScanSource.gallery,
+                      meal: meal,
+                      day: day,
+                    ),
+                  ),
                 ),
                 _Action(
                   key: const Key('action-search'),

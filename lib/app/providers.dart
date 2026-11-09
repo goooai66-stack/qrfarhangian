@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/ad_service.dart';
+import 'config.dart';
 import '../core/billing/billing_service.dart';
 import '../core/recognition/food_recognizer.dart';
 import '../core/utils/jalali_date.dart';
+import '../data/api/api_client.dart';
 import '../data/db/app_database.dart';
 import '../data/foods/food_repository.dart';
 import '../data/logs/food_log_repository.dart';
+import '../data/scan/pending_scan_repository.dart';
+import '../data/scan/photo_store.dart';
+import '../features/scan/photo_source.dart';
+import '../features/scan/scan_service.dart';
 import '../data/profile/profile_repository.dart';
 
 /// دیتابیس محلی. در main با نمونه‌ی واقعی override می‌شود؛ در تست با حافظه.
@@ -22,8 +28,16 @@ final adServiceProvider = Provider<AdService>((ref) => FakeAdService());
 final billingServiceProvider = Provider<BillingService>(
   (ref) => FakeBillingService(),
 );
+final apiClientProvider = Provider<ApiClient>(
+  (ref) =>
+      ApiClient(baseUrl: AppConfig.apiBaseUrl, db: ref.watch(databaseProvider)),
+);
+
+/// تشخیص غذا: ابری از طریق سرور واسط؛ یا جعلی با `FAKE_SCAN=true`.
 final foodRecognizerProvider = Provider<FoodRecognizer>(
-  (ref) => FakeFoodRecognizer(),
+  (ref) => AppConfig.fakeScan
+      ? FakeFoodRecognizer(delay: const Duration(seconds: 2))
+      : CloudRecognizer(ref.watch(apiClientProvider)),
 );
 
 const _themeKey = 'theme_mode';
@@ -136,4 +150,36 @@ final recentFoodIdsProvider = StreamProvider<List<String>>(
 
 final favoriteFoodIdsProvider = StreamProvider<Set<String>>(
   (ref) => ref.watch(foodLogRepositoryProvider).watchFavorites(),
+);
+
+// ---- اسکن عکس (مرحله‌ی ۳) ----
+
+final photoStoreProvider = Provider<PhotoStore>((ref) => PhotoStore());
+
+final photoSourceProvider = Provider<PhotoSource>(
+  (ref) => ImagePickerPhotoSource(),
+);
+
+final pendingScanRepositoryProvider = Provider<PendingScanRepository>(
+  (ref) => PendingScanRepository(ref.watch(databaseProvider)),
+);
+
+final pendingScansProvider = StreamProvider<List<PendingScan>>(
+  (ref) => ref.watch(pendingScanRepositoryProvider).watchAll(),
+);
+
+final pendingScanProcessorProvider = Provider<PendingScanProcessor>(
+  (ref) => PendingScanProcessor(
+    repo: ref.watch(pendingScanRepositoryProvider),
+    recognizer: ref.watch(foodRecognizerProvider),
+    readPhoto: ref.watch(photoStoreProvider).read,
+  ),
+);
+
+final scanServiceProvider = Provider<ScanService>(
+  (ref) => ScanService(
+    recognizer: ref.watch(foodRecognizerProvider),
+    photos: ref.watch(photoStoreProvider),
+    pending: ref.watch(pendingScanRepositoryProvider),
+  ),
 );

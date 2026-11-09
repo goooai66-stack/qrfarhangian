@@ -2911,7 +2911,57 @@ class $PendingScansTable extends PendingScans
     requiredDuringInsert: true,
   ).withConverter<PendingScanStatus>($PendingScansTable.$converterstatus);
   @override
-  List<GeneratedColumn> get $columns => [id, photoPath, createdAt, status];
+  late final GeneratedColumnWithTypeConverter<MealType?, String> mealType =
+      GeneratedColumn<String>(
+        'meal_type',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<MealType?>($PendingScansTable.$convertermealTypen);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resultJsonMeta = const VerificationMeta(
+    'resultJson',
+  );
+  @override
+  late final GeneratedColumn<String> resultJson = GeneratedColumn<String>(
+    'result_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    photoPath,
+    createdAt,
+    status,
+    mealType,
+    date,
+    resultJson,
+    attempts,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2943,6 +2993,24 @@ class $PendingScansTable extends PendingScans
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    }
+    if (data.containsKey('result_json')) {
+      context.handle(
+        _resultJsonMeta,
+        resultJson.isAcceptableOrUnknown(data['result_json']!, _resultJsonMeta),
+      );
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
     return context;
   }
 
@@ -2970,6 +3038,24 @@ class $PendingScansTable extends PendingScans
           data['${effectivePrefix}status'],
         )!,
       ),
+      mealType: $PendingScansTable.$convertermealTypen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}meal_type'],
+        ),
+      ),
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      ),
+      resultJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result_json'],
+      ),
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
     );
   }
 
@@ -2982,6 +3068,10 @@ class $PendingScansTable extends PendingScans
   $converterstatus = const EnumNameConverter<PendingScanStatus>(
     PendingScanStatus.values,
   );
+  static JsonTypeConverter2<MealType, String, String> $convertermealType =
+      const EnumNameConverter<MealType>(MealType.values);
+  static JsonTypeConverter2<MealType?, String?, String?> $convertermealTypen =
+      JsonTypeConverter2.asNullable($convertermealType);
 }
 
 class PendingScan extends DataClass implements Insertable<PendingScan> {
@@ -2989,11 +3079,21 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
   final String photoPath;
   final DateTime createdAt;
   final PendingScanStatus status;
+
+  /// وعده و روزی که کاربر هنگام عکس گرفتن در نظر داشت (v3).
+  final MealType? mealType;
+  final String? date;
+  final String? resultJson;
+  final int attempts;
   const PendingScan({
     required this.id,
     required this.photoPath,
     required this.createdAt,
     required this.status,
+    this.mealType,
+    this.date,
+    this.resultJson,
+    required this.attempts,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3006,6 +3106,18 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
         $PendingScansTable.$converterstatus.toSql(status),
       );
     }
+    if (!nullToAbsent || mealType != null) {
+      map['meal_type'] = Variable<String>(
+        $PendingScansTable.$convertermealTypen.toSql(mealType),
+      );
+    }
+    if (!nullToAbsent || date != null) {
+      map['date'] = Variable<String>(date);
+    }
+    if (!nullToAbsent || resultJson != null) {
+      map['result_json'] = Variable<String>(resultJson);
+    }
+    map['attempts'] = Variable<int>(attempts);
     return map;
   }
 
@@ -3015,6 +3127,14 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
       photoPath: Value(photoPath),
       createdAt: Value(createdAt),
       status: Value(status),
+      mealType: mealType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mealType),
+      date: date == null && nullToAbsent ? const Value.absent() : Value(date),
+      resultJson: resultJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resultJson),
+      attempts: Value(attempts),
     );
   }
 
@@ -3030,6 +3150,12 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
       status: $PendingScansTable.$converterstatus.fromJson(
         serializer.fromJson<String>(json['status']),
       ),
+      mealType: $PendingScansTable.$convertermealTypen.fromJson(
+        serializer.fromJson<String?>(json['mealType']),
+      ),
+      date: serializer.fromJson<String?>(json['date']),
+      resultJson: serializer.fromJson<String?>(json['resultJson']),
+      attempts: serializer.fromJson<int>(json['attempts']),
     );
   }
   @override
@@ -3042,6 +3168,12 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
       'status': serializer.toJson<String>(
         $PendingScansTable.$converterstatus.toJson(status),
       ),
+      'mealType': serializer.toJson<String?>(
+        $PendingScansTable.$convertermealTypen.toJson(mealType),
+      ),
+      'date': serializer.toJson<String?>(date),
+      'resultJson': serializer.toJson<String?>(resultJson),
+      'attempts': serializer.toJson<int>(attempts),
     };
   }
 
@@ -3050,11 +3182,19 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
     String? photoPath,
     DateTime? createdAt,
     PendingScanStatus? status,
+    Value<MealType?> mealType = const Value.absent(),
+    Value<String?> date = const Value.absent(),
+    Value<String?> resultJson = const Value.absent(),
+    int? attempts,
   }) => PendingScan(
     id: id ?? this.id,
     photoPath: photoPath ?? this.photoPath,
     createdAt: createdAt ?? this.createdAt,
     status: status ?? this.status,
+    mealType: mealType.present ? mealType.value : this.mealType,
+    date: date.present ? date.value : this.date,
+    resultJson: resultJson.present ? resultJson.value : this.resultJson,
+    attempts: attempts ?? this.attempts,
   );
   PendingScan copyWithCompanion(PendingScansCompanion data) {
     return PendingScan(
@@ -3062,6 +3202,12 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       status: data.status.present ? data.status.value : this.status,
+      mealType: data.mealType.present ? data.mealType.value : this.mealType,
+      date: data.date.present ? data.date.value : this.date,
+      resultJson: data.resultJson.present
+          ? data.resultJson.value
+          : this.resultJson,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
     );
   }
 
@@ -3071,13 +3217,26 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
           ..write('id: $id, ')
           ..write('photoPath: $photoPath, ')
           ..write('createdAt: $createdAt, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('mealType: $mealType, ')
+          ..write('date: $date, ')
+          ..write('resultJson: $resultJson, ')
+          ..write('attempts: $attempts')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, photoPath, createdAt, status);
+  int get hashCode => Object.hash(
+    id,
+    photoPath,
+    createdAt,
+    status,
+    mealType,
+    date,
+    resultJson,
+    attempts,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3085,7 +3244,11 @@ class PendingScan extends DataClass implements Insertable<PendingScan> {
           other.id == this.id &&
           other.photoPath == this.photoPath &&
           other.createdAt == this.createdAt &&
-          other.status == this.status);
+          other.status == this.status &&
+          other.mealType == this.mealType &&
+          other.date == this.date &&
+          other.resultJson == this.resultJson &&
+          other.attempts == this.attempts);
 }
 
 class PendingScansCompanion extends UpdateCompanion<PendingScan> {
@@ -3093,17 +3256,29 @@ class PendingScansCompanion extends UpdateCompanion<PendingScan> {
   final Value<String> photoPath;
   final Value<DateTime> createdAt;
   final Value<PendingScanStatus> status;
+  final Value<MealType?> mealType;
+  final Value<String?> date;
+  final Value<String?> resultJson;
+  final Value<int> attempts;
   const PendingScansCompanion({
     this.id = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.status = const Value.absent(),
+    this.mealType = const Value.absent(),
+    this.date = const Value.absent(),
+    this.resultJson = const Value.absent(),
+    this.attempts = const Value.absent(),
   });
   PendingScansCompanion.insert({
     this.id = const Value.absent(),
     required String photoPath,
     required DateTime createdAt,
     required PendingScanStatus status,
+    this.mealType = const Value.absent(),
+    this.date = const Value.absent(),
+    this.resultJson = const Value.absent(),
+    this.attempts = const Value.absent(),
   }) : photoPath = Value(photoPath),
        createdAt = Value(createdAt),
        status = Value(status);
@@ -3112,12 +3287,20 @@ class PendingScansCompanion extends UpdateCompanion<PendingScan> {
     Expression<String>? photoPath,
     Expression<DateTime>? createdAt,
     Expression<String>? status,
+    Expression<String>? mealType,
+    Expression<String>? date,
+    Expression<String>? resultJson,
+    Expression<int>? attempts,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (photoPath != null) 'photo_path': photoPath,
       if (createdAt != null) 'created_at': createdAt,
       if (status != null) 'status': status,
+      if (mealType != null) 'meal_type': mealType,
+      if (date != null) 'date': date,
+      if (resultJson != null) 'result_json': resultJson,
+      if (attempts != null) 'attempts': attempts,
     });
   }
 
@@ -3126,12 +3309,20 @@ class PendingScansCompanion extends UpdateCompanion<PendingScan> {
     Value<String>? photoPath,
     Value<DateTime>? createdAt,
     Value<PendingScanStatus>? status,
+    Value<MealType?>? mealType,
+    Value<String?>? date,
+    Value<String?>? resultJson,
+    Value<int>? attempts,
   }) {
     return PendingScansCompanion(
       id: id ?? this.id,
       photoPath: photoPath ?? this.photoPath,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
+      mealType: mealType ?? this.mealType,
+      date: date ?? this.date,
+      resultJson: resultJson ?? this.resultJson,
+      attempts: attempts ?? this.attempts,
     );
   }
 
@@ -3152,6 +3343,20 @@ class PendingScansCompanion extends UpdateCompanion<PendingScan> {
         $PendingScansTable.$converterstatus.toSql(status.value),
       );
     }
+    if (mealType.present) {
+      map['meal_type'] = Variable<String>(
+        $PendingScansTable.$convertermealTypen.toSql(mealType.value),
+      );
+    }
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (resultJson.present) {
+      map['result_json'] = Variable<String>(resultJson.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
     return map;
   }
 
@@ -3161,7 +3366,11 @@ class PendingScansCompanion extends UpdateCompanion<PendingScan> {
           ..write('id: $id, ')
           ..write('photoPath: $photoPath, ')
           ..write('createdAt: $createdAt, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('mealType: $mealType, ')
+          ..write('date: $date, ')
+          ..write('resultJson: $resultJson, ')
+          ..write('attempts: $attempts')
           ..write(')'))
         .toString();
   }
@@ -4943,6 +5152,10 @@ typedef $$PendingScansTableCreateCompanionBuilder =
       required String photoPath,
       required DateTime createdAt,
       required PendingScanStatus status,
+      Value<MealType?> mealType,
+      Value<String?> date,
+      Value<String?> resultJson,
+      Value<int> attempts,
     });
 typedef $$PendingScansTableUpdateCompanionBuilder =
     PendingScansCompanion Function({
@@ -4950,6 +5163,10 @@ typedef $$PendingScansTableUpdateCompanionBuilder =
       Value<String> photoPath,
       Value<DateTime> createdAt,
       Value<PendingScanStatus> status,
+      Value<MealType?> mealType,
+      Value<String?> date,
+      Value<String?> resultJson,
+      Value<int> attempts,
     });
 
 class $$PendingScansTableFilterComposer
@@ -4981,6 +5198,27 @@ class $$PendingScansTableFilterComposer
     column: $table.status,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<MealType?, MealType, String> get mealType =>
+      $composableBuilder(
+        column: $table.mealType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$PendingScansTableOrderingComposer
@@ -5011,6 +5249,26 @@ class $$PendingScansTableOrderingComposer
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get mealType => $composableBuilder(
+    column: $table.mealType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PendingScansTableAnnotationComposer
@@ -5033,6 +5291,20 @@ class $$PendingScansTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<PendingScanStatus, String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<MealType?, String> get mealType =>
+      $composableBuilder(column: $table.mealType, builder: (column) => column);
+
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get resultJson => $composableBuilder(
+    column: $table.resultJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
 }
 
 class $$PendingScansTableTableManager
@@ -5070,11 +5342,19 @@ class $$PendingScansTableTableManager
                 Value<String> photoPath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<PendingScanStatus> status = const Value.absent(),
+                Value<MealType?> mealType = const Value.absent(),
+                Value<String?> date = const Value.absent(),
+                Value<String?> resultJson = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
               }) => PendingScansCompanion(
                 id: id,
                 photoPath: photoPath,
                 createdAt: createdAt,
                 status: status,
+                mealType: mealType,
+                date: date,
+                resultJson: resultJson,
+                attempts: attempts,
               ),
           createCompanionCallback:
               ({
@@ -5082,11 +5362,19 @@ class $$PendingScansTableTableManager
                 required String photoPath,
                 required DateTime createdAt,
                 required PendingScanStatus status,
+                Value<MealType?> mealType = const Value.absent(),
+                Value<String?> date = const Value.absent(),
+                Value<String?> resultJson = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
               }) => PendingScansCompanion.insert(
                 id: id,
                 photoPath: photoPath,
                 createdAt: createdAt,
                 status: status,
+                mealType: mealType,
+                date: date,
+                resultJson: resultJson,
+                attempts: attempts,
               ),
           withReferenceMapper: (p0) => p0
               .map(

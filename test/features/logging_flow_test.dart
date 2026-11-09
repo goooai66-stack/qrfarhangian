@@ -75,8 +75,10 @@ void main() {
 
     taps = 0;
     await tap(tester, find.byKey(const Key('fab-log')));
-    // منو: عکس/گالری/صوتی هنوز «به‌زودی»، جستجو فعال، و غذاهای اخیر.
-    expect(find.text('به‌زودی'), findsNWidgets(3));
+    // منو: عکس/گالری/جستجو فعال، فقط صوتی «به‌زودی» (مرحله‌ی ۶)، و غذاهای اخیر.
+    expect(find.text('به‌زودی'), findsOneWidget);
+    expect(find.byKey(const Key('action-camera')), findsOneWidget);
+    expect(find.byKey(const Key('action-gallery')), findsOneWidget);
     expect(find.byKey(const Key('action-search')), findsOneWidget);
     expect(find.text('اخیر'), findsOneWidget);
     await tap(tester, find.byKey(const Key('sheet-food-chelo')));

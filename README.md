@@ -2,7 +2,7 @@
 
 کالری‌شمار عکسی غذاهای ایرانی — Flutter، اندروید (کافه‌بازار و مایکت).
 
-وضعیت: **مرحله‌ی ۰ (اسکلت)، ۱ (آنبوردینگ و هدف) و ۲ (پایگاه غذا، ثبت دستی، داشبورد)** انجام شده است.
+وضعیت: مرحله‌های **۰ تا ۳** انجام شده است (اسکلت، آنبوردینگ و هدف، پایگاه غذا و داشبورد، سرور واسط و اسکن عکس).
 
 ## پیش‌نیازها
 
@@ -21,11 +21,30 @@ flutter run --flavor bazaar
 flutter run --flavor myket
 ```
 
+## اسکن عکس و سرور واسط
+
+اسکن عکس از سرور واسط (`server/`) استفاده می‌کند؛ راه‌اندازی آن در `server/README.md`.
+
+```bash
+# سرور توسعه (ارائه‌دهنده‌ی جعلی):
+cd server && VISION_PROVIDER=fake uvicorn app.main:app --port 8000
+
+# اپ روی شبیه‌ساز (پیش‌فرض: http://10.0.2.2:8000):
+flutter run --flavor bazaar
+# روی گوشی واقعی یا سرور دیگر:
+flutter run --flavor bazaar --dart-define=API_BASE_URL=http://IP-رایانه:8000
+# بدون سرور، فقط برای دیدن UI:
+flutter run --flavor bazaar --dart-define=FAKE_SCAN=true
+```
+
+نسخه‌ی release فقط با HTTPS به سرور وصل می‌شود (`--dart-define=API_BASE_URL=https://...`).
+
 ## تست و بررسی
 
 ```bash
 flutter analyze
 flutter test
+cd server && pytest -q
 ```
 
 ## ساخت APK
@@ -57,7 +76,7 @@ lib/
 assets/
   data/foods.json        پایگاه غذا (فعلاً ۲۰ نمونه با مقادیر null)
   fonts/Vazirmatn/       Regular/Medium/Bold — مجوز OFL (OFL.txt)
-server/                  (مرحله‌ی ۳)
+server/                  سرور واسط FastAPI (تشخیص، سهمیه، لاگ هزینه)
 ```
 
 ## جایگزین کردن پایگاه غذا

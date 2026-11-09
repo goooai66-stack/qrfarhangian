@@ -11,8 +11,8 @@ void main() {
   setUp(() => db = AppDatabase(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  test('نسخه‌ی طرح ۲ است و همه‌ی جدول‌ها ساخته می‌شوند', () async {
-    expect(db.schemaVersion, 2);
+  test('نسخه‌ی طرح ۳ است و همه‌ی جدول‌ها ساخته می‌شوند', () async {
+    expect(db.schemaVersion, 3);
     final rows = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();
@@ -69,7 +69,7 @@ void main() {
     expect(row.kcal, isNull);
   });
 
-  test('مهاجرت v1 ← v2: داده حفظ و ستون‌ها nullable می‌شوند', () async {
+  test('مهاجرت v1 ← v3: داده حفظ و ستون‌ها nullable می‌شوند', () async {
     await db.close();
     // ۱) پایگاه کامل روی دیسک بساز، ۲) جدول food_logs را به طرح دقیق
     // نسخه‌ی ۱ (از sqlite_master نسخه‌ی ۱) برگردان و user_version=1 کن.
@@ -88,6 +88,13 @@ void main() {
           if (downgraded) return;
           downgraded = true;
           raw.execute('DROP TABLE food_logs');
+          // pending_scans هم به طرح نسخه‌ی ۱ برمی‌گردد (مهاجرت تا v3 ادامه دارد).
+          raw.execute('DROP TABLE pending_scans');
+          raw.execute(
+            'CREATE TABLE "pending_scans" ("id" INTEGER NOT NULL PRIMARY KEY '
+            'AUTOINCREMENT, "photo_path" TEXT NOT NULL, "created_at" INTEGER '
+            'NOT NULL, "status" TEXT NOT NULL)',
+          );
           raw.execute(
             'CREATE TABLE "food_logs" ("id" INTEGER NOT NULL PRIMARY KEY '
             'AUTOINCREMENT, "date" TEXT NOT NULL, "meal_type" TEXT NOT NULL, '

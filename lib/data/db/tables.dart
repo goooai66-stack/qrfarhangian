@@ -88,12 +88,20 @@ class CustomMeals extends Table {
   TextColumn get itemsJson => text().withDefault(const Constant('[]'))();
 }
 
-/// صف اسکن آفلاین.
+/// صف اسکن آفلاین (طرح نسخه‌ی ۳).
+/// queued ← بعد از وصل شدن تحلیل می‌شود؛ done ← نتیجه در [resultJson]،
+/// آماده‌ی بررسی کاربر؛ failed ← بعد از چند تلاش ناموفق.
 class PendingScans extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get photoPath => text()();
   DateTimeColumn get createdAt => dateTime()();
   TextColumn get status => textEnum<PendingScanStatus>()();
+
+  /// وعده و روزی که کاربر هنگام عکس گرفتن در نظر داشت (v3).
+  TextColumn get mealType => textEnum<MealType>().nullable()();
+  TextColumn get date => text().nullable()();
+  TextColumn get resultJson => text().nullable()();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
 }
 
 /// تنظیمات کلید-مقدار.

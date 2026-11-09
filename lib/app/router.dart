@@ -9,6 +9,8 @@ import '../features/logging/food_search_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/plans/plans_screen.dart';
 import '../features/profile/profile_edit_screen.dart';
+import '../features/scan/photo_source.dart';
+import '../features/scan/scan_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/progress/progress_screen.dart';
 import 'home_shell.dart';
@@ -38,6 +40,27 @@ abstract final class Routes {
     path: '$food/$foodId',
     queryParameters: {'meal': meal.name, 'date': dayKey(day)},
   ).toString();
+
+  /// جستجو برای انتخاب یک غذا (نتیجه با pop برمی‌گردد).
+  static const pickFood = '$search?pick=1';
+
+  static const scan = '/scan';
+
+  static String scanFor({
+    required ScanSource source,
+    required MealType meal,
+    required DateTime day,
+  }) => Uri(
+    path: scan,
+    queryParameters: {
+      'source': source.name,
+      'meal': meal.name,
+      'date': dayKey(day),
+    },
+  ).toString();
+
+  static String reviewPending(int id) =>
+      Uri(path: scan, queryParameters: {'pending': '$id'}).toString();
 
   static String editLog({required String foodId, required int logId}) => Uri(
     path: '$food/$foodId',
@@ -78,7 +101,22 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
       builder: (_, state) => FoodSearchScreen(
         meal: _meal(state.uri.queryParameters['meal']),
         day: _day(state.uri.queryParameters['date']),
+        pickMode: state.uri.queryParameters['pick'] == '1',
       ),
+    ),
+    GoRoute(
+      path: Routes.scan,
+      builder: (_, state) {
+        final q = state.uri.queryParameters;
+        return ScanScreen(
+          source: ScanSource.values
+              .where((s) => s.name == q['source'])
+              .firstOrNull,
+          meal: _meal(q['meal']),
+          day: _day(q['date']),
+          pendingId: int.tryParse(q['pending'] ?? ''),
+        );
+      },
     ),
     GoRoute(
       path: '${Routes.food}/:id',

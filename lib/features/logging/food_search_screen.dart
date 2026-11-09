@@ -12,10 +12,18 @@ import '../../l10n/app_localizations.dart';
 /// جستجوی غذا. بدون عبارت: علاقه‌مندی‌ها، اخیر، پرتکرار و همه‌ی غذاها
 /// (ثبت یک غذای اخیر: «ثبت غذا» ← غذا ← «ثبت» = ۳ لمس).
 class FoodSearchScreen extends ConsumerStatefulWidget {
-  const FoodSearchScreen({super.key, this.meal, this.day});
+  const FoodSearchScreen({
+    super.key,
+    this.meal,
+    this.day,
+    this.pickMode = false,
+  });
 
   final MealType? meal;
   final DateTime? day;
+
+  /// حالت انتخاب: با لمس غذا، همان [Food] برمی‌گردد (برای صفحه‌ی نتیجه‌ی اسکن).
+  final bool pickMode;
 
   @override
   ConsumerState<FoodSearchScreen> createState() => _FoodSearchScreenState();
@@ -32,6 +40,10 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
   }
 
   void _open(Food f) {
+    if (widget.pickMode) {
+      context.pop(f);
+      return;
+    }
     final meal = widget.meal ?? defaultMealForTime(DateTime.now());
     final day = widget.day ?? ref.read<DateTime>(selectedDayProvider);
     context.push(Routes.foodFor(foodId: f.id, meal: meal, day: day));

@@ -56,3 +56,21 @@ Future<void> disposeApp(WidgetTester tester) async {
 FoodRepository loadAppFoods() => FoodRepository.fromJsonString(
   File(FoodRepository.assetPath).readAsStringSync(),
 );
+
+/// تا وقتی [finder] پیدا شود پمپ می‌کند (برای صفحه‌هایی با انیمیشن بی‌پایان
+/// که pumpAndSettle در آن‌ها تمام نمی‌شود). کارهای واقعی (دیتابیس، فایل) هم
+/// در runAsync جلو می‌روند.
+Future<void> pumpUntil(
+  WidgetTester tester,
+  Finder finder, {
+  int maxTries = 200,
+}) async {
+  for (var i = 0; i < maxTries; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 5)),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  throw TestFailure('پیدا نشد: $finder');
+}

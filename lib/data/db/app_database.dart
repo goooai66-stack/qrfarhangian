@@ -26,8 +26,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// هر تغییر جدول = افزایش این عدد + یک گام در [migration].
   /// v2: ستون‌های grams/kcal/protein/carbs/fat در food_logs nullable شدند.
+  /// v3: ستون‌های meal_type/date/result_json/attempts در pending_scans.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -40,6 +41,12 @@ class AppDatabase extends _$AppDatabase {
         // تغییر nullability در SQLite = بازسازی جدول با حفظ داده.
         await m.alterTable(TableMigration(foodLogs));
         await _createIndexes();
+      }
+      if (from < 3) {
+        await m.addColumn(pendingScans, pendingScans.mealType);
+        await m.addColumn(pendingScans, pendingScans.date);
+        await m.addColumn(pendingScans, pendingScans.resultJson);
+        await m.addColumn(pendingScans, pendingScans.attempts);
       }
     },
     beforeOpen: (details) async {

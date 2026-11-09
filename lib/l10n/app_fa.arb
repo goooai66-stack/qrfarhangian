@@ -376,5 +376,81 @@
   "actionCamera": "عکس",
   "actionGallery": "گالری",
   "actionSearch": "جستجو",
-  "actionVoice": "صوتی"
+  "actionVoice": "صوتی",
+  "scanGuideTitle": "راهنمای عکس گرفتن",
+  "scanGuide1": "بشقاب را از بالا و کامل در کادر بگیر.",
+  "scanGuide2": "نور کافی باشد و سایه روی غذا نیفتد.",
+  "scanGuide3": "قاشق یا دست کنار بشقاب، به تخمین اندازه کمک می‌کند.",
+  "scanGuideOk": "متوجه شدم، عکس بگیر",
+  "analyzing": "در حال تحلیل…",
+  "scanTip1": "آب را قبل از غذا بنوش؛ به حس سیری کمک می‌کند.",
+  "scanTip2": "پروتئین کافی در هر وعده، گرسنگی را دیرتر می‌کند.",
+  "scanTip3": "آهسته غذا خوردن به بدن فرصت می‌دهد سیری را حس کند.",
+  "scanTip4": "سبزی خوردن و سالاد کنار غذا، بشقاب را پرتر و سبک‌تر می‌کند.",
+  "scanTip5": "ته‌دیگ خوشمزه است؛ فقط حواست به اندازه‌اش باشد!",
+  "scanResultTitle": "نتیجه‌ی تشخیص",
+  "scanLowConfidence": "مطمئن نیستیم، لطفاً بررسی کن.",
+  "scanNotFound": "این غذا را پیدا نکردیم، انتخاب کن.",
+  "scanChooseFood": "انتخاب غذا",
+  "scanChangeFood": "تغییر غذا",
+  "scanAddMissing": "افزودن آیتم جاافتاده",
+  "scanDetected": "تشخیص: {name}",
+  "@scanDetected": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "scanNoItems": "هیچ آیتمی نمانده. یک غذا اضافه کن یا عکس دیگری بگیر.",
+  "scanUnitAdjusted": "واحد به {unit} تغییر کرد.",
+  "@scanUnitAdjusted": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "scanNotFood": "غذایی در عکس پیدا نشد.",
+  "scanNotFoodHint": "سهمیه‌ات کم نشد. دوباره امتحان کن یا دستی ثبت کن.",
+  "scanOfflineTitle": "اینترنت نیست",
+  "scanOfflineQueued": "عکس ذخیره شد؛ وقتی وصل شدی تحلیلش می‌کنیم.",
+  "scanTimeout": "پاسخ دیر رسید. دوباره امتحان کن.",
+  "scanBusy": "سرور شلوغ است. کمی بعد دوباره امتحان کن.",
+  "scanRateLimited": "چند اسکن پشت سر هم زدی؛ یک دقیقه صبر کن.",
+  "scanBadImage": "این عکس قابل استفاده نیست. عکس دیگری انتخاب کن.",
+  "scanError": "تشخیص انجام نشد. دوباره امتحان کن.",
+  "scanQuotaTitle": "سهمیه‌ی اسکن امروز تمام شد",
+  "scanQuotaHint": "فردا سهمیه‌ی رایگانت دوباره پر می‌شود. تا آن موقع می‌توانی دستی ثبت کنی.",
+  "scanQuotaVideo": "🎬 دیدن یک ویدیو = ۱ اسکن",
+  "scanQuotaPremium": "💎 اسکن نامحدود",
+  "retry": "دوباره",
+  "manualLog": "ثبت دستی",
+  "takeAnother": "عکس دیگر",
+  "pendingReady": "{count} عکس آماده‌ی بررسی است",
+  "@pendingReady": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingQueued": "{count} عکس در صف تحلیل (بعد از وصل شدن)",
+  "@pendingQueued": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "review": "بررسی",
+  "discard": "کنار بگذار",
+  "confidenceValue": "اطمینان {percent}٪",
+  "@confidenceValue": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  }
 }

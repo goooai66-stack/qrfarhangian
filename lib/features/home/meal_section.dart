@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../core/utils/persian_digits.dart';
@@ -83,11 +85,7 @@ class MealSection extends StatelessWidget {
       key: Key('log-${l.id}'),
       contentPadding: const EdgeInsetsDirectional.only(end: 12),
       dense: true,
-      // جای عکس کوچک برای ثبت‌های عکسی (مرحله‌ی ۳).
-      leading: const CircleAvatar(
-        radius: 18,
-        child: Icon(Icons.restaurant, size: 18),
-      ),
+      leading: _Thumb(path: l.photoPath),
       title: Text(food?.nameFa ?? l.customName ?? t.unknownFood),
       subtitle: Text(t.quantityLabel(l.quantity, l.unit, fallback: unitName)),
       trailing: l.kcal == null
@@ -97,6 +95,28 @@ class MealSection extends StatelessWidget {
             )
           : Text(t.kcalOrDash(l.kcal)),
       onTap: () => onTapItem(l),
+    );
+  }
+}
+
+/// عکس کوچک ثبت‌های عکسی؛ اگر عکسی نیست یا پاک شده، آیکون.
+class _Thumb extends StatelessWidget {
+  const _Thumb({this.path});
+
+  final String? path;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = path;
+    if (p != null && File(p).existsSync()) {
+      return CircleAvatar(
+        radius: 18,
+        backgroundImage: ResizeImage(FileImage(File(p)), width: 96),
+      );
+    }
+    return const CircleAvatar(
+      radius: 18,
+      child: Icon(Icons.restaurant, size: 18),
     );
   }
 }

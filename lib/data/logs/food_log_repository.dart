@@ -25,34 +25,44 @@ class FoodLogRepository {
     _db.foodLogs,
   )..where((t) => t.id.equals(id))).getSingleOrNull();
 
+  /// [foodId] یا [customName] (برای غذای پیدانشده در اسکن) لازم است.
   Future<int> add({
     required String dayKey,
     required MealType meal,
-    required String foodId,
+    String? foodId,
+    String? customName,
     required double quantity,
     required String unit,
     required double? grams,
     required Nutrients nutrients,
     LogSource source = LogSource.search,
+    String? photoPath,
+    String? scanId,
     DateTime? now,
-  }) => _db
-      .into(_db.foodLogs)
-      .insert(
-        FoodLogsCompanion.insert(
-          date: dayKey,
-          mealType: meal,
-          foodId: Value(foodId),
-          quantity: quantity,
-          unit: unit,
-          grams: Value(grams),
-          kcal: Value(nutrients.kcal),
-          protein: Value(nutrients.protein),
-          carbs: Value(nutrients.carbs),
-          fat: Value(nutrients.fat),
-          source: source,
-          createdAt: now ?? DateTime.now(),
-        ),
-      );
+  }) {
+    assert(foodId != null || customName != null);
+    return _db
+        .into(_db.foodLogs)
+        .insert(
+          FoodLogsCompanion.insert(
+            date: dayKey,
+            mealType: meal,
+            foodId: Value(foodId),
+            customName: Value(customName),
+            quantity: quantity,
+            unit: unit,
+            grams: Value(grams),
+            kcal: Value(nutrients.kcal),
+            protein: Value(nutrients.protein),
+            carbs: Value(nutrients.carbs),
+            fat: Value(nutrients.fat),
+            source: source,
+            photoPath: Value(photoPath),
+            scanId: Value(scanId),
+            createdAt: now ?? DateTime.now(),
+          ),
+        );
+  }
 
   /// ویرایش مقدار/واحد/وعده؛ ارزش غذایی دوباره snapshot می‌شود.
   Future<void> updateServing(

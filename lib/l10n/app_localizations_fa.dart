@@ -642,4 +642,142 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get actionVoice => 'صوتی';
+
+  @override
+  String get scanGuideTitle => 'راهنمای عکس گرفتن';
+
+  @override
+  String get scanGuide1 => 'بشقاب را از بالا و کامل در کادر بگیر.';
+
+  @override
+  String get scanGuide2 => 'نور کافی باشد و سایه روی غذا نیفتد.';
+
+  @override
+  String get scanGuide3 =>
+      'قاشق یا دست کنار بشقاب، به تخمین اندازه کمک می‌کند.';
+
+  @override
+  String get scanGuideOk => 'متوجه شدم، عکس بگیر';
+
+  @override
+  String get analyzing => 'در حال تحلیل…';
+
+  @override
+  String get scanTip1 => 'آب را قبل از غذا بنوش؛ به حس سیری کمک می‌کند.';
+
+  @override
+  String get scanTip2 => 'پروتئین کافی در هر وعده، گرسنگی را دیرتر می‌کند.';
+
+  @override
+  String get scanTip3 => 'آهسته غذا خوردن به بدن فرصت می‌دهد سیری را حس کند.';
+
+  @override
+  String get scanTip4 =>
+      'سبزی خوردن و سالاد کنار غذا، بشقاب را پرتر و سبک‌تر می‌کند.';
+
+  @override
+  String get scanTip5 => 'ته‌دیگ خوشمزه است؛ فقط حواست به اندازه‌اش باشد!';
+
+  @override
+  String get scanResultTitle => 'نتیجه‌ی تشخیص';
+
+  @override
+  String get scanLowConfidence => 'مطمئن نیستیم، لطفاً بررسی کن.';
+
+  @override
+  String get scanNotFound => 'این غذا را پیدا نکردیم، انتخاب کن.';
+
+  @override
+  String get scanChooseFood => 'انتخاب غذا';
+
+  @override
+  String get scanChangeFood => 'تغییر غذا';
+
+  @override
+  String get scanAddMissing => 'افزودن آیتم جاافتاده';
+
+  @override
+  String scanDetected(String name) {
+    return 'تشخیص: $name';
+  }
+
+  @override
+  String get scanNoItems =>
+      'هیچ آیتمی نمانده. یک غذا اضافه کن یا عکس دیگری بگیر.';
+
+  @override
+  String scanUnitAdjusted(String unit) {
+    return 'واحد به $unit تغییر کرد.';
+  }
+
+  @override
+  String get scanNotFood => 'غذایی در عکس پیدا نشد.';
+
+  @override
+  String get scanNotFoodHint =>
+      'سهمیه‌ات کم نشد. دوباره امتحان کن یا دستی ثبت کن.';
+
+  @override
+  String get scanOfflineTitle => 'اینترنت نیست';
+
+  @override
+  String get scanOfflineQueued => 'عکس ذخیره شد؛ وقتی وصل شدی تحلیلش می‌کنیم.';
+
+  @override
+  String get scanTimeout => 'پاسخ دیر رسید. دوباره امتحان کن.';
+
+  @override
+  String get scanBusy => 'سرور شلوغ است. کمی بعد دوباره امتحان کن.';
+
+  @override
+  String get scanRateLimited => 'چند اسکن پشت سر هم زدی؛ یک دقیقه صبر کن.';
+
+  @override
+  String get scanBadImage => 'این عکس قابل استفاده نیست. عکس دیگری انتخاب کن.';
+
+  @override
+  String get scanError => 'تشخیص انجام نشد. دوباره امتحان کن.';
+
+  @override
+  String get scanQuotaTitle => 'سهمیه‌ی اسکن امروز تمام شد';
+
+  @override
+  String get scanQuotaHint =>
+      'فردا سهمیه‌ی رایگانت دوباره پر می‌شود. تا آن موقع می‌توانی دستی ثبت کنی.';
+
+  @override
+  String get scanQuotaVideo => '🎬 دیدن یک ویدیو = ۱ اسکن';
+
+  @override
+  String get scanQuotaPremium => '💎 اسکن نامحدود';
+
+  @override
+  String get retry => 'دوباره';
+
+  @override
+  String get manualLog => 'ثبت دستی';
+
+  @override
+  String get takeAnother => 'عکس دیگر';
+
+  @override
+  String pendingReady(String count) {
+    return '$count عکس آماده‌ی بررسی است';
+  }
+
+  @override
+  String pendingQueued(String count) {
+    return '$count عکس در صف تحلیل (بعد از وصل شدن)';
+  }
+
+  @override
+  String get review => 'بررسی';
+
+  @override
+  String get discard => 'کنار بگذار';
+
+  @override
+  String confidenceValue(String percent) {
+    return 'اطمینان $percent٪';
+  }
 }

@@ -118,6 +118,7 @@ class TodayScreen extends ConsumerWidget {
               ),
             ),
           ),
+          _PendingScansBanner(),
           WaterCard(
             glasses: water,
             onChanged: (n) =>
@@ -174,5 +175,43 @@ class TodayScreen extends ConsumerWidget {
       ),
     );
     if (ok == true) await ref.read(foodLogRepositoryProvider).delete(l.id);
+  }
+}
+
+/// اسکن‌های صف آفلاین: «آماده‌ی بررسی» یا «در صف».
+class _PendingScansBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final all = ref.watch(pendingScansProvider).value ?? const [];
+    final ready = [
+      for (final p in all)
+        if (p.status == PendingScanStatus.done) p,
+    ];
+    final queued = all.where((p) => p.status == PendingScanStatus.queued);
+    if (ready.isEmpty && queued.isEmpty) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      key: const Key('pending-banner'),
+      color: ready.isEmpty ? cs.surfaceContainerHighest : cs.tertiaryContainer,
+      child: ListTile(
+        leading: Icon(
+          ready.isEmpty ? Icons.cloud_upload_outlined : Icons.photo_camera,
+        ),
+        title: Text(
+          ready.isEmpty
+              ? t.pendingQueued(toPersianDigits('${queued.length}'))
+              : t.pendingReady(toPersianDigits('${ready.length}')),
+        ),
+        trailing: ready.isEmpty
+            ? null
+            : FilledButton.tonal(
+                key: const Key('pending-review'),
+                onPressed: () =>
+                    context.push(Routes.reviewPending(ready.first.id)),
+                child: Text(t.review),
+              ),
+      ),
+    );
   }
 }

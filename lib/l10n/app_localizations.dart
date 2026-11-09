@@ -1239,6 +1239,252 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'صوتی'**
   String get actionVoice;
+
+  /// No description provided for @scanGuideTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'راهنمای عکس گرفتن'**
+  String get scanGuideTitle;
+
+  /// No description provided for @scanGuide1.
+  ///
+  /// In fa, this message translates to:
+  /// **'بشقاب را از بالا و کامل در کادر بگیر.'**
+  String get scanGuide1;
+
+  /// No description provided for @scanGuide2.
+  ///
+  /// In fa, this message translates to:
+  /// **'نور کافی باشد و سایه روی غذا نیفتد.'**
+  String get scanGuide2;
+
+  /// No description provided for @scanGuide3.
+  ///
+  /// In fa, this message translates to:
+  /// **'قاشق یا دست کنار بشقاب، به تخمین اندازه کمک می‌کند.'**
+  String get scanGuide3;
+
+  /// No description provided for @scanGuideOk.
+  ///
+  /// In fa, this message translates to:
+  /// **'متوجه شدم، عکس بگیر'**
+  String get scanGuideOk;
+
+  /// No description provided for @analyzing.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال تحلیل…'**
+  String get analyzing;
+
+  /// No description provided for @scanTip1.
+  ///
+  /// In fa, this message translates to:
+  /// **'آب را قبل از غذا بنوش؛ به حس سیری کمک می‌کند.'**
+  String get scanTip1;
+
+  /// No description provided for @scanTip2.
+  ///
+  /// In fa, this message translates to:
+  /// **'پروتئین کافی در هر وعده، گرسنگی را دیرتر می‌کند.'**
+  String get scanTip2;
+
+  /// No description provided for @scanTip3.
+  ///
+  /// In fa, this message translates to:
+  /// **'آهسته غذا خوردن به بدن فرصت می‌دهد سیری را حس کند.'**
+  String get scanTip3;
+
+  /// No description provided for @scanTip4.
+  ///
+  /// In fa, this message translates to:
+  /// **'سبزی خوردن و سالاد کنار غذا، بشقاب را پرتر و سبک‌تر می‌کند.'**
+  String get scanTip4;
+
+  /// No description provided for @scanTip5.
+  ///
+  /// In fa, this message translates to:
+  /// **'ته‌دیگ خوشمزه است؛ فقط حواست به اندازه‌اش باشد!'**
+  String get scanTip5;
+
+  /// No description provided for @scanResultTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'نتیجه‌ی تشخیص'**
+  String get scanResultTitle;
+
+  /// No description provided for @scanLowConfidence.
+  ///
+  /// In fa, this message translates to:
+  /// **'مطمئن نیستیم، لطفاً بررسی کن.'**
+  String get scanLowConfidence;
+
+  /// No description provided for @scanNotFound.
+  ///
+  /// In fa, this message translates to:
+  /// **'این غذا را پیدا نکردیم، انتخاب کن.'**
+  String get scanNotFound;
+
+  /// No description provided for @scanChooseFood.
+  ///
+  /// In fa, this message translates to:
+  /// **'انتخاب غذا'**
+  String get scanChooseFood;
+
+  /// No description provided for @scanChangeFood.
+  ///
+  /// In fa, this message translates to:
+  /// **'تغییر غذا'**
+  String get scanChangeFood;
+
+  /// No description provided for @scanAddMissing.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن آیتم جاافتاده'**
+  String get scanAddMissing;
+
+  /// No description provided for @scanDetected.
+  ///
+  /// In fa, this message translates to:
+  /// **'تشخیص: {name}'**
+  String scanDetected(String name);
+
+  /// No description provided for @scanNoItems.
+  ///
+  /// In fa, this message translates to:
+  /// **'هیچ آیتمی نمانده. یک غذا اضافه کن یا عکس دیگری بگیر.'**
+  String get scanNoItems;
+
+  /// No description provided for @scanUnitAdjusted.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد به {unit} تغییر کرد.'**
+  String scanUnitAdjusted(String unit);
+
+  /// No description provided for @scanNotFood.
+  ///
+  /// In fa, this message translates to:
+  /// **'غذایی در عکس پیدا نشد.'**
+  String get scanNotFood;
+
+  /// No description provided for @scanNotFoodHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهمیه‌ات کم نشد. دوباره امتحان کن یا دستی ثبت کن.'**
+  String get scanNotFoodHint;
+
+  /// No description provided for @scanOfflineTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'اینترنت نیست'**
+  String get scanOfflineTitle;
+
+  /// No description provided for @scanOfflineQueued.
+  ///
+  /// In fa, this message translates to:
+  /// **'عکس ذخیره شد؛ وقتی وصل شدی تحلیلش می‌کنیم.'**
+  String get scanOfflineQueued;
+
+  /// No description provided for @scanTimeout.
+  ///
+  /// In fa, this message translates to:
+  /// **'پاسخ دیر رسید. دوباره امتحان کن.'**
+  String get scanTimeout;
+
+  /// No description provided for @scanBusy.
+  ///
+  /// In fa, this message translates to:
+  /// **'سرور شلوغ است. کمی بعد دوباره امتحان کن.'**
+  String get scanBusy;
+
+  /// No description provided for @scanRateLimited.
+  ///
+  /// In fa, this message translates to:
+  /// **'چند اسکن پشت سر هم زدی؛ یک دقیقه صبر کن.'**
+  String get scanRateLimited;
+
+  /// No description provided for @scanBadImage.
+  ///
+  /// In fa, this message translates to:
+  /// **'این عکس قابل استفاده نیست. عکس دیگری انتخاب کن.'**
+  String get scanBadImage;
+
+  /// No description provided for @scanError.
+  ///
+  /// In fa, this message translates to:
+  /// **'تشخیص انجام نشد. دوباره امتحان کن.'**
+  String get scanError;
+
+  /// No description provided for @scanQuotaTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهمیه‌ی اسکن امروز تمام شد'**
+  String get scanQuotaTitle;
+
+  /// No description provided for @scanQuotaHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'فردا سهمیه‌ی رایگانت دوباره پر می‌شود. تا آن موقع می‌توانی دستی ثبت کنی.'**
+  String get scanQuotaHint;
+
+  /// No description provided for @scanQuotaVideo.
+  ///
+  /// In fa, this message translates to:
+  /// **'🎬 دیدن یک ویدیو = ۱ اسکن'**
+  String get scanQuotaVideo;
+
+  /// No description provided for @scanQuotaPremium.
+  ///
+  /// In fa, this message translates to:
+  /// **'💎 اسکن نامحدود'**
+  String get scanQuotaPremium;
+
+  /// No description provided for @retry.
+  ///
+  /// In fa, this message translates to:
+  /// **'دوباره'**
+  String get retry;
+
+  /// No description provided for @manualLog.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت دستی'**
+  String get manualLog;
+
+  /// No description provided for @takeAnother.
+  ///
+  /// In fa, this message translates to:
+  /// **'عکس دیگر'**
+  String get takeAnother;
+
+  /// No description provided for @pendingReady.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} عکس آماده‌ی بررسی است'**
+  String pendingReady(String count);
+
+  /// No description provided for @pendingQueued.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} عکس در صف تحلیل (بعد از وصل شدن)'**
+  String pendingQueued(String count);
+
+  /// No description provided for @review.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی'**
+  String get review;
+
+  /// No description provided for @discard.
+  ///
+  /// In fa, this message translates to:
+  /// **'کنار بگذار'**
+  String get discard;
+
+  /// No description provided for @confidenceValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'اطمینان {percent}٪'**
+  String confidenceValue(String percent);
 }
 
 class _AppLocalizationsDelegate
