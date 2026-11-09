@@ -1,0 +1,31 @@
+{
+  "@@locale": "fa",
+  "appTitle": "کالری‌لنز",
+  "@appTitle": { "description": "نام اپ (موقت)" },
+
+  "tabToday": "امروز",
+  "tabProgress": "پیشرفت",
+  "tabPlans": "برنامه‌ها",
+  "tabProfile": "پروفایل",
+
+  "todayPlaceholder": "داشبورد روزانه در مرحله‌ی ۲ ساخته می‌شود.",
+  "progressPlaceholder": "ثبت وزن و نمودارها در مرحله‌ی ۴ ساخته می‌شود.",
+  "plansPlaceholder": "برنامه‌ها و چالش‌ها در نسخه‌های بعدی می‌آیند.",
+  "profilePlaceholder": "پروفایل و تنظیمات در مرحله‌ی ۱ ساخته می‌شود.",
+  "comingSoon": "به‌زودی",
+
+  "themeMode": "حالت نمایش",
+  "themeSystem": "مطابق سیستم",
+  "themeLight": "روشن",
+  "themeDark": "تیره",
+
+  "logFood": "ثبت غذا",
+
+  "medicalDisclaimer": "این اپ جایگزین پزشک یا متخصص تغذیه نیست. اعداد تخمینی‌اند.",
+  "@medicalDisclaimer": { "description": "سلب مسئولیت پزشکی — بخش ۶-۵؛ هرگز حذف نشود" },
+
+  "todayDate": "امروز: {date}",
+  "@todayDate": {
+    "placeholders": { "date": { "type": "String" } }
+  }
+}
