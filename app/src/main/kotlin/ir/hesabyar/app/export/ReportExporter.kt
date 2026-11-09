@@ -76,7 +76,7 @@ class ReportExporter(private val context: Context, private val db: AppDatabase, 
         ReportBuilder.slices(d.rows.filter { it.tx.type == TransactionType.EXPENSE }.map { ReportBuilder.Entry(it.tx.occurredAt, it.tx.type, it.tx.amountRial, it.tx.categoryId) }, max = 1000)
             .forEach { s -> summary += listOf(Cell.Text(categoryName(d, s.categoryId)), Cell.Number(s.amountRial / 10), Cell.Text("%.1f%%".format(Locale.US, s.percent))) }
 
-        val txSheet = mutableListOf(
+        val txSheet = mutableListOf<List<Cell>>(
             listOf("تاریخ", "ساعت", "نوع", "دسته", "حساب", "طرف انتقال", "مبلغ (تومان)", "مانده پس از تراکنش (تومان)", "توضیحات").map { Cell.Header(it) },
         )
         d.rows.forEach { row ->
@@ -89,7 +89,7 @@ class ReportExporter(private val context: Context, private val db: AppDatabase, 
             )
         }
 
-        val accSheet = mutableListOf(listOf("حساب", "نوع", "بانک", "موجودی فعلی (تومان)").map { Cell.Header(it) })
+        val accSheet = mutableListOf<List<Cell>>(listOf("حساب", "نوع", "بانک", "موجودی فعلی (تومان)").map { Cell.Header(it) })
         d.accounts.forEach { a ->
             accSheet += listOf(Cell.Text(a.name), Cell.Text(accountKind(a.kind)), Cell.Text(a.bank?.persianName.orEmpty()), Cell.Number(a.currentBalanceRial / 10))
         }

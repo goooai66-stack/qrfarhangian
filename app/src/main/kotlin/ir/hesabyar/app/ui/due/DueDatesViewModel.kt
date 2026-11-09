@@ -180,7 +180,7 @@ class DueDatesViewModel(private val c: AppContainer) : ViewModel() {
     fun deleteLoan(id: Long) = action { c.dues.deleteLoan(id) }
 
     fun addDebt(name: String, dir: DebtDirection, rial: Long, due: JalaliDate?, note: String, onResult: (String?) -> Unit) =
-        run(onResult) { c.dues.addDebt(requireLedger(), name, dir, rial, due, note) }
+        action(onResult) { c.dues.addDebt(requireLedger(), name, dir, rial, due, note) }
     fun settleDebt(id: Long, rial: Long, accountId: Long?) = action { c.dues.settleDebt(id, rial, accountId) }
     fun deleteDebt(id: Long) = action { c.dues.deleteDebt(id) }
     fun splitBill(d: SplitDraft, onResult: (String?) -> Unit) = action(onResult) { c.dues.splitBill(d) }
