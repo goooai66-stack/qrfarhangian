@@ -37,6 +37,9 @@ interface AccountDao {
     suspend fun listByLedger(ledgerId: Long): List<AccountEntity>
 
     /** All user accounts across ledgers: an SMS belongs to whichever ledger owns the card. */
+    @Query("SELECT * FROM accounts WHERE ledgerId = :ledgerId")
+    suspend fun listAllInLedger(ledgerId: Long): List<AccountEntity>
+
     @Query("SELECT * FROM accounts WHERE isArchived = 0")
     suspend fun listAll(): List<AccountEntity>
 

@@ -161,6 +161,19 @@ interface PlanningDao {
     @Query("DELETE FROM debts WHERE id = :id")
     suspend fun deleteDebt(id: Long)
 
+    // ============================================================ fiscal-year reset: drop links to deleted transactions
+    @Query("UPDATE cheques SET transactionId = NULL WHERE ledgerId = :ledgerId")
+    suspend fun clearChequeTxRefs(ledgerId: Long)
+
+    @Query("UPDATE installments SET transactionId = NULL WHERE loanId IN (SELECT id FROM loans WHERE ledgerId = :ledgerId)")
+    suspend fun clearInstallmentTxRefs(ledgerId: Long)
+
+    @Query("UPDATE savings_deposits SET transactionId = NULL WHERE goalId IN (SELECT id FROM savings_goals WHERE ledgerId = :ledgerId)")
+    suspend fun clearDepositTxRefs(ledgerId: Long)
+
+    @Query("UPDATE bank_sms SET transactionId = NULL WHERE matchedAccountId IN (SELECT id FROM accounts WHERE ledgerId = :ledgerId)")
+    suspend fun clearSmsTxRefs(ledgerId: Long)
+
     // ============================================================ savings goals (سپر ضدتورم)
     @Insert suspend fun insertGoal(goal: SavingsGoalEntity): Long
     @Insert suspend fun insertDeposit(deposit: SavingsDepositEntity): Long

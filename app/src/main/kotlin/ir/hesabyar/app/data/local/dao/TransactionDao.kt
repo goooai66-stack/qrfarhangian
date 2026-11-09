@@ -20,6 +20,14 @@ data class TransactionRow(
     @ColumnInfo(name = "counter_account_name") val counterAccountName: String?,
 )
 
+/** Lightweight projection for analytics (no joins). */
+data class ReportRow(
+    val occurredAt: Long,
+    val type: TransactionType,
+    val amountRial: Long,
+    val categoryId: Long?,
+)
+
 data class LedgerEntryRow(
     val id: Long,
     val occurredAt: Long,
@@ -125,6 +133,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE transferGroupId = :groupId")
     suspend fun getTransferLegs(groupId: String): List<TransactionEntity>
+
+    @Query("SELECT occurredAt, type, amountRial, categoryId FROM transactions WHERE ledgerId = :ledgerId AND occurredAt >= :fromMillis AND occurredAt < :toMillis")
+    fun observeReportRows(ledgerId: Long, fromMillis: Long, toMillis: Long): Flow<List<ReportRow>>
 
     /** Fiscal-year reset: wipes movements, keeps accounts & categories. */
     @Query("DELETE FROM transactions WHERE ledgerId = :ledgerId")

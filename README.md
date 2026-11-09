@@ -18,7 +18,7 @@
 
 ## وضعیت
 
-گام ۳ از ۵ (+ نرخ زنده، ماشین‌حساب طلا و وام، سپر ضدتورم؛ فید نرخ: [`docs/rates-feed.md`](docs/rates-feed.md)) — جزئیات معماری، اسکیمای دیتابیس، موتور پیامک و قوانین تبلیغات در
+گام‌های ۱، ۲، ۳ و ۵ انجام شده (+ گزارش و نمودار، خروجی Excel/PDF، پشتیبان رمزنگاری‌شده، قفل اثر انگشت/رمز، سال مالی جدید). باقی‌مانده: گام ۴، اتصال SDK تبلیغات. فید نرخ: [`docs/rates-feed.md`](docs/rates-feed.md) — جزئیات معماری، اسکیمای دیتابیس، موتور پیامک و قوانین تبلیغات در
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 فونت Vazirmatn تحت مجوز SIL OFL 1.1 — [`licenses/Vazirmatn-OFL.txt`](licenses/Vazirmatn-OFL.txt).

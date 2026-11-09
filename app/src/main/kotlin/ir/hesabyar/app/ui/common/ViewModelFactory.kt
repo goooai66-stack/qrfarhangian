@@ -8,6 +8,8 @@ import ir.hesabyar.app.HesabyarApp
 import ir.hesabyar.app.ui.dashboard.DashboardViewModel
 import ir.hesabyar.app.ui.due.DueDatesViewModel
 import ir.hesabyar.app.ui.tools.ToolsViewModel
+import ir.hesabyar.app.ui.reports.ReportsViewModel
+import ir.hesabyar.app.ui.settings.SettingsViewModel
 import ir.hesabyar.app.ui.transaction.AddTransactionViewModel
 import ir.hesabyar.app.ui.transactions.TransactionsViewModel
 
@@ -18,5 +20,7 @@ object AppViewModels {
         initializer { TransactionsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
         initializer { DueDatesViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
         initializer { ToolsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
+        initializer { ReportsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
+        initializer { SettingsViewModel((this[APPLICATION_KEY] as HesabyarApp).container) }
     }
 }

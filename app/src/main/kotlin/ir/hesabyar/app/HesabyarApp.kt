@@ -6,7 +6,9 @@ import ir.hesabyar.app.ads.AdsController
 import ir.hesabyar.app.ads.FakeAdProvider
 import ir.hesabyar.app.ads.NoAdProvider
 import ir.hesabyar.app.ads.PolicedAdProvider
+import ir.hesabyar.app.backup.BackupManager
 import ir.hesabyar.app.data.local.AppDatabase
+import ir.hesabyar.app.export.ReportExporter
 import ir.hesabyar.app.data.local.DatabaseSeeder
 import ir.hesabyar.app.data.prefs.AppPreferences
 import ir.hesabyar.app.data.remote.JsonRateSource
@@ -20,6 +22,7 @@ import ir.hesabyar.app.reminders.ReminderNotifier
 import ir.hesabyar.app.reminders.ReminderScheduler
 import ir.hesabyar.app.usecase.ConfirmBankSmsUseCase
 import ir.hesabyar.app.usecase.DueUseCases
+import ir.hesabyar.app.usecase.FiscalYearReset
 import ir.hesabyar.app.usecase.SavingsUseCases
 import ir.hesabyar.domain.sms.BankSmsParser
 import ir.hesabyar.domain.sms.SelfTransferDetector
@@ -63,6 +66,10 @@ class AppContainer(context: Context) {
     val smsIngestor by lazy { SmsIngestor(db, BankSmsParser(), SelfTransferDetector()) }
     val smsImporter by lazy { SmsInboxImporter(app, smsIngestor) }
     val smsNotifier by lazy { SmsNotifier(app) }
+
+    val backup by lazy { BackupManager(db) }
+    val exporter by lazy { ReportExporter(app, db, transactions) }
+    val fiscalYearReset by lazy { FiscalYearReset(db) }
 
     val reminderNotifier by lazy { ReminderNotifier(app) }
     val reminderEngine by lazy { ReminderEngine(db, prefs, reminderNotifier) }

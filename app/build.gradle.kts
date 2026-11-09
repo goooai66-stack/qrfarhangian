@@ -61,6 +61,9 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.biometric) // fingerprint / face unlock, API 23+
+    // biometric pulls fragment 1.2.x; ≥1.3 is required for Compose activity-result launchers on a FragmentActivity.
+    implementation(libs.androidx.fragment)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
