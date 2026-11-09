@@ -5,6 +5,7 @@ import '../core/ads/ad_service.dart';
 import '../core/billing/billing_service.dart';
 import '../core/recognition/food_recognizer.dart';
 import '../data/db/app_database.dart';
+import '../data/profile/profile_repository.dart';
 
 /// دیتابیس محلی. در main با نمونه‌ی واقعی override می‌شود؛ در تست با حافظه.
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -46,4 +47,37 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
   ThemeModeNotifier.new,
+);
+
+// ---- پروفایل و آنبوردینگ ----
+
+final profileRepositoryProvider = Provider<ProfileRepository>(
+  (ref) => ProfileRepository(ref.watch(databaseProvider)),
+);
+
+/// مقدار اولیه در main از دیتابیس خوانده و override می‌شود.
+final initialOnboardingDoneProvider = Provider<bool>((ref) => false);
+
+/// آیا آنبوردینگ کامل شده است؟ (= پروفایل ذخیره شده)
+class OnboardingDoneNotifier extends Notifier<bool> {
+  @override
+  bool build() => ref.read(initialOnboardingDoneProvider);
+
+  void markDone() => state = true;
+}
+
+final onboardingDoneProvider = NotifierProvider<OnboardingDoneNotifier, bool>(
+  OnboardingDoneNotifier.new,
+);
+
+final profileProvider = StreamProvider<UserProfile?>(
+  (ref) => ref.watch(profileRepositoryProvider).watchProfile(),
+);
+
+final activeGoalProvider = StreamProvider<Goal?>(
+  (ref) => ref.watch(profileRepositoryProvider).watchActiveGoal(),
+);
+
+final currentWeightProvider = StreamProvider<double?>(
+  (ref) => ref.watch(profileRepositoryProvider).watchCurrentWeight(),
 );

@@ -5,12 +5,11 @@
 // «YYYY-MM-DD» بر اساس روز محلی کاربر است (jalali_date.dayKey).
 import 'package:drift/drift.dart';
 
-/// enumها به‌صورت متن ذخیره می‌شوند تا تغییر ترتیبشان داده را خراب نکند.
-enum Sex { male, female }
+import '../../core/nutrition/nutrition_types.dart';
 
-enum ActivityLevel { sedentary, light, moderate, active, veryActive }
+export '../../core/nutrition/nutrition_types.dart';
 
-enum GoalType { lose, maintain, gain }
+// enumها به‌صورت متن (نام) ذخیره می‌شوند تا تغییر ترتیبشان داده را خراب نکند.
 
 enum MealType { breakfast, lunch, dinner, snack }
 

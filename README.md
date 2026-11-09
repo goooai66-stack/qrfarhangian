@@ -2,7 +2,7 @@
 
 کالری‌شمار عکسی غذاهای ایرانی — Flutter، اندروید (کافه‌بازار و مایکت).
 
-وضعیت: **مرحله‌ی ۰ (اسکلت پروژه)** انجام شده است.
+وضعیت: **مرحله‌ی ۰ (اسکلت) و ۱ (آنبوردینگ، پروفایل، محاسبه‌ی هدف)** انجام شده است.
 
 ## پیش‌نیازها
 
@@ -44,12 +44,13 @@ lib/
   app/          روتر (go_router)، تم روشن/تیره، Flavor، providerها (Riverpod)
   core/
     utils/      ارقام فارسی، نرمال‌سازی متن فارسی، تاریخ شمسی
-    nutrition/  (مرحله‌ی ۱)
+    nutrition/  BMR، TDEE، کالری هدف، درشت‌مغذی‌ها، قوانین ایمنی (با تست)
     ads/        AdService + FakeAdService
     billing/    BillingService + FakeBillingService
     recognition/ FoodRecognizer + FakeFoodRecognizer + OnDeviceRecognizer (خالی)
   data/db/      Drift: جدول‌های بخش ۱۰-۳، طرح نسخه‌ی ۱
-  features/     صفحه‌ها (فعلاً ۴ تب موقت)
+  data/profile/ ProfileRepository: پروفایل، تاریخچه‌ی هدف، وزن فعلی
+  features/     آنبوردینگ، صفحه‌ی نتیجه، پروفایل و ویرایش آن، ۴ تب
   l10n/         app_fa.arb — همه‌ی متن‌های رابط کاربری اینجا
 assets/
   data/foods.json        (مرحله‌ی ۲)

@@ -2,8 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
+import 'app/providers.dart';
+import 'data/db/app_database.dart';
+import 'data/profile/profile_repository.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: CalorieLensApp()));
+  final db = AppDatabase();
+  // یک کوئری سبک: اگر پروفایل هست، آنبوردینگ تکرار نمی‌شود.
+  final done = await ProfileRepository(db).hasProfile();
+  runApp(
+    ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        initialOnboardingDoneProvider.overrideWithValue(done),
+      ],
+      child: const CalorieLensApp(),
+    ),
+  );
 }

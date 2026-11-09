@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
+import '../../app/router.dart';
+import '../../core/nutrition/nutrition_calculator.dart';
+import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
+import 'profile_labels.dart';
 
-/// تب «پروفایل» — فعلاً فقط انتخاب تم و سلب مسئولیت.
-/// پروفایل و هدف در مرحله‌ی ۱ اضافه می‌شوند.
+/// تب «پروفایل»: خلاصه‌ی برنامه، ویرایش، تم و سلب مسئولیت.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -13,14 +17,71 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final mode = ref.watch(themeModeProvider);
+    final profile = ref.watch(profileProvider).value;
+    final goal = ref.watch(activeGoalProvider).value;
+    final weight = ref.watch(currentWeightProvider).value;
+    final tt = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(title: Text(t.tabProfile)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(t.profilePlaceholder),
+          if (profile == null || goal == null)
+            Text(t.profileNoData)
+          else
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.profileSummary, style: tt.titleMedium),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${formatPersianNumber(goal.kcal)} ${t.kcalUnit}',
+                      key: const Key('profile-kcal'),
+                      style: tt.headlineMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '${t.macroProtein} ${t.grams(goal.proteinG)} · '
+                      '${t.macroCarbs} ${t.grams(goal.carbsG)} · '
+                      '${t.macroFat} ${t.grams(goal.fatG)}',
+                    ),
+                    const Divider(height: 24),
+                    _Row(
+                      t.profileGoal,
+                      t.goalLabel(
+                        profile.goalType,
+                        minor:
+                            ageInYears(profile.birthDate, DateTime.now()) <
+                            adultAge,
+                      ),
+                    ),
+                    if (weight != null)
+                      _Row(t.profileCurrentWeight, t.kg(weight)),
+                    if (profile.goalType != GoalType.maintain)
+                      _Row(t.profileGoalWeight, t.kg(profile.goalWeightKg)),
+                    _Row(
+                      t.profileActivity,
+                      t.activityLabel(profile.activityLevel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 8),
+          FilledButton.tonalIcon(
+            key: const Key('profile-edit'),
+            onPressed: () => context.push(Routes.profileEdit),
+            icon: const Icon(Icons.edit_outlined),
+            label: Text(t.profileEdit),
+          ),
           const SizedBox(height: 24),
-          Text(t.themeMode, style: Theme.of(context).textTheme.titleMedium),
+          Text(t.themeMode, style: tt.titleMedium),
           const SizedBox(height: 8),
           SegmentedButton<ThemeMode>(
             segments: [
@@ -55,4 +116,22 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _Row extends StatelessWidget {
+  const _Row(this.label, this.value);
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        Expanded(child: Text(label)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+      ],
+    ),
+  );
 }

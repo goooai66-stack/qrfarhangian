@@ -16,16 +16,24 @@ class CalorieLensApp extends ConsumerStatefulWidget {
 }
 
 class _CalorieLensAppState extends ConsumerState<CalorieLensApp> {
-  late final GoRouter _router = buildRouter();
+  late final ValueNotifier<bool> _onboardingDone = ValueNotifier(
+    ref.read(onboardingDoneProvider),
+  );
+  late final GoRouter _router = buildRouter(_onboardingDone);
 
   @override
   void dispose() {
     _router.dispose();
+    _onboardingDone.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      onboardingDoneProvider,
+      (_, done) => _onboardingDone.value = done,
+    );
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp.router(
       onGenerateTitle: (c) => AppLocalizations.of(c).appTitle,
