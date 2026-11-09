@@ -10,6 +10,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write   # publish the APK as a (pre)release for direct phone download
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -50,3 +53,16 @@ jobs:
           name: hesabyar-debug-apk
           path: out/*.apk
           retention-days: 30
+
+      - name: Publish test release (direct APK download link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: test-build-${{ github.run_number }}
+          name: "نسخه آزمایشی ${{ github.run_number }} (${{ github.sha }})"
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          files: out/*.apk
+          body: |
+            نسخه‌ی آزمایشی (debug) حساب‌یار برای نصب و تست.
+            - تبلیغات این نسخه «نمونه» است (SDK واقعی هنوز وصل نشده).
+            - نرخ آنلاین تنظیم نشده؛ نرخ را در تب «ابزار و طلا» دستی ثبت کنید.
