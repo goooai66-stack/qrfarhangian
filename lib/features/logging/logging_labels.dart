@@ -4,10 +4,11 @@ import '../../l10n/app_localizations.dart';
 
 /// برچسب وعده‌ها، واحدها و قالب اعداد تغذیه‌ای.
 extension LoggingLabels on AppLocalizations {
-  String mealLabel(MealType m) => switch (m) {
-    MealType.breakfast => mealBreakfast,
+  /// در حالت رمضان صبحانه «سحر» و شام «افطار» نامیده می‌شود.
+  String mealLabel(MealType m, {bool ramadan = false}) => switch (m) {
+    MealType.breakfast => ramadan ? mealSuhoor : mealBreakfast,
     MealType.lunch => mealLunch,
-    MealType.dinner => mealDinner,
+    MealType.dinner => ramadan ? mealIftar : mealDinner,
     MealType.snack => mealSnack,
   };
 

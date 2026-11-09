@@ -634,5 +634,111 @@
   "rewardNotCompleted": "ویدیو کامل دیده نشد؛ اسکنی اضافه نشد.",
   "rewardUnavailable": "الان ویدیویی برای نمایش نیست.",
   "rewardLimit": "سقف ویدیوی امروز پر شده است.",
-  "rewardFailed": "ثبت پاداش انجام نشد. دوباره امتحان کن."
+  "rewardFailed": "ثبت پاداش انجام نشد. دوباره امتحان کن.",
+  "mealSuhoor": "سحر",
+  "mealIftar": "افطار",
+  "ramadanMode": "حالت رمضان",
+  "ramadanModeDesc": "سحر و افطار به‌جای صبحانه و شام؛ یادآور آب بین افطار و سحر",
+  "notifSuhoorTitle": "وقت سحر 🌙",
+  "notifSuhoorBody": "سحری‌ات را ثبت کن؛ آب کافی هم یادت نرود.",
+  "notifIftarTitle": "افطار 🌅",
+  "notifIftarBody": "قبول باشد! افطارت را با یک عکس ثبت کن.",
+  "voiceTitle": "ثبت صوتی یا متنی",
+  "voiceHold": "نگه دار و بگو",
+  "voiceListening": "در حال شنیدن…",
+  "voiceHint": "مثلاً: «ناهار یه بشقاب قیمه با برنج و یه دوغ خوردم»",
+  "voiceTypeHint": "یا اینجا بنویس…",
+  "voiceSend": "ثبت",
+  "voiceUnavailable": "تشخیص گفتار روی این گوشی در دسترس نیست؛ جمله را تایپ کن.",
+  "voiceNotFood": "در این جمله غذایی پیدا نشد. دوباره بگو یا بنویس.",
+  "voiceQuota": "سهمیه‌ی ثبت صوتی امروز تمام شد. ثبت دستی همیشه رایگان است.",
+  "customMeals": "غذاهای ترکیبی من",
+  "saveAsCustomMeal": "ذخیره به‌عنوان غذای ترکیبی",
+  "customMealName": "نام غذای ترکیبی",
+  "customMealNameHint": "مثلاً «صبحانه‌ی همیشگی»",
+  "customMealSaved": "«{name}» ذخیره شد",
+  "@customMealSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "customMealItems": "{n} قلم",
+  "@customMealItems": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "customMealLogged": "{n} قلم ثبت شد",
+  "@customMealLogged": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "customMealDeleteConfirm": "«{name}» حذف شود؟",
+  "@customMealDeleteConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "copyYesterday": "کپی از دیروز",
+  "copiedYesterday": "{n} قلم از دیروز کپی شد",
+  "@copiedYesterday": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "nothingYesterday": "دیروز در این وعده چیزی ثبت نشده.",
+  "inviteTitle": "دعوت از دوستان",
+  "inviteDesc": "هر دوستی که با کد تو بیاید، هر دوی شما {days} روز ویژه می‌گیرید.",
+  "@inviteDesc": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteYourCode": "کد دعوت تو",
+  "inviteCopied": "کد کپی شد",
+  "inviteShare": "ارسال برای دوستان",
+  "inviteShareText": "کالری‌لنز رو نصب کن و کد {code} رو وارد کن؛ هر دومون {days} روز ویژه می‌گیریم 🎁",
+  "@inviteShareText": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteCount": "{n} دوست با کد تو آمده‌اند",
+  "@inviteCount": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteEnter": "کد دعوت داری؟",
+  "inviteRedeem": "ثبت کد",
+  "inviteRedeemed": "هدیه فعال شد 🎁",
+  "inviteInvalid": "این کد پیدا نشد.",
+  "inviteOwn": "کد خودت را نمی‌توانی وارد کنی.",
+  "inviteAlready": "قبلاً یک کد دعوت وارد کرده‌ای.",
+  "inviteOffline": "برای دعوت به اینترنت نیاز است.",
+  "wrongDetection": "تشخیص اشتباه بود؟",
+  "wrongDetectionTitle": "گزارش تشخیص اشتباه",
+  "wrongDetectionHint": "اصلاحاتی که در فهرست کردی همراه گزارش فرستاده می‌شود (بدون عکس). اگر توضیحی داری بنویس:",
+  "wrongDetectionSend": "ارسال گزارش",
+  "wrongDetectionThanks": "ممنون! برای بهتر شدن تشخیص استفاده می‌شود."
 }

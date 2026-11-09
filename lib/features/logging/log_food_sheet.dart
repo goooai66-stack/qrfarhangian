@@ -13,7 +13,6 @@ import 'logging_labels.dart';
 ///
 /// غذاهای اخیر داخل همین منو هستند تا ثبت تکراری ۳ لمس بماند:
 /// «ثبت غذا» ← غذای اخیر ← «ثبت».
-/// صوتی در مرحله‌ی ۶ فعال می‌شود.
 Future<void> showLogFoodSheet(
   BuildContext context, {
   required MealType meal,
@@ -63,7 +62,9 @@ class _LogFoodSheet extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              t.logSheetTitle(t.mealLabel(meal)),
+              t.logSheetTitle(
+                t.mealLabel(meal, ramadan: ref.watch(ramadanProvider)),
+              ),
               style: tt.titleLarge,
               textAlign: TextAlign.center,
             ),
@@ -104,9 +105,11 @@ class _LogFoodSheet extends ConsumerWidget {
                       _go(context, Routes.searchFor(meal: meal, day: day)),
                 ),
                 _Action(
+                  key: const Key('action-voice'),
                   icon: Icons.mic_none,
                   label: t.actionVoice,
-                  soon: t.comingSoon,
+                  onTap: () =>
+                      _go(context, Routes.voiceFor(meal: meal, day: day)),
                 ),
               ],
             ),
@@ -144,15 +147,11 @@ class _Action extends StatelessWidget {
     required this.icon,
     required this.label,
     this.onTap,
-    this.soon,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
-
-  /// برچسب «به‌زودی» برای گزینه‌های غیرفعال.
-  final String? soon;
 
   @override
   Widget build(BuildContext context) {
@@ -178,17 +177,6 @@ class _Action extends StatelessWidget {
                   Icon(icon, size: 30, color: fg),
                   const SizedBox(height: 6),
                   Text(label, style: tt.labelLarge?.copyWith(color: fg)),
-                  // جای خط «به‌زودی» همیشه رزرو می‌شود تا کاشی‌ها هم‌قد باشند.
-                  Visibility(
-                    visible: !enabled && soon != null,
-                    maintainSize: true,
-                    maintainAnimation: true,
-                    maintainState: true,
-                    child: Text(
-                      soon ?? '',
-                      style: tt.labelSmall?.copyWith(color: fg),
-                    ),
-                  ),
                 ],
               ),
             ),

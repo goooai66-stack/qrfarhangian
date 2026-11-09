@@ -2049,6 +2049,288 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'ثبت پاداش انجام نشد. دوباره امتحان کن.'**
   String get rewardFailed;
+
+  /// No description provided for @mealSuhoor.
+  ///
+  /// In fa, this message translates to:
+  /// **'سحر'**
+  String get mealSuhoor;
+
+  /// No description provided for @mealIftar.
+  ///
+  /// In fa, this message translates to:
+  /// **'افطار'**
+  String get mealIftar;
+
+  /// No description provided for @ramadanMode.
+  ///
+  /// In fa, this message translates to:
+  /// **'حالت رمضان'**
+  String get ramadanMode;
+
+  /// No description provided for @ramadanModeDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'سحر و افطار به‌جای صبحانه و شام؛ یادآور آب بین افطار و سحر'**
+  String get ramadanModeDesc;
+
+  /// No description provided for @notifSuhoorTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'وقت سحر 🌙'**
+  String get notifSuhoorTitle;
+
+  /// No description provided for @notifSuhoorBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'سحری‌ات را ثبت کن؛ آب کافی هم یادت نرود.'**
+  String get notifSuhoorBody;
+
+  /// No description provided for @notifIftarTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'افطار 🌅'**
+  String get notifIftarTitle;
+
+  /// No description provided for @notifIftarBody.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبول باشد! افطارت را با یک عکس ثبت کن.'**
+  String get notifIftarBody;
+
+  /// No description provided for @voiceTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت صوتی یا متنی'**
+  String get voiceTitle;
+
+  /// No description provided for @voiceHold.
+  ///
+  /// In fa, this message translates to:
+  /// **'نگه دار و بگو'**
+  String get voiceHold;
+
+  /// No description provided for @voiceListening.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال شنیدن…'**
+  String get voiceListening;
+
+  /// No description provided for @voiceHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'مثلاً: «ناهار یه بشقاب قیمه با برنج و یه دوغ خوردم»'**
+  String get voiceHint;
+
+  /// No description provided for @voiceTypeHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'یا اینجا بنویس…'**
+  String get voiceTypeHint;
+
+  /// No description provided for @voiceSend.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت'**
+  String get voiceSend;
+
+  /// No description provided for @voiceUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'تشخیص گفتار روی این گوشی در دسترس نیست؛ جمله را تایپ کن.'**
+  String get voiceUnavailable;
+
+  /// No description provided for @voiceNotFood.
+  ///
+  /// In fa, this message translates to:
+  /// **'در این جمله غذایی پیدا نشد. دوباره بگو یا بنویس.'**
+  String get voiceNotFood;
+
+  /// No description provided for @voiceQuota.
+  ///
+  /// In fa, this message translates to:
+  /// **'سهمیه‌ی ثبت صوتی امروز تمام شد. ثبت دستی همیشه رایگان است.'**
+  String get voiceQuota;
+
+  /// No description provided for @customMeals.
+  ///
+  /// In fa, this message translates to:
+  /// **'غذاهای ترکیبی من'**
+  String get customMeals;
+
+  /// No description provided for @saveAsCustomMeal.
+  ///
+  /// In fa, this message translates to:
+  /// **'ذخیره به‌عنوان غذای ترکیبی'**
+  String get saveAsCustomMeal;
+
+  /// No description provided for @customMealName.
+  ///
+  /// In fa, this message translates to:
+  /// **'نام غذای ترکیبی'**
+  String get customMealName;
+
+  /// No description provided for @customMealNameHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'مثلاً «صبحانه‌ی همیشگی»'**
+  String get customMealNameHint;
+
+  /// No description provided for @customMealSaved.
+  ///
+  /// In fa, this message translates to:
+  /// **'«{name}» ذخیره شد'**
+  String customMealSaved(String name);
+
+  /// No description provided for @customMealItems.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} قلم'**
+  String customMealItems(String n);
+
+  /// No description provided for @customMealLogged.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} قلم ثبت شد'**
+  String customMealLogged(String n);
+
+  /// No description provided for @customMealDeleteConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'«{name}» حذف شود؟'**
+  String customMealDeleteConfirm(String name);
+
+  /// No description provided for @copyYesterday.
+  ///
+  /// In fa, this message translates to:
+  /// **'کپی از دیروز'**
+  String get copyYesterday;
+
+  /// No description provided for @copiedYesterday.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} قلم از دیروز کپی شد'**
+  String copiedYesterday(String n);
+
+  /// No description provided for @nothingYesterday.
+  ///
+  /// In fa, this message translates to:
+  /// **'دیروز در این وعده چیزی ثبت نشده.'**
+  String get nothingYesterday;
+
+  /// No description provided for @inviteTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'دعوت از دوستان'**
+  String get inviteTitle;
+
+  /// No description provided for @inviteDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'هر دوستی که با کد تو بیاید، هر دوی شما {days} روز ویژه می‌گیرید.'**
+  String inviteDesc(String days);
+
+  /// No description provided for @inviteYourCode.
+  ///
+  /// In fa, this message translates to:
+  /// **'کد دعوت تو'**
+  String get inviteYourCode;
+
+  /// No description provided for @inviteCopied.
+  ///
+  /// In fa, this message translates to:
+  /// **'کد کپی شد'**
+  String get inviteCopied;
+
+  /// No description provided for @inviteShare.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارسال برای دوستان'**
+  String get inviteShare;
+
+  /// No description provided for @inviteShareText.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری‌لنز رو نصب کن و کد {code} رو وارد کن؛ هر دومون {days} روز ویژه می‌گیریم 🎁'**
+  String inviteShareText(String code, String days);
+
+  /// No description provided for @inviteCount.
+  ///
+  /// In fa, this message translates to:
+  /// **'{n} دوست با کد تو آمده‌اند'**
+  String inviteCount(String n);
+
+  /// No description provided for @inviteEnter.
+  ///
+  /// In fa, this message translates to:
+  /// **'کد دعوت داری؟'**
+  String get inviteEnter;
+
+  /// No description provided for @inviteRedeem.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت کد'**
+  String get inviteRedeem;
+
+  /// No description provided for @inviteRedeemed.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدیه فعال شد 🎁'**
+  String get inviteRedeemed;
+
+  /// No description provided for @inviteInvalid.
+  ///
+  /// In fa, this message translates to:
+  /// **'این کد پیدا نشد.'**
+  String get inviteInvalid;
+
+  /// No description provided for @inviteOwn.
+  ///
+  /// In fa, this message translates to:
+  /// **'کد خودت را نمی‌توانی وارد کنی.'**
+  String get inviteOwn;
+
+  /// No description provided for @inviteAlready.
+  ///
+  /// In fa, this message translates to:
+  /// **'قبلاً یک کد دعوت وارد کرده‌ای.'**
+  String get inviteAlready;
+
+  /// No description provided for @inviteOffline.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای دعوت به اینترنت نیاز است.'**
+  String get inviteOffline;
+
+  /// No description provided for @wrongDetection.
+  ///
+  /// In fa, this message translates to:
+  /// **'تشخیص اشتباه بود؟'**
+  String get wrongDetection;
+
+  /// No description provided for @wrongDetectionTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'گزارش تشخیص اشتباه'**
+  String get wrongDetectionTitle;
+
+  /// No description provided for @wrongDetectionHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'اصلاحاتی که در فهرست کردی همراه گزارش فرستاده می‌شود (بدون عکس). اگر توضیحی داری بنویس:'**
+  String get wrongDetectionHint;
+
+  /// No description provided for @wrongDetectionSend.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارسال گزارش'**
+  String get wrongDetectionSend;
+
+  /// No description provided for @wrongDetectionThanks.
+  ///
+  /// In fa, this message translates to:
+  /// **'ممنون! برای بهتر شدن تشخیص استفاده می‌شود.'**
+  String get wrongDetectionThanks;
 }
 
 class _AppLocalizationsDelegate

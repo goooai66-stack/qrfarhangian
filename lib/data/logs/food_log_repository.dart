@@ -85,6 +85,37 @@ class FoodLogRepository {
     ),
   );
 
+  /// کپی ثبت‌های یک وعده از روزی به روز دیگر (همان مقادیر ثبت‌شده).
+  Future<int> copyMeal({
+    required String fromDay,
+    required String toDay,
+    required MealType meal,
+  }) => _db.transaction(() async {
+    final rows =
+        await (_db.select(_db.foodLogs)
+              ..where(
+                (t) => t.date.equals(fromDay) & t.mealType.equalsValue(meal),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+            .get();
+    final now = DateTime.now();
+    for (final r in rows) {
+      await _db
+          .into(_db.foodLogs)
+          .insert(
+            r
+                .toCompanion(false)
+                .copyWith(
+                  id: const Value.absent(),
+                  date: Value(toDay),
+                  createdAt: Value(now),
+                  scanId: const Value(null),
+                ),
+          );
+    }
+    return rows.length;
+  });
+
   Future<void> delete(int id) =>
       (_db.delete(_db.foodLogs)..where((t) => t.id.equals(id))).go();
 

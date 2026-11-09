@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import re
 import time
@@ -27,11 +28,12 @@ from .config import Settings
 from .db import Database
 from .foods import FoodDB
 from .model_output import InvalidModelOutput, parse_model_output
-from .prompt import OUTPUT_SCHEMA, USER_TEXT, build_system_prompt
+from .prompt import MAX_TEXT_CHARS, OUTPUT_SCHEMA, USER_TEXT, VOICE_SCHEMA, build_system_prompt, build_voice_prompt
 from .providers import build_provider
 from .providers.base import ProviderBusy, ProviderError, ProviderRefused, ProviderTimeout, VisionProvider
 from .ratelimit import RateLimiter
 from .scan_service import resolve
+from .text_parser import KeywordTextParser
 
 log = logging.getLogger("calorielens")
 
@@ -61,6 +63,21 @@ class RewardIn(BaseModel):
     reward_token: str
 
 
+class VoiceIn(BaseModel):
+    text: str
+
+
+class InviteIn(BaseModel):
+    code: str
+
+
+class FeedbackIn(BaseModel):
+    scan_id: str | None = None
+    original: list[dict]
+    corrected: list[dict]
+    note: str | None = None
+
+
 class PurchaseIn(BaseModel):
     store: str
     product_id: str
@@ -77,6 +94,7 @@ def create_app(
     db = Database(s.db_path, s.quota_timezone)
     vision = provider or build_provider(s)
     system_prompt = build_system_prompt(foods)
+    voice_prompt = build_voice_prompt(foods)
     product_days = parse_product_days(s.product_days)
     purchases = (
         FakePurchaseVerifier(product_days) if s.purchase_verifier == "fake" else NotConfiguredPurchaseVerifier()
@@ -87,6 +105,9 @@ def create_app(
     scan_limiter = RateLimiter(s.scans_per_minute, 60)
     register_limiter = RateLimiter(s.device_registrations_per_hour_per_ip, 3600)
     if vision.name == "fake":
+        # توسعه: جمله‌ها با تجزیه‌گر قاعده‌محور (بدون کلید API).
+        if getattr(vision, "text_parser", None) is None and getattr(vision, "text_result", None) is None:
+            vision.text_parser = KeywordTextParser(foods)
         log.warning("VISION_PROVIDER=fake — پاسخ‌ها ساختگی‌اند؛ فقط برای توسعه.")
 
     app = FastAPI(title="CalorieLens API", version="1.0")
@@ -116,7 +137,11 @@ def create_app(
             "premium": premium,
             "premium_until": device["premium_until"] if premium else None,
             "rewards_left": 0 if premium else max(0, s.rewards_per_day - rewards),
+            "voice_remaining": max(0, voice_limit_for(device) - db.voice_today(device["id"])),
         }
+
+    def voice_limit_for(device) -> int:
+        return s.premium_voice_per_day if db.is_premium(device) else s.free_voice_per_day
 
     def fresh(device):
         """ردیف دستگاه بعد از تغییر (مثلاً خرید)."""
@@ -214,6 +239,87 @@ def create_app(
             latency_ms=int((time.monotonic() - started) * 1000),
         )
         return {"scan_id": scan_id, **result, "quota": quota_body(device)}
+
+    @app.post("/voice")
+    async def voice(body: VoiceIn, device=Depends(current_device)):
+        """ثبت صوتی/متنی (بخش ۸-۴): جمله ← همان JSON آیتم‌ها + وعده.
+        صدا روی گوشی به متن تبدیل می‌شود؛ صدا به سرور نمی‌آید."""
+        text = body.text.strip()
+        if not text:
+            raise ApiError(400, "empty_text", "text is empty")
+        if len(text) > MAX_TEXT_CHARS:
+            raise ApiError(413, "text_too_long", f"max {MAX_TEXT_CHARS} chars")
+        wait = scan_limiter.check(device["id"])
+        if wait is not None:
+            raise ApiError(429, "rate_limited", "too many requests", {"Retry-After": str(int(wait) + 1)})
+        if not db.try_reserve_voice(device["id"], voice_limit_for(device)):
+            raise ApiError(429, "voice_quota_exceeded", "daily voice quota exhausted")
+        started = time.monotonic()
+        log_base = {"id": str(uuid.uuid4()), "device_id": device["id"], "provider": vision.name, "model": vision.model}
+
+        def fail(status, code, message, log_status):
+            db.refund_voice(device["id"])
+            db.log_scan(**log_base, status=f"voice_{log_status}", latency_ms=int((time.monotonic() - started) * 1000))
+            raise ApiError(status, code, message)
+
+        try:
+            resp = await vision.parse_text(voice_prompt, text, VOICE_SCHEMA)
+        except ProviderTimeout:
+            fail(504, "provider_timeout", "parsing timed out", "timeout")
+        except ProviderBusy:
+            fail(503, "provider_busy", "service busy", "busy")
+        except ProviderError:
+            fail(502, "provider_error", "parsing failed", "error")
+        try:
+            raw = parse_model_output(resp.text, allow_meal=True)
+        except InvalidModelOutput:
+            fail(502, "invalid_model_output", "parsing returned invalid data", "invalid_output")
+        result = resolve(raw, foods)
+        if not result["is_food"]:
+            db.refund_voice(device["id"])
+        cost = None
+        if resp.input_tokens is not None and resp.output_tokens is not None and (
+            s.price_input_per_mtok or s.price_output_per_mtok
+        ):
+            cost = (resp.input_tokens * s.price_input_per_mtok + resp.output_tokens * s.price_output_per_mtok) / 1e6
+        db.log_scan(
+            **log_base,
+            status="voice_ok",
+            is_food=int(result["is_food"]),
+            item_count=len(result["items"]),
+            input_tokens=resp.input_tokens,
+            output_tokens=resp.output_tokens,
+            cost_usd=cost,
+            latency_ms=int((time.monotonic() - started) * 1000),
+        )
+        return {"scan_id": log_base["id"], **result, "meal": raw.meal, "quota": quota_body(device)}
+
+    @app.get("/invite")
+    async def invite(device=Depends(current_device)):
+        n, by = db.invite_stats(device["id"])
+        return {"code": db.invite_code(device["id"]), "invited": n, "redeemed_code": by, "days": s.invite_days}
+
+    @app.post("/invite/redeem")
+    async def invite_redeem(body: InviteIn, device=Depends(current_device)):
+        """کد دعوت دوست ← ۷ روز ویژه برای هر دو (ثبت سمت سرور)."""
+        r = db.redeem_invite(device["id"], body.code, s.invite_days, s.invite_max_rewards)
+        if r == "invalid":
+            raise ApiError(404, "invalid_code", "invite code not found")
+        if r == "self":
+            raise ApiError(400, "own_code", "cannot redeem own code")
+        if r == "already":
+            raise ApiError(409, "already_redeemed", "an invite code was already redeemed")
+        return quota_body(fresh(device))
+
+    @app.post("/feedback/scan")
+    async def feedback_scan(body: FeedbackIn, device=Depends(current_device)):
+        """«تشخیص اشتباه بود» + اصلاح کاربر (برای بهبود داده؛ بدون عکس)."""
+        original = json.dumps(body.original, ensure_ascii=False)
+        corrected = json.dumps(body.corrected, ensure_ascii=False)
+        if len(original) + len(corrected) > 20_000 or (body.note and len(body.note) > 500):
+            raise ApiError(413, "feedback_too_large", "feedback too large")
+        db.add_feedback(device["id"], body.scan_id, original, corrected, body.note)
+        return {"ok": True}
 
     @app.post("/quota/reward")
     async def quota_reward(body: RewardIn, device=Depends(current_device)):

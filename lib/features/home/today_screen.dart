@@ -18,6 +18,7 @@ import 'macro_bars.dart';
 import 'meal_section.dart';
 import 'water_card.dart';
 import '../../l10n/date_names.dart';
+import '../common/persian_counter.dart';
 
 /// تب «امروز»: داشبورد روزانه (بخش ۴-۳).
 class TodayScreen extends ConsumerWidget {
@@ -27,6 +28,7 @@ class TodayScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final day = ref.watch(selectedDayProvider);
+    final ramadan = ref.watch(ramadanProvider);
     final today = dateOnly(DateTime.now());
     final logs = ref.watch(dayLogsProvider(day)).value ?? const <FoodLog>[];
     final goal = ref.watch(goalOnProvider(day)).value;
@@ -129,16 +131,28 @@ class TodayScreen extends ConsumerWidget {
                 ref.read(foodLogRepositoryProvider).setWater(dayKey(day), n),
           ),
           for (final m in MealType.values)
-            MealSection(
-              meal: m,
-              logs: [
-                for (final l in logs)
-                  if (l.mealType == m) l,
-              ],
-              foodOf: (id) => id == null ? null : foods?.byId(id),
-              onAdd: () => openSearch(m),
-              onTapItem: openLog,
-            ),
+            if (!(ramadan &&
+                m == MealType.lunch &&
+                !logs.any((l) => l.mealType == m)))
+              MealSection(
+                meal: m,
+                ramadan: ramadan,
+                logs: [
+                  for (final l in logs)
+                    if (l.mealType == m) l,
+                ],
+                foodOf: (id) => id == null ? null : foods?.byId(id),
+                onAdd: () => openSearch(m),
+                onTapItem: openLog,
+                onSaveCustom:
+                    logs.any((l) => l.mealType == m && l.foodId != null)
+                    ? () => _saveCustomMeal(context, ref, [
+                        for (final l in logs)
+                          if (l.mealType == m) l,
+                      ])
+                    : null,
+                onCopyYesterday: () => _copyYesterday(context, ref, day, m),
+              ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -146,12 +160,73 @@ class TodayScreen extends ConsumerWidget {
         onPressed: () => showLogFoodSheet(
           context,
           meal: day == today
-              ? defaultMealForTime(DateTime.now())
-              : MealType.lunch,
+              ? defaultMealForTime(DateTime.now(), ramadan: ramadan)
+              : (ramadan ? MealType.dinner : MealType.lunch),
           day: day,
         ),
         icon: const Icon(Icons.add),
         label: Text(t.logFood),
+      ),
+    );
+  }
+
+  Future<void> _saveCustomMeal(
+    BuildContext context,
+    WidgetRef ref,
+    List<FoodLog> logs,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final c = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(t.customMealName),
+        content: TextField(
+          key: const Key('custom-meal-name'),
+          controller: c,
+          autofocus: true,
+          maxLength: 40,
+          buildCounter: persianCounter,
+          decoration: InputDecoration(hintText: t.customMealNameHint),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(t.cancel)),
+          FilledButton(
+            key: const Key('custom-meal-save'),
+            onPressed: () => Navigator.pop(d, c.text.trim()),
+            child: Text(t.save),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    await ref.read(customMealRepositoryProvider).createFromLogs(name, logs);
+    messenger.showSnackBar(SnackBar(content: Text(t.customMealSaved(name))));
+  }
+
+  Future<void> _copyYesterday(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime day,
+    MealType meal,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final n = await ref
+        .read(foodLogRepositoryProvider)
+        .copyMeal(
+          fromDay: dayKey(DateTime(day.year, day.month, day.day - 1)),
+          toDay: dayKey(day),
+          meal: meal,
+        );
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          n == 0
+              ? t.nothingYesterday
+              : t.copiedYesterday(formatPersianNumber(n)),
+        ),
       ),
     );
   }

@@ -1085,4 +1085,166 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get rewardFailed => 'ثبت پاداش انجام نشد. دوباره امتحان کن.';
+
+  @override
+  String get mealSuhoor => 'سحر';
+
+  @override
+  String get mealIftar => 'افطار';
+
+  @override
+  String get ramadanMode => 'حالت رمضان';
+
+  @override
+  String get ramadanModeDesc =>
+      'سحر و افطار به‌جای صبحانه و شام؛ یادآور آب بین افطار و سحر';
+
+  @override
+  String get notifSuhoorTitle => 'وقت سحر 🌙';
+
+  @override
+  String get notifSuhoorBody => 'سحری‌ات را ثبت کن؛ آب کافی هم یادت نرود.';
+
+  @override
+  String get notifIftarTitle => 'افطار 🌅';
+
+  @override
+  String get notifIftarBody => 'قبول باشد! افطارت را با یک عکس ثبت کن.';
+
+  @override
+  String get voiceTitle => 'ثبت صوتی یا متنی';
+
+  @override
+  String get voiceHold => 'نگه دار و بگو';
+
+  @override
+  String get voiceListening => 'در حال شنیدن…';
+
+  @override
+  String get voiceHint => 'مثلاً: «ناهار یه بشقاب قیمه با برنج و یه دوغ خوردم»';
+
+  @override
+  String get voiceTypeHint => 'یا اینجا بنویس…';
+
+  @override
+  String get voiceSend => 'ثبت';
+
+  @override
+  String get voiceUnavailable =>
+      'تشخیص گفتار روی این گوشی در دسترس نیست؛ جمله را تایپ کن.';
+
+  @override
+  String get voiceNotFood => 'در این جمله غذایی پیدا نشد. دوباره بگو یا بنویس.';
+
+  @override
+  String get voiceQuota =>
+      'سهمیه‌ی ثبت صوتی امروز تمام شد. ثبت دستی همیشه رایگان است.';
+
+  @override
+  String get customMeals => 'غذاهای ترکیبی من';
+
+  @override
+  String get saveAsCustomMeal => 'ذخیره به‌عنوان غذای ترکیبی';
+
+  @override
+  String get customMealName => 'نام غذای ترکیبی';
+
+  @override
+  String get customMealNameHint => 'مثلاً «صبحانه‌ی همیشگی»';
+
+  @override
+  String customMealSaved(String name) {
+    return '«$name» ذخیره شد';
+  }
+
+  @override
+  String customMealItems(String n) {
+    return '$n قلم';
+  }
+
+  @override
+  String customMealLogged(String n) {
+    return '$n قلم ثبت شد';
+  }
+
+  @override
+  String customMealDeleteConfirm(String name) {
+    return '«$name» حذف شود؟';
+  }
+
+  @override
+  String get copyYesterday => 'کپی از دیروز';
+
+  @override
+  String copiedYesterday(String n) {
+    return '$n قلم از دیروز کپی شد';
+  }
+
+  @override
+  String get nothingYesterday => 'دیروز در این وعده چیزی ثبت نشده.';
+
+  @override
+  String get inviteTitle => 'دعوت از دوستان';
+
+  @override
+  String inviteDesc(String days) {
+    return 'هر دوستی که با کد تو بیاید، هر دوی شما $days روز ویژه می‌گیرید.';
+  }
+
+  @override
+  String get inviteYourCode => 'کد دعوت تو';
+
+  @override
+  String get inviteCopied => 'کد کپی شد';
+
+  @override
+  String get inviteShare => 'ارسال برای دوستان';
+
+  @override
+  String inviteShareText(String code, String days) {
+    return 'کالری‌لنز رو نصب کن و کد $code رو وارد کن؛ هر دومون $days روز ویژه می‌گیریم 🎁';
+  }
+
+  @override
+  String inviteCount(String n) {
+    return '$n دوست با کد تو آمده‌اند';
+  }
+
+  @override
+  String get inviteEnter => 'کد دعوت داری؟';
+
+  @override
+  String get inviteRedeem => 'ثبت کد';
+
+  @override
+  String get inviteRedeemed => 'هدیه فعال شد 🎁';
+
+  @override
+  String get inviteInvalid => 'این کد پیدا نشد.';
+
+  @override
+  String get inviteOwn => 'کد خودت را نمی‌توانی وارد کنی.';
+
+  @override
+  String get inviteAlready => 'قبلاً یک کد دعوت وارد کرده‌ای.';
+
+  @override
+  String get inviteOffline => 'برای دعوت به اینترنت نیاز است.';
+
+  @override
+  String get wrongDetection => 'تشخیص اشتباه بود؟';
+
+  @override
+  String get wrongDetectionTitle => 'گزارش تشخیص اشتباه';
+
+  @override
+  String get wrongDetectionHint =>
+      'اصلاحاتی که در فهرست کردی همراه گزارش فرستاده می‌شود (بدون عکس). اگر توضیحی داری بنویس:';
+
+  @override
+  String get wrongDetectionSend => 'ارسال گزارش';
+
+  @override
+  String get wrongDetectionThanks =>
+      'ممنون! برای بهتر شدن تشخیص استفاده می‌شود.';
 }

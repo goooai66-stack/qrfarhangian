@@ -6,7 +6,11 @@ import '../core/utils/jalali_date.dart';
 import '../features/home/today_screen.dart';
 import '../features/logging/food_detail_screen.dart';
 import '../features/logging/food_search_screen.dart';
+import '../core/recognition/food_recognizer.dart';
+import '../data/db/app_database.dart' show LogSource;
+import '../features/invite/invite_screen.dart';
 import '../features/monetization/paywall_screen.dart';
+import '../features/voice/voice_log_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/plans/plans_screen.dart';
 import '../features/profile/profile_edit_screen.dart';
@@ -49,6 +53,23 @@ abstract final class Routes {
 
   static const scan = '/scan';
   static const paywall = '/paywall';
+  static const voice = '/voice';
+  static const invite = '/profile/invite';
+
+  static String voiceFor({required MealType meal, required DateTime day}) =>
+      Uri(
+        path: voice,
+        queryParameters: {'meal': meal.name, 'date': dayKey(day)},
+      ).toString();
+
+  /// صفحه‌ی نتیجه با نتیجه‌ی آماده (extra: (result, source)).
+  static String scanPreset({MealType? meal, DateTime? day}) => Uri(
+    path: '$scan/preset',
+    queryParameters: {
+      'meal': ?meal?.name,
+      'date': ?(day == null ? null : dayKey(day)),
+    },
+  ).toString();
   static const paywallSoft = '/paywall?soft=1';
 
   static String scanFor({
@@ -108,6 +129,26 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
         day: _day(state.uri.queryParameters['date']),
         pickMode: state.uri.queryParameters['pick'] == '1',
       ),
+    ),
+    GoRoute(
+      path: Routes.voice,
+      builder: (_, state) => VoiceLogScreen(
+        meal: _meal(state.uri.queryParameters['meal']),
+        day: _day(state.uri.queryParameters['date']),
+      ),
+    ),
+    GoRoute(
+      path: '${Routes.scan}/preset',
+      builder: (_, state) {
+        final extra =
+            state.extra! as ({RecognitionResult result, LogSource source});
+        return ScanScreen(
+          meal: _meal(state.uri.queryParameters['meal']),
+          day: _day(state.uri.queryParameters['date']),
+          preset: extra.result,
+          presetSource: extra.source,
+        );
+      },
     ),
     GoRoute(
       path: Routes.paywall,
@@ -171,6 +212,10 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
                 GoRoute(
                   path: 'reminders',
                   builder: (_, _) => const RemindersScreen(),
+                ),
+                GoRoute(
+                  path: 'invite',
+                  builder: (_, _) => const InviteScreen(),
                 ),
               ],
             ),

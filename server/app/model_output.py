@@ -23,11 +23,15 @@ class RawItem:
     confidence: float
 
 
+MEALS = ("breakfast", "lunch", "dinner", "snack")
+
+
 @dataclass
 class RawResult:
     items: list[RawItem]
     is_food: bool
     notes_fa: str | None
+    meal: str | None = None
 
 
 def _strip_fence(text: str) -> str:
@@ -39,15 +43,19 @@ def _strip_fence(text: str) -> str:
     return t.strip()
 
 
-def parse_model_output(text: str) -> RawResult:
+def parse_model_output(text: str, allow_meal: bool = False) -> RawResult:
     try:
         data = json.loads(_strip_fence(text))
     except (json.JSONDecodeError, TypeError) as e:
         raise InvalidModelOutput(f"JSON نامعتبر: {e}") from e
     if not isinstance(data, dict):
         raise InvalidModelOutput("ریشه باید object باشد")
-    if set(data) - {"items", "is_food", "notes_fa"}:
-        raise InvalidModelOutput(f"کلید اضافه: {set(data) - {'items', 'is_food', 'notes_fa'}}")
+    allowed = {"items", "is_food", "notes_fa"} | ({"meal"} if allow_meal else set())
+    if set(data) - allowed:
+        raise InvalidModelOutput(f"کلید اضافه: {set(data) - allowed}")
+    meal = data.get("meal")
+    if meal is not None and meal not in MEALS:
+        raise InvalidModelOutput(f"meal نامعتبر: {meal}")
     is_food = data.get("is_food")
     if not isinstance(is_food, bool):
         raise InvalidModelOutput("is_food باید boolean باشد")
@@ -90,4 +98,4 @@ def parse_model_output(text: str) -> RawResult:
         )
     if not is_food:
         items = []
-    return RawResult(items=items, is_food=is_food, notes_fa=(notes or None))
+    return RawResult(items=items, is_food=is_food, notes_fa=(notes or None), meal=meal)

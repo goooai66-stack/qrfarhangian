@@ -161,3 +161,26 @@ def test_openai_compatible_extra_headers():
     assert seen["http-referer"] == "https://calorielens.ir"
     assert seen["x-title"] == "CalorieLens"
     assert "x-empty" not in seen
+
+
+def test_anthropic_parse_text_has_no_image():
+    seen = {}
+
+    def handler(req: httpx2.Request):
+        seen["body"] = json.loads(req.content)
+        return httpx2.Response(200, json=message())
+
+    run(anthropic_with(handler).parse_text("SYS", "یه دوغ", OUTPUT_SCHEMA))
+    content = seen["body"]["messages"][0]["content"]
+    assert content == [{"type": "text", "text": "یه دوغ"}]
+
+
+def test_openai_parse_text_has_no_image():
+    seen = {}
+
+    def handler(req: httpx.Request):
+        seen["body"] = json.loads(req.content)
+        return httpx.Response(200, json={"choices": [{"message": {"content": RESULT}}]})
+
+    run(openai_with(handler).parse_text("SYS", "یه دوغ", OUTPUT_SCHEMA))
+    assert seen["body"]["messages"][1]["content"] == [{"type": "text", "text": "یه دوغ"}]

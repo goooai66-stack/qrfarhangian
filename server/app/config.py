@@ -51,6 +51,13 @@ class Settings:
     max_image_bytes: int = 1_000_000
     cache_ttl_days: int = 7
 
+    # ثبت صوتی/متنی (بخش ۹-۱): رایگان ۲ در روز، ویژه با سقف منصفانه
+    free_voice_per_day: int = 2
+    premium_voice_per_day: int = 30
+    # کد دعوت: ۷ روز ویژه برای هر دو طرف؛ سقف پاداش دعوت‌کننده
+    invite_days: int = 7
+    invite_max_rewards: int = 10
+
     # پاداش ویدیو: هر ویدیو = ۱ اسکن، حداکثر چند ویدیو در روز (بخش ۹-۱)
     rewards_per_day: int = 5
     # fake (توسعه) | stores (API فروشگاه‌ها؛ هنوز وصل نشده)
@@ -85,6 +92,10 @@ class Settings:
             cache_ttl_days=_int("CACHE_TTL_DAYS", 7),
             admin_token=e.get("ADMIN_TOKEN", ""),
             rewards_per_day=_int("REWARDS_PER_DAY", 5),
+            free_voice_per_day=_int("FREE_VOICE_PER_DAY", 2),
+            premium_voice_per_day=_int("PREMIUM_VOICE_PER_DAY", 30),
+            invite_days=_int("INVITE_DAYS", 7),
+            invite_max_rewards=_int("INVITE_MAX_REWARDS", 10),
             purchase_verifier=e.get("PURCHASE_VERIFIER", "fake"),
             product_days=e.get(
                 "PRODUCT_DAYS", "premium_monthly=30,premium_quarterly=90,premium_yearly=365"

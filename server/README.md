@@ -78,6 +78,10 @@ python -m tools.eval_photos --photos ./photos \
 | POST | `/auth/device` | `{device_id}` ← `{token}` (توکن ناشناس دستگاه) |
 | GET | `/quota` | `{used, limit, remaining, day}` |
 | POST | `/scan` | `multipart: image` ← `{scan_id, is_food, notes_fa, items[], quota}` |
+| POST | `/voice` | `{text}` ← آیتم‌ها + `meal` (ثبت صوتی/متنی؛ ۲ در روز رایگان) |
+| GET | `/invite` | کد دعوت این دستگاه و تعداد دعوت‌ها |
+| POST | `/invite/redeem` | `{code}` ← ۷ روز ویژه برای هر دو طرف |
+| POST | `/feedback/scan` | `{scan_id, original, corrected, note}` «تشخیص اشتباه بود» (بدون عکس) |
 | POST | `/quota/reward` | `{reward_token}` ← ویدیوی کامل = ۱ اسکن (حداکثر ۵ در روز) |
 | POST | `/purchase/verify` | `{store, product_id, purchase_token}` ← ویژه؛ بازیابی بعد از نصب دوباره هم همین |
 | GET | `/admin/stats?days=30` | هدر `X-Admin-Token`؛ هزینه‌ی روزانه و هزینه‌ی هر دستگاه فعال |
@@ -94,4 +98,5 @@ python -m tools.eval_photos --photos ./photos \
 - اعتبارسنجی واقعی خرید (API توسعه‌دهنده‌ی کافه‌بازار و مایکت) و تأیید پاداش تپسل هنوز وصل نیست:
   `app/billing/verifiers.py` (`NotConfiguredPurchaseVerifier`، `TrustingRewardVerifier`). در تولید
   `PURCHASE_VERIFIER=fake` نگذارید.
-- `/voice` و `/feedback/scan` (مرحله‌ی ۶) هنوز نیستند.
+- با `VISION_PROVIDER=fake`، جمله‌های `/voice` با یک تجزیه‌گر ساده‌ی قاعده‌محور (`app/text_parser.py`) فهمیده می‌شوند؛ در تولید، مدل زبانی.
+- کد دعوت را می‌شود با ساختن دستگاه‌های جعلی سوءاستفاده کرد؛ سقف ۱۰ پاداش برای دعوت‌کننده و محدودیت ثبت دستگاه این را محدود می‌کند.

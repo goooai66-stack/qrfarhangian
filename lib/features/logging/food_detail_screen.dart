@@ -36,7 +36,9 @@ class FoodDetailScreen extends ConsumerStatefulWidget {
 class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
   String? _unit;
   double _quantity = 1;
-  late MealType _meal = widget.meal ?? defaultMealForTime(DateTime.now());
+  late MealType _meal =
+      widget.meal ??
+      defaultMealForTime(DateTime.now(), ramadan: ref.read(ramadanProvider));
   FoodLog? _log;
   bool _loadingLog = false;
   bool _saving = false;
@@ -179,6 +181,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
     final s = food.serving(unit, _quantity);
     final favs = ref.watch(favoriteFoodIdsProvider).value ?? const {};
     final isFav = favs.contains(food.id);
+    final ramadan = ref.watch(ramadanProvider);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
@@ -302,7 +305,10 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
             showSelectedIcon: false,
             segments: [
               for (final m in MealType.values)
-                ButtonSegment(value: m, label: Text(t.mealLabel(m))),
+                ButtonSegment(
+                  value: m,
+                  label: Text(t.mealLabel(m, ramadan: ramadan)),
+                ),
             ],
             selected: {_meal},
             onSelectionChanged: (v) => setState(() => _meal = v.first),
@@ -315,7 +321,11 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
           child: FilledButton(
             key: const Key('save-log'),
             onPressed: _saving ? null : () => _save(food),
-            child: Text(_editing ? t.save : t.logToMeal(t.mealLabel(_meal))),
+            child: Text(
+              _editing
+                  ? t.save
+                  : t.logToMeal(t.mealLabel(_meal, ramadan: ramadan)),
+            ),
           ),
         ),
       ),

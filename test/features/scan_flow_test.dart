@@ -6,6 +6,7 @@ import 'package:calorie_lens/core/nutrition/nutrition_calculator.dart';
 import 'package:calorie_lens/core/recognition/food_recognizer.dart';
 import 'package:calorie_lens/core/utils/image_compress.dart';
 import 'package:calorie_lens/core/utils/jalali_date.dart';
+import 'package:calorie_lens/data/community/community_api.dart';
 import 'package:calorie_lens/data/db/app_database.dart';
 import 'package:calorie_lens/data/logs/food_log_repository.dart';
 import 'package:calorie_lens/data/profile/profile_repository.dart';
@@ -56,7 +57,7 @@ void main() {
     dir.deleteSync(recursive: true);
   });
 
-  Future<void> start(WidgetTester tester) async {
+  Future<void> start(WidgetTester tester, {FakeCommunityApi? community}) async {
     await tester.runAsync(() {
       final input = NutritionInput(
         sex: Sex.female,
@@ -75,6 +76,7 @@ void main() {
       tester,
       db,
       onboardingDone: true,
+      community: community,
       overrides: [
         photoSourceProvider.overrideWithValue(photos),
         foodRecognizerProvider.overrideWithValue(recognizer),
@@ -312,6 +314,48 @@ void main() {
     await openScan(tester, 'action-gallery');
     await pumpUntil(tester, find.byKey(const Key('fab-log')));
     expect(find.byKey(const Key('scan-save')), findsNothing);
+    await disposeApp(tester);
+  });
+
+  testWidgets('«تشخیص اشتباه بود» ← اصلاح کاربر به سرور (بدون عکس)', (
+    tester,
+  ) async {
+    final community = FakeCommunityApi();
+    recognizer.result = const RecognitionResult(
+      isFood: true,
+      scanId: 'scan-1',
+      items: [
+        RecognizedItem(
+          foodId: 'chelo',
+          nameFa: 'چلو',
+          quantity: 1,
+          unit: 'kafgir',
+          confidence: 0.9,
+        ),
+      ],
+    );
+    await start(tester, community: community);
+    await openScan(tester, 'action-gallery');
+    await pumpUntil(tester, find.byKey(const Key('scan-save')));
+    // کاربر اصلاح می‌کند: ۱٫۵ کفگیر.
+    await tester.tap(find.byKey(const Key('scan-item-plus-0')));
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('wrong-detection')));
+    await tester.tap(find.byKey(const Key('wrong-detection')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('wrong-note')), 'کته بود');
+    await tester.tap(find.byKey(const Key('wrong-send')));
+    await settle(tester);
+    expect(
+      find.text('ممنون! برای بهتر شدن تشخیص استفاده می‌شود.'),
+      findsOneWidget,
+    );
+    final f = community.feedback.single;
+    expect(f['scan_id'], 'scan-1');
+    expect((f['original'] as List).single['quantity'], 1.0);
+    expect((f['corrected'] as List).single['quantity'], 1.5);
+    expect(f['note'], 'کته بود');
+    expect(f.containsKey('photo'), isFalse);
     await disposeApp(tester);
   });
 }

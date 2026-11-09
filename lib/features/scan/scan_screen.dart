@@ -21,6 +21,7 @@ import '../logging/logging_labels.dart';
 import '../monetization/ad_coordinator.dart';
 import 'photo_source.dart';
 import 'scan_service.dart';
+import '../common/persian_counter.dart';
 
 /// اطمینان کمتر از این ← «مطمئن نیستیم، لطفاً بررسی کن».
 const lowConfidence = 0.6;
@@ -78,12 +79,18 @@ class ScanScreen extends ConsumerStatefulWidget {
     this.meal,
     this.day,
     this.pendingId,
+    this.preset,
+    this.presetSource = LogSource.text,
   });
 
   final ScanSource? source;
   final MealType? meal;
   final DateTime? day;
   final int? pendingId;
+
+  /// نتیجه‌ی آماده از ثبت صوتی/متنی (بدون عکس) ← مستقیم صفحه‌ی نتیجه.
+  final RecognitionResult? preset;
+  final LogSource presetSource;
 
   @override
   ConsumerState<ScanScreen> createState() => _ScanScreenState();
@@ -95,7 +102,10 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   RecognitionResult? _result;
   List<ScanDraftItem> _items = [];
   ApiErrorKind? _error;
-  late MealType _meal = widget.meal ?? defaultMealForTime(DateTime.now());
+  late MealType _meal =
+      widget.preset?.meal ??
+      widget.meal ??
+      defaultMealForTime(DateTime.now(), ramadan: ref.read(ramadanProvider));
   late DateTime _day = widget.day ?? ref.read<DateTime>(selectedDayProvider);
   PendingScan? _pending;
   int _tip = 0;
@@ -115,6 +125,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   }
 
   Future<void> _start() async {
+    if (widget.preset != null) {
+      final foods = await ref.read(foodRepositoryProvider.future);
+      if (mounted) setState(() => _show(widget.preset!, foods));
+      return;
+    }
     if (widget.pendingId != null) return _loadPending();
     final seen = await ref.read(databaseProvider).getSetting(_guideSeenKey);
     if (!mounted) return;
@@ -237,7 +252,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         unit: i.unit,
         grams: s.grams,
         nutrients: s.nutrients,
-        source: LogSource.photo,
+        source: widget.preset != null ? widget.presetSource : LogSource.photo,
         photoPath: photoPath,
         scanId: _result?.scanId,
       );
@@ -281,6 +296,72 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     if (r == RewardFlowResult.granted && _jpeg != null) await _analyze();
   }
 
+  Future<void> _reportWrong() async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final note = TextEditingController();
+    final send = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (c) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          16 + MediaQuery.of(c).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t.wrongDetectionTitle,
+              style: Theme.of(c).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(t.wrongDetectionHint),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('wrong-note'),
+              controller: note,
+              maxLength: 300,
+              buildCounter: persianCounter,
+              maxLines: 3,
+            ),
+            FilledButton(
+              key: const Key('wrong-send'),
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(t.wrongDetectionSend),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (send != true) return;
+    try {
+      await ref
+          .read(communityApiProvider)
+          .sendScanFeedback(
+            scanId: _result?.scanId,
+            original: [for (final i in _result!.items) i.toJson()],
+            corrected: [
+              for (final i in _items)
+                {
+                  'food_id': i.food?.id,
+                  'name_fa': i.food?.nameFa ?? i.detectedName,
+                  'quantity': i.quantity,
+                  'unit': i.unit,
+                },
+            ],
+            note: note.text.trim().isEmpty ? null : note.text.trim(),
+          );
+      messenger.showSnackBar(SnackBar(content: Text(t.wrongDetectionThanks)));
+    } catch (_) {
+      messenger.showSnackBar(SnackBar(content: Text(t.scanError)));
+    }
+  }
+
   Future<void> _markGuideSeen() async {
     await ref.read(databaseProvider).setSetting(_guideSeenKey, '1');
     await _pickAndAnalyze();
@@ -292,7 +373,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _phase == _Phase.result ? t.scanResultTitle : t.actionCamera,
+          widget.preset != null
+              ? t.voiceTitle
+              : _phase == _Phase.result
+              ? t.scanResultTitle
+              : t.actionCamera,
         ),
       ),
       body: SafeArea(
@@ -327,7 +412,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 child: FilledButton(
                   key: const Key('scan-save'),
                   onPressed: _saving || _items.isEmpty ? null : _save,
-                  child: Text(t.logToMeal(t.mealLabel(_meal))),
+                  child: Text(
+                    t.logToMeal(
+                      t.mealLabel(_meal, ramadan: ref.watch(ramadanProvider)),
+                    ),
+                  ),
                 ),
               ),
             )
@@ -487,13 +576,26 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           showSelectedIcon: false,
           segments: [
             for (final m in MealType.values)
-              ButtonSegment(value: m, label: Text(t.mealLabel(m))),
+              ButtonSegment(
+                value: m,
+                label: Text(
+                  t.mealLabel(m, ramadan: ref.watch(ramadanProvider)),
+                ),
+              ),
           ],
           selected: {_meal},
           onSelectionChanged: (v) => setState(() => _meal = v.first),
         ),
         if (_pending != null)
           TextButton(onPressed: _discardPending, child: Text(t.discard)),
+        // «تشخیص اشتباه بود» + اصلاح کاربر (فقط اسکن عکس، بدون ارسال عکس).
+        if (widget.preset == null && _result?.scanId != null)
+          TextButton.icon(
+            key: const Key('wrong-detection'),
+            onPressed: _reportWrong,
+            icon: const Icon(Icons.flag_outlined),
+            label: Text(t.wrongDetection),
+          ),
       ],
     );
   }

@@ -17,6 +17,9 @@ class MealSection extends StatelessWidget {
     required this.foodOf,
     required this.onAdd,
     required this.onTapItem,
+    this.ramadan = false,
+    this.onSaveCustom,
+    this.onCopyYesterday,
   });
 
   final MealType meal;
@@ -24,6 +27,11 @@ class MealSection extends StatelessWidget {
   final Food? Function(String? id) foodOf;
   final VoidCallback onAdd;
   final ValueChanged<FoodLog> onTapItem;
+  final bool ramadan;
+
+  /// «ذخیره به‌عنوان غذای ترکیبی» (اگر null، گزینه نیست).
+  final VoidCallback? onSaveCustom;
+  final VoidCallback? onCopyYesterday;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +49,10 @@ class MealSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(t.mealLabel(meal), style: tt.titleMedium),
+                Text(
+                  t.mealLabel(meal, ramadan: ramadan),
+                  style: tt.titleMedium,
+                ),
                 const SizedBox(width: 8),
                 if (logs.isNotEmpty)
                   Text(
@@ -49,9 +60,25 @@ class MealSection extends StatelessWidget {
                     style: tt.bodyMedium?.copyWith(color: cs.primary),
                   ),
                 const Spacer(),
+                if (onSaveCustom != null || onCopyYesterday != null)
+                  PopupMenuButton<int>(
+                    key: Key('meal-menu-${meal.name}'),
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (v) =>
+                        (v == 0 ? onSaveCustom : onCopyYesterday)?.call(),
+                    itemBuilder: (_) => [
+                      if (onSaveCustom != null)
+                        PopupMenuItem(
+                          value: 0,
+                          child: Text(t.saveAsCustomMeal),
+                        ),
+                      if (onCopyYesterday != null)
+                        PopupMenuItem(value: 1, child: Text(t.copyYesterday)),
+                    ],
+                  ),
                 IconButton(
                   key: Key('add-${meal.name}'),
-                  tooltip: t.addToMeal(t.mealLabel(meal)),
+                  tooltip: t.addToMeal(t.mealLabel(meal, ramadan: ramadan)),
                   icon: const Icon(Icons.add_circle_outline),
                   onPressed: onAdd,
                 ),

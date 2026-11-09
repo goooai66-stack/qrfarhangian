@@ -101,6 +101,15 @@ class ProfileScreen extends ConsumerWidget {
           ),
           Card(
             child: ListTile(
+              key: const Key('open-invite'),
+              leading: const Icon(Icons.card_giftcard_outlined),
+              title: Text(t.inviteTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.invite),
+            ),
+          ),
+          Card(
+            child: ListTile(
               key: const Key('open-reminders'),
               leading: const Icon(Icons.notifications_outlined),
               title: Text(t.remindersTitle),

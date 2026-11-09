@@ -32,6 +32,20 @@ CREATE TABLE IF NOT EXISTS purchases (
   expires_at INTEGER NOT NULL,
   verified_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS invites (
+  invitee_id TEXT PRIMARY KEY,
+  inviter_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS scan_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  device_id TEXT NOT NULL,
+  scan_id TEXT,
+  original_json TEXT NOT NULL,
+  corrected_json TEXT NOT NULL,
+  note TEXT,
+  created_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS scan_cache (
   image_hash TEXT PRIMARY KEY,
   result_json TEXT NOT NULL,
@@ -76,6 +90,12 @@ class Database:
         cols = {r["name"] for r in self._conn.execute("PRAGMA table_info(usage)")}
         if "rewards" not in cols:
             self._conn.execute("ALTER TABLE usage ADD COLUMN rewards INTEGER NOT NULL DEFAULT 0")
+        if "voice" not in cols:
+            self._conn.execute("ALTER TABLE usage ADD COLUMN voice INTEGER NOT NULL DEFAULT 0")
+        dcols = {r["name"] for r in self._conn.execute("PRAGMA table_info(devices)")}
+        if "invite_code" not in dcols:
+            self._conn.execute("ALTER TABLE devices ADD COLUMN invite_code TEXT")
+            self._conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_invite_code ON devices(invite_code)")
 
     def today(self) -> str:
         """روز سهمیه بر اساس ساعت ایران (ریست نیمه‌شب تهران)."""
@@ -233,3 +253,96 @@ class Database:
             )
             out.append(d)
         return out
+
+    # ---- ثبت صوتی/متنی ----
+
+    def voice_today(self, device_id: str) -> int:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT voice FROM usage WHERE device_id = ? AND day = ?", (device_id, self.today())
+            ).fetchone()
+        return row["voice"] if row else 0
+
+    def try_reserve_voice(self, device_id: str, limit: int) -> bool:
+        day = self.today()
+        with self._lock:
+            self._conn.execute(
+                "INSERT OR IGNORE INTO usage (device_id, day, scans) VALUES (?, ?, 0)", (device_id, day)
+            )
+            cur = self._conn.execute(
+                "UPDATE usage SET voice = voice + 1 WHERE device_id = ? AND day = ? AND voice < ?",
+                (device_id, day, limit),
+            )
+            return cur.rowcount == 1
+
+    def refund_voice(self, device_id: str) -> None:
+        with self._lock:
+            self._conn.execute(
+                "UPDATE usage SET voice = voice - 1 WHERE device_id = ? AND day = ? AND voice > 0",
+                (device_id, self.today()),
+            )
+
+    # ---- کد دعوت ----
+
+    _ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # بدون O/0/I/1 (اشتباه‌پذیر)
+
+    def invite_code(self, device_id: str) -> str:
+        with self._lock:
+            row = self._conn.execute("SELECT invite_code FROM devices WHERE id = ?", (device_id,)).fetchone()
+            if row and row["invite_code"]:
+                return row["invite_code"]
+            while True:
+                code = "".join(secrets.choice(self._ALPHABET) for _ in range(6))
+                try:
+                    self._conn.execute("UPDATE devices SET invite_code = ? WHERE id = ?", (code, device_id))
+                    return code
+                except sqlite3.IntegrityError:
+                    continue
+
+    def invite_stats(self, device_id: str) -> tuple[int, str | None]:
+        """(تعداد دعوت‌های موفق، کد دعوت‌کننده‌ی خود این دستگاه)"""
+        with self._lock:
+            n = self._conn.execute("SELECT COUNT(*) FROM invites WHERE inviter_id = ?", (device_id,)).fetchone()[0]
+            by = self._conn.execute(
+                "SELECT d.invite_code FROM invites i JOIN devices d ON d.id = i.inviter_id WHERE i.invitee_id = ?",
+                (device_id,),
+            ).fetchone()
+        return n, (by[0] if by else None)
+
+    def redeem_invite(self, invitee_id: str, code: str, days: int, max_rewards: int) -> str:
+        """نتیجه: ok | invalid | self | already | (هر دو طرف [days] روز ویژه می‌گیرند؛
+        دعوت‌کننده حداکثر [max_rewards] بار)."""
+        now = int(time.time())
+        with self._lock:
+            inviter = self._conn.execute(
+                "SELECT id FROM devices WHERE invite_code = ?", (code.strip().upper(),)
+            ).fetchone()
+            if inviter is None:
+                return "invalid"
+            if inviter["id"] == invitee_id:
+                return "self"
+            try:
+                self._conn.execute(
+                    "INSERT INTO invites (invitee_id, inviter_id, created_at) VALUES (?, ?, ?)",
+                    (invitee_id, inviter["id"], now),
+                )
+            except sqlite3.IntegrityError:
+                return "already"
+            extend = (
+                "UPDATE devices SET premium_until = MAX(COALESCE(premium_until, 0), ?) + ? WHERE id = ?"
+            )
+            self._conn.execute(extend, (now, days * 86400, invitee_id))
+            n = self._conn.execute("SELECT COUNT(*) FROM invites WHERE inviter_id = ?", (inviter["id"],)).fetchone()[0]
+            if n <= max_rewards:
+                self._conn.execute(extend, (now, days * 86400, inviter["id"]))
+            return "ok"
+
+    # ---- «تشخیص اشتباه بود» ----
+
+    def add_feedback(self, device_id: str, scan_id: str | None, original: str, corrected: str, note: str | None) -> None:
+        with self._lock:
+            self._conn.execute(
+                "INSERT INTO scan_feedback (device_id, scan_id, original_json, corrected_json, note, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (device_id, scan_id, original, corrected, note, int(time.time())),
+            )

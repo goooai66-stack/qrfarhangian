@@ -25,8 +25,14 @@ enum MealType { breakfast, lunch, dinner, snack }
 
 /// وعده‌ی پیش‌فرض بر اساس ساعت (بخش ۴-۲).
 /// ۴ تا ۱۰:۵۹ صبحانه، ۱۱ تا ۱۵:۵۹ ناهار، ۱۹ تا ۲۲:۵۹ شام، بقیه میان‌وعده.
-MealType defaultMealForTime(DateTime t) {
+/// در حالت رمضان: ۱ تا ۶ سحر (breakfast)، ۱۶ تا ۲۲ افطار (dinner)، بقیه میان‌وعده.
+MealType defaultMealForTime(DateTime t, {bool ramadan = false}) {
   final h = t.hour;
+  if (ramadan) {
+    if (h >= 1 && h < 7) return MealType.breakfast;
+    if (h >= 16 && h < 23) return MealType.dinner;
+    return MealType.snack;
+  }
   if (h >= 4 && h < 11) return MealType.breakfast;
   if (h >= 11 && h < 16) return MealType.lunch;
   if (h >= 19 && h < 23) return MealType.dinner;

@@ -4,7 +4,7 @@ library;
 
 import 'dart:convert';
 
-enum ReminderKind { breakfast, lunch, dinner, water, weight }
+enum ReminderKind { breakfast, lunch, dinner, water, weight, suhoor, iftar }
 
 class TimeOfDayHM {
   const TimeOfDayHM(this.hour, this.minute);
@@ -35,6 +35,9 @@ class ReminderSettings {
     this.weight = false,
     this.weightWeekday = DateTime.saturday,
     this.weightTime = const TimeOfDayHM(8, 0),
+    this.ramadan = false,
+    this.suhoor = const TimeOfDayHM(3, 30),
+    this.iftar = const TimeOfDayHM(18, 0),
   });
 
   final bool meals;
@@ -46,6 +49,11 @@ class ReminderSettings {
   /// DateTime.saturday … DateTime.friday
   final int weightWeekday;
   final TimeOfDayHM weightTime;
+
+  /// حالت رمضان (بخش ۴-۵): سحر و افطار به‌جای صبحانه و شام، بدون یادآور ناهار،
+  /// یادآور آب بین افطار و سحر.
+  final bool ramadan;
+  final TimeOfDayHM suhoor, iftar;
 
   bool get anyEnabled => meals || water || weight;
 
@@ -59,6 +67,9 @@ class ReminderSettings {
     bool? weight,
     int? weightWeekday,
     TimeOfDayHM? weightTime,
+    bool? ramadan,
+    TimeOfDayHM? suhoor,
+    TimeOfDayHM? iftar,
   }) => ReminderSettings(
     meals: meals ?? this.meals,
     breakfast: breakfast ?? this.breakfast,
@@ -71,6 +82,9 @@ class ReminderSettings {
     weight: weight ?? this.weight,
     weightWeekday: weightWeekday ?? this.weightWeekday,
     weightTime: weightTime ?? this.weightTime,
+    ramadan: ramadan ?? this.ramadan,
+    suhoor: suhoor ?? this.suhoor,
+    iftar: iftar ?? this.iftar,
   );
 
   String encode() => jsonEncode({
@@ -85,6 +99,9 @@ class ReminderSettings {
     'weight': weight,
     'weightDay': weightWeekday,
     'weightTime': weightTime.toJson(),
+    'ramadan': ramadan,
+    'suhoor': suhoor.toJson(),
+    'iftar': iftar.toJson(),
   });
 
   /// داده‌ی خراب یا قدیمی ← پیش‌فرض‌ها.
@@ -108,6 +125,9 @@ class ReminderSettings {
         weight: j['weight'] as bool? ?? false,
         weightWeekday: j['weightDay'] as int? ?? d.weightWeekday,
         weightTime: t('weightTime', d.weightTime),
+        ramadan: j['ramadan'] as bool? ?? false,
+        suhoor: t('suhoor', d.suhoor),
+        iftar: t('iftar', d.iftar),
       );
     } catch (_) {
       return const ReminderSettings();
@@ -138,7 +158,7 @@ const _waterBaseId = 10;
 const _weightId = 40;
 
 List<PlannedReminder> planReminders(ReminderSettings s) => [
-  if (s.meals) ...[
+  if (s.meals && !s.ramadan) ...[
     PlannedReminder(
       _mealIds[ReminderKind.breakfast]!,
       ReminderKind.breakfast,
@@ -151,13 +171,26 @@ List<PlannedReminder> planReminders(ReminderSettings s) => [
       s.dinner,
     ),
   ],
-  if (s.water)
+  if (s.meals && s.ramadan) ...[
+    PlannedReminder(
+      _mealIds[ReminderKind.breakfast]!,
+      ReminderKind.suhoor,
+      s.suhoor,
+    ),
+    PlannedReminder(
+      _mealIds[ReminderKind.dinner]!,
+      ReminderKind.iftar,
+      s.iftar,
+    ),
+  ],
+  if (s.water && !s.ramadan)
     for (
       var h = s.waterStartHour, i = 0;
       h <= s.waterEndHour && i < 20;
       h += s.waterEveryHours.clamp(1, 12), i++
     )
       PlannedReminder(_waterBaseId + i, ReminderKind.water, TimeOfDayHM(h, 0)),
+  if (s.water && s.ramadan) ..._ramadanWater(s),
   if (s.weight)
     PlannedReminder(
       _weightId,
@@ -166,3 +199,17 @@ List<PlannedReminder> planReminders(ReminderSettings s) => [
       weekday: s.weightWeekday,
     ),
 ];
+
+/// آب در رمضان: از یک ساعت بعد از افطار تا قبل از سحر (از نیمه‌شب می‌گذرد).
+List<PlannedReminder> _ramadanWater(ReminderSettings s) {
+  final span = (s.suhoor.hour - s.iftar.hour + 24) % 24;
+  final step = s.waterEveryHours.clamp(1, 12);
+  return [
+    for (var off = 1, i = 0; off < span && i < 20; off += step, i++)
+      PlannedReminder(
+        _waterBaseId + i,
+        ReminderKind.water,
+        TimeOfDayHM((s.iftar.hour + off) % 24, 0),
+      ),
+  ];
+}

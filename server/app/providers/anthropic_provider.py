@@ -22,28 +22,30 @@ class AnthropicProvider:
         self._client = anthropic.AsyncAnthropic(timeout=timeout, max_retries=0)
 
     async def recognize(self, image, media_type, system_prompt, user_text, schema) -> ProviderResponse:
+        content = [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": base64.standard_b64encode(image).decode("ascii"),
+                },
+            },
+            {"type": "text", "text": user_text},
+        ]
+        return await self._call(system_prompt, content, schema)
+
+    async def parse_text(self, system_prompt, text, schema) -> ProviderResponse:
+        return await self._call(system_prompt, [{"type": "text", "text": text}], schema)
+
+    async def _call(self, system_prompt: str, content: list, schema: dict) -> ProviderResponse:
         try:
             response = await self._client.messages.create(
                 model=self.model,
                 max_tokens=4000,
                 # فهرست غذاها ثابت است ← کش پرامپت هزینه را کم می‌کند.
                 system=[{"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image",
-                                "source": {
-                                    "type": "base64",
-                                    "media_type": media_type,
-                                    "data": base64.standard_b64encode(image).decode("ascii"),
-                                },
-                            },
-                            {"type": "text", "text": user_text},
-                        ],
-                    }
-                ],
+                messages=[{"role": "user", "content": content}],
                 output_config={"effort": self.effort, "format": {"type": "json_schema", "schema": schema}},
                 # رد ایمنی ← اجرای دوباره روی مدل جایگزین پیشنهادی Anthropic.
                 extra_headers={"anthropic-beta": "server-side-fallback-2026-07-01"},

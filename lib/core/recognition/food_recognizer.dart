@@ -6,6 +6,7 @@
 library;
 
 import '../../data/api/api_client.dart';
+import '../nutrition/nutrition_types.dart';
 
 export '../../data/api/api_client.dart' show ApiErrorKind;
 
@@ -51,6 +52,7 @@ class RecognitionResult {
     this.notesFa,
     this.scanId,
     this.quotaRemaining,
+    this.meal,
   });
 
   final List<RecognizedItem> items;
@@ -60,6 +62,9 @@ class RecognitionResult {
 
   /// اسکن‌های باقی‌مانده‌ی امروز (اگر سرور گفته باشد).
   final int? quotaRemaining;
+
+  /// وعده‌ای که در جمله گفته شده (ثبت صوتی/متنی)؛ null یعنی گفته نشده.
+  final MealType? meal;
 
   factory RecognitionResult.fromJson(Map<String, dynamic> j) =>
       RecognitionResult(
@@ -71,6 +76,7 @@ class RecognitionResult {
         notesFa: j['notes_fa'] as String?,
         scanId: j['scan_id'] as String?,
         quotaRemaining: ((j['quota'] as Map?)?['remaining'] as num?)?.toInt(),
+        meal: MealType.values.where((m) => m.name == j['meal']).firstOrNull,
       );
 
   Map<String, dynamic> toJson() => {
@@ -78,6 +84,7 @@ class RecognitionResult {
     'is_food': isFood,
     'notes_fa': notesFa,
     'scan_id': scanId,
+    'meal': meal?.name,
   };
 }
 

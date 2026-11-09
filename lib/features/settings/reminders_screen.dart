@@ -18,6 +18,8 @@ ReminderTexts reminderTexts(AppLocalizations t) => {
   ReminderKind.dinner: (title: t.notifDinnerTitle, body: t.notifDinnerBody),
   ReminderKind.water: (title: t.notifWaterTitle, body: t.notifWaterBody),
   ReminderKind.weight: (title: t.notifWeightTitle, body: t.notifWeightBody),
+  ReminderKind.suhoor: (title: t.notifSuhoorTitle, body: t.notifSuhoorBody),
+  ReminderKind.iftar: (title: t.notifIftarTitle, body: t.notifIftarBody),
 };
 
 String formatHM(TimeOfDayHM t) => toPersianDigits(
@@ -89,12 +91,25 @@ class _RemindersScreenState extends ConsumerState<RemindersScreen> {
       body: ListView(
         children: [
           SwitchListTile(
+            key: const Key('ramadan-mode'),
+            secondary: const Text('🌙', style: TextStyle(fontSize: 22)),
+            title: Text(t.ramadanMode),
+            subtitle: Text(t.ramadanModeDesc),
+            value: s.ramadan,
+            onChanged: (v) => _update(s.copyWith(ramadan: v)),
+          ),
+          if (s.ramadan) ...[
+            timeTile(t.mealSuhoor, s.suhoor, (v) => s.copyWith(suhoor: v)),
+            timeTile(t.mealIftar, s.iftar, (v) => s.copyWith(iftar: v)),
+          ],
+          const Divider(),
+          SwitchListTile(
             key: const Key('remind-meals'),
             title: Text(t.remindMeals),
             value: s.meals,
             onChanged: (v) => _update(s.copyWith(meals: v)),
           ),
-          if (s.meals) ...[
+          if (s.meals && !s.ramadan) ...[
             timeTile(
               t.mealBreakfast,
               s.breakfast,

@@ -6,6 +6,9 @@ import 'package:calorie_lens/data/db/app_database.dart';
 import 'package:calorie_lens/core/ads/ad_service.dart';
 import 'package:calorie_lens/core/billing/billing_service.dart';
 import 'package:calorie_lens/core/platform/home_widget_service.dart';
+import 'package:calorie_lens/core/platform/speech_service.dart';
+import 'package:calorie_lens/core/recognition/text_parser.dart';
+import 'package:calorie_lens/data/community/community_api.dart';
 import 'package:calorie_lens/data/monetization/monetization.dart';
 import 'package:calorie_lens/core/platform/share_service.dart';
 import 'package:calorie_lens/core/platform/store_rating.dart';
@@ -32,6 +35,9 @@ Future<void> pumpApp(
   FakeBillingService? billing,
   FakeMonetizationApi? monetization,
   bool overridesBilling = false,
+  FakeTextParser? textParser,
+  FakeSpeechService? speech,
+  FakeCommunityApi? community,
 }) async {
   final foodRepo = foods ?? loadAppFoods();
   RatingPromptGate.checkedThisSession = false;
@@ -62,6 +68,11 @@ Future<void> pumpApp(
         monetizationApiProvider.overrideWithValue(
           monetization ?? FakeMonetizationApi(),
         ),
+        textFoodParserProvider.overrideWithValue(
+          textParser ?? FakeTextParser(),
+        ),
+        speechServiceProvider.overrideWithValue(speech ?? FakeSpeechService()),
+        communityApiProvider.overrideWithValue(community ?? FakeCommunityApi()),
         ...overrides,
       ],
       child: const CalorieLensApp(),

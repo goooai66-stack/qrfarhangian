@@ -17,10 +17,14 @@ import '../core/progress/streak.dart';
 import '../core/reminders/reminder_plan.dart';
 import '../core/reminders/reminder_scheduler.dart';
 import '../core/utils/persian_digits.dart';
+import '../core/platform/speech_service.dart';
 import '../core/recognition/food_recognizer.dart';
+import '../core/recognition/text_parser.dart';
 import '../core/utils/jalali_date.dart';
 import '../data/api/api_client.dart';
+import '../data/community/community_api.dart';
 import '../data/db/app_database.dart';
+import '../data/logs/custom_meal_repository.dart';
 import '../data/foods/food_repository.dart';
 import '../data/logs/food_log_repository.dart';
 import '../data/monetization/monetization.dart';
@@ -437,4 +441,33 @@ final isPremiumProvider = Provider<bool>(
 
 final adCoordinatorProvider = Provider<AdCoordinator>(
   (ref) => AdCoordinator(ref),
+);
+
+// ---- ثبت صوتی/متنی، غذای ترکیبی، رمضان، دعوت (مرحله‌ی ۶) ----
+
+final textFoodParserProvider = Provider<TextFoodParser>(
+  (ref) => AppConfig.fakeScan
+      ? FakeTextParser()
+      : CloudTextParser(ref.watch(apiClientProvider)),
+);
+
+final speechServiceProvider = Provider<SpeechService>(
+  (ref) => DeviceSpeechService(),
+);
+
+final communityApiProvider = Provider<CommunityApi>(
+  (ref) => ServerCommunityApi(ref.watch(apiClientProvider)),
+);
+
+final customMealRepositoryProvider = Provider<CustomMealRepository>(
+  (ref) => CustomMealRepository(ref.watch(databaseProvider)),
+);
+
+final customMealsProvider = StreamProvider<List<CustomMeal>>(
+  (ref) => ref.watch(customMealRepositoryProvider).watchAll(),
+);
+
+/// حالت رمضان (از تنظیمات یادآورها).
+final ramadanProvider = Provider<bool>(
+  (ref) => ref.watch(reminderSettingsProvider).value?.ramadan ?? false,
 );

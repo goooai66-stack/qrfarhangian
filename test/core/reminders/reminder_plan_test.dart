@@ -43,4 +43,31 @@ void main() {
     expect(ReminderSettings.decode('{bad').meals, isFalse);
     expect(ReminderSettings.decode(null).anyEnabled, isFalse);
   });
+
+  group('حالت رمضان', () {
+    const r = ReminderSettings(
+      ramadan: true,
+      meals: true,
+      water: true,
+      suhoor: TimeOfDayHM(3, 30),
+      iftar: TimeOfDayHM(18, 0),
+    );
+    test('سحر و افطار، بدون ناهار', () {
+      final meals = planReminders(r).where((p) => p.kind != ReminderKind.water);
+      expect(meals.map((p) => p.kind), [
+        ReminderKind.suhoor,
+        ReminderKind.iftar,
+      ]);
+      expect(meals.first.time, const TimeOfDayHM(3, 30));
+    });
+    test('آب بین افطار و سحر (از نیمه‌شب می‌گذرد)', () {
+      final water = planReminders(r).where((p) => p.kind == ReminderKind.water);
+      expect(water.map((p) => p.time.hour), [19, 21, 23, 1]);
+    });
+    test('ذخیره و بازیابی', () {
+      final d = ReminderSettings.decode(r.encode());
+      expect(d.ramadan, isTrue);
+      expect(d.suhoor, const TimeOfDayHM(3, 30));
+    });
+  });
 }

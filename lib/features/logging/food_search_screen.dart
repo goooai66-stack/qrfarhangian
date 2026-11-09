@@ -4,9 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
-import '../../core/nutrition/nutrition_types.dart';
 import '../../core/ads/ad_service.dart';
+import '../../core/utils/jalali_date.dart';
+import '../../core/utils/persian_digits.dart';
+import '../../data/db/app_database.dart';
 import '../../data/foods/food.dart';
+import '../../data/logs/custom_meal_repository.dart';
+import 'logging_labels.dart';
 import '../monetization/ad_coordinator.dart';
 import '../../data/foods/food_repository.dart';
 import '../../l10n/app_localizations.dart';
@@ -46,7 +50,9 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
       context.pop(f);
       return;
     }
-    final meal = widget.meal ?? defaultMealForTime(DateTime.now());
+    final meal =
+        widget.meal ??
+        defaultMealForTime(DateTime.now(), ramadan: ref.read(ramadanProvider));
     final day = widget.day ?? ref.read<DateTime>(selectedDayProvider);
     context.push(Routes.foodFor(foodId: f.id, meal: meal, day: day));
   }
@@ -131,8 +137,16 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
         return c != 0 ? c : a.nameFa.compareTo(b.nameFa);
       });
 
+    final customMeals = widget.pickMode
+        ? const <CustomMeal>[]
+        : ref.watch(customMealsProvider).value ?? const <CustomMeal>[];
+
     return ListView(
       children: [
+        if (customMeals.isNotEmpty) ...[
+          _header(t.customMeals),
+          for (final m in customMeals) _customTile(t, m),
+        ],
         if (favFoods.isNotEmpty) ...[
           _header(t.sectionFavorites),
           for (final f in favFoods) _tile(t, f, true),
@@ -149,6 +163,92 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
         for (final f in all) _tile(t, f, favs.contains(f.id)),
       ],
     );
+  }
+
+  Widget _customTile(AppLocalizations t, CustomMeal m) {
+    final n = CustomMealRepository.itemsOf(m).length;
+    return ListTile(
+      key: Key('custom-${m.id}'),
+      leading: const Icon(Icons.bookmark_outline),
+      title: Text(m.name),
+      subtitle: Text(t.customMealItems(toPersianDigits('$n'))),
+      onTap: () => _logCustom(t, m),
+      onLongPress: () async {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (c) => AlertDialog(
+            content: Text(t.customMealDeleteConfirm(m.name)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(c, false),
+                child: Text(t.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(c, true),
+                child: Text(t.deleteItem),
+              ),
+            ],
+          ),
+        );
+        if (ok == true) {
+          await ref.read(customMealRepositoryProvider).delete(m.id);
+        }
+      },
+    );
+  }
+
+  /// ثبت همه‌ی اقلام غذای ترکیبی در وعده (با تأیید).
+  Future<void> _logCustom(AppLocalizations t, CustomMeal m) async {
+    final ramadan = ref.read(ramadanProvider);
+    final meal =
+        widget.meal ?? defaultMealForTime(DateTime.now(), ramadan: ramadan);
+    final day = widget.day ?? ref.read<DateTime>(selectedDayProvider);
+    final foods = await ref.read(foodRepositoryProvider.future);
+    if (!mounted) return;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(m.name, style: Theme.of(c).textTheme.titleLarge),
+              for (final i in CustomMealRepository.itemsOf(m))
+                ListTile(
+                  dense: true,
+                  title: Text(foods.byId(i.foodId)?.nameFa ?? t.unknownFood),
+                  trailing: Text(t.quantityLabel(i.quantity, i.unit)),
+                ),
+              FilledButton(
+                key: const Key('custom-log'),
+                onPressed: () => Navigator.pop(c, true),
+                child: Text(t.logToMeal(t.mealLabel(meal, ramadan: ramadan))),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final n = await ref
+        .read(customMealRepositoryProvider)
+        .logToMeal(
+          m,
+          foods: foods,
+          logs: ref.read(foodLogRepositoryProvider),
+          dayKey: dayKey(day),
+          mealType: meal,
+        );
+    ref.read(selectedDayProvider.notifier).select(day);
+    await ref.read(adCoordinatorProvider).afterLogSaved();
+    messenger.showSnackBar(
+      SnackBar(content: Text(t.customMealLogged(toPersianDigits('$n')))),
+    );
+    if (mounted) context.go(Routes.today);
   }
 
   Widget _header(String text) => Padding(

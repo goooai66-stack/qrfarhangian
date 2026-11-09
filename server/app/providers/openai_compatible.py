@@ -36,7 +36,7 @@ class OpenAICompatibleProvider:
         # بعضی مدل‌ها json_schema را نمی‌پذیرند؛ بعد از اولین رد، json_object.
         self._schema_supported = True
 
-    def _body(self, data_url: str, system_prompt: str, user_text: str, schema: dict, strict: bool) -> dict:
+    def _body(self, data_url: str | None, system_prompt: str, user_text: str, schema: dict, strict: bool) -> dict:
         if strict:
             system = system_prompt
             response_format = {
@@ -55,7 +55,7 @@ class OpenAICompatibleProvider:
                     "role": "user",
                     "content": [
                         {"type": "text", "text": user_text},
-                        {"type": "image_url", "image_url": {"url": data_url}},
+                        *([{"type": "image_url", "image_url": {"url": data_url}}] if data_url else []),
                     ],
                 },
             ],
@@ -73,6 +73,12 @@ class OpenAICompatibleProvider:
 
     async def recognize(self, image, media_type, system_prompt, user_text, schema) -> ProviderResponse:
         data_url = f"data:{media_type};base64,{base64.standard_b64encode(image).decode('ascii')}"
+        return await self._complete(data_url, system_prompt, user_text, schema)
+
+    async def parse_text(self, system_prompt, text, schema) -> ProviderResponse:
+        return await self._complete(None, system_prompt, text, schema)
+
+    async def _complete(self, data_url, system_prompt, user_text, schema) -> ProviderResponse:
         r = await self._post(self._body(data_url, system_prompt, user_text, schema, self._schema_supported))
         if r.status_code == 400 and self._schema_supported:
             # احتمالاً json_schema پشتیبانی نمی‌شود ← یک‌بار با json_object.

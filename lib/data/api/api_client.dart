@@ -30,6 +30,14 @@ enum ApiErrorKind {
   /// سقف ویدیوی جایزه‌دار امروز پر شد.
   rewardLimit,
 
+  /// سهمیه‌ی ثبت صوتی/متنی امروز تمام شد.
+  voiceQuotaExceeded,
+
+  /// کد دعوت پیدا نشد / کد خود کاربر / قبلاً کدی وارد شده.
+  invalidCode,
+  ownCode,
+  alreadyRedeemed,
+
   /// خرید تأیید نشد (توکن نامعتبر یا منقضی).
   invalidPurchase,
 
@@ -139,6 +147,41 @@ class ApiClient {
     ),
   );
 
+  Map<String, String> _json(String t) => {
+    'Authorization': 'Bearer $t',
+    'Content-Type': 'application/json',
+  };
+
+  /// جمله‌ی غذا (از صدا یا تایپ) ← همان JSON آیتم‌ها + meal (بخش ۸-۴).
+  Future<Map<String, dynamic>> voice(String text) => _authed(
+    (t) => _http.post(
+      _uri('/voice'),
+      headers: _json(t),
+      body: jsonEncode({'text': text}),
+    ),
+  );
+
+  Future<Map<String, dynamic>> invite() => _authed(
+    (t) => _http.get(_uri('/invite'), headers: {'Authorization': 'Bearer $t'}),
+  );
+
+  Future<Map<String, dynamic>> redeemInvite(String code) => _authed(
+    (t) => _http.post(
+      _uri('/invite/redeem'),
+      headers: _json(t),
+      body: jsonEncode({'code': code}),
+    ),
+  );
+
+  Future<Map<String, dynamic>> feedbackScan(Map<String, dynamic> body) =>
+      _authed(
+        (t) => _http.post(
+          _uri('/feedback/scan'),
+          headers: _json(t),
+          body: jsonEncode(body),
+        ),
+      );
+
   /// عکس فشرده ← JSON نتیجه (بخش ۸-۲).
   Future<Map<String, dynamic>> scan(List<int> jpeg) => _authed((t) async {
     final req = http.MultipartRequest('POST', _uri('/scan'))
@@ -194,6 +237,10 @@ class ApiClient {
     return switch ((res.statusCode, code)) {
       (429, 'quota_exceeded') => ApiErrorKind.quotaExceeded,
       (429, 'reward_limit') => ApiErrorKind.rewardLimit,
+      (429, 'voice_quota_exceeded') => ApiErrorKind.voiceQuotaExceeded,
+      (404, 'invalid_code') => ApiErrorKind.invalidCode,
+      (400, 'own_code') => ApiErrorKind.ownCode,
+      (409, 'already_redeemed') => ApiErrorKind.alreadyRedeemed,
       (402, _) => ApiErrorKind.invalidPurchase,
       (503, 'verification_unavailable') => ApiErrorKind.verificationUnavailable,
       (429, _) => ApiErrorKind.rateLimited,

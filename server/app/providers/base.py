@@ -44,3 +44,7 @@ class VisionProvider(Protocol):
         user_text: str,
         schema: dict,
     ) -> ProviderResponse: ...
+
+    async def parse_text(self, system_prompt: str, text: str, schema: dict) -> ProviderResponse:
+        """ثبت صوتی/متنی (بخش ۸-۴): جمله ← همان JSON آیتم‌ها."""
+        ...
