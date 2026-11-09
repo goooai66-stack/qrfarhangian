@@ -59,7 +59,11 @@ void main() {
       );
       expect(find.textContaining('جایگزین پزشک'), findsOneWidget);
 
-      await next(tester); // «شروع کن» ← ذخیره و رفتن به خانه
+      await next(tester); // «شروع کن» ← ذخیره ← Paywall نرم
+      await pumpUntil(tester, find.byKey(const Key('paywall-not-now')));
+      expect(find.text('کالری‌لنز ویژه 💎'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('paywall-not-now')));
+      await settle(tester);
       expect(find.byType(NavigationBar), findsOneWidget);
 
       final goal = await tester.runAsync(

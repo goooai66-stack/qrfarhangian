@@ -1010,4 +1010,79 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get storeGeneric => 'فروشگاه';
+
+  @override
+  String get adLabel => 'تبلیغ';
+
+  @override
+  String get premiumTitle => 'کالری‌لنز ویژه 💎';
+
+  @override
+  String get premiumBenefitScan => 'اسکن نامحدود عکس (سقف منصفانه‌ی ۳۰ در روز)';
+
+  @override
+  String get premiumBenefitNoAds => 'بدون هیچ تبلیغی';
+
+  @override
+  String get premiumBenefitMore => 'امکانات ویژه‌ی بعدی هم برای تو باز می‌شوند';
+
+  @override
+  String get planMonthly => 'ماهانه';
+
+  @override
+  String get planQuarterly => 'سه‌ماهه';
+
+  @override
+  String get planYearly => 'سالانه';
+
+  @override
+  String get bestValue => 'به‌صرفه‌ترین';
+
+  @override
+  String get priceInStore => 'قیمت در فروشگاه';
+
+  @override
+  String get buy => 'خرید';
+
+  @override
+  String get notNow => 'فعلاً نه';
+
+  @override
+  String get restorePurchases => 'بازیابی خرید';
+
+  @override
+  String get purchaseSuccess => 'اشتراک ویژه فعال شد 💎';
+
+  @override
+  String get purchaseUnavailable => 'پرداخت هنوز فعال نشده است.';
+
+  @override
+  String get purchaseFailed =>
+      'خرید تأیید نشد. اگر مبلغی کم شده، «بازیابی خرید» را بزن.';
+
+  @override
+  String get restoreNone => 'خریدی برای بازیابی پیدا نشد.';
+
+  @override
+  String premiumActiveUntil(String date) {
+    return 'ویژه تا $date';
+  }
+
+  @override
+  String get upgradePremium => 'ارتقا به ویژه 💎';
+
+  @override
+  String get rewardGranted => '۱ اسکن به سهمیه‌ات اضافه شد';
+
+  @override
+  String get rewardNotCompleted => 'ویدیو کامل دیده نشد؛ اسکنی اضافه نشد.';
+
+  @override
+  String get rewardUnavailable => 'الان ویدیویی برای نمایش نیست.';
+
+  @override
+  String get rewardLimit => 'سقف ویدیوی امروز پر شده است.';
+
+  @override
+  String get rewardFailed => 'ثبت پاداش انجام نشد. دوباره امتحان کن.';
 }

@@ -43,7 +43,9 @@ def test_scan_ok_and_calories_from_our_db(client):
     # «گوجه کبابی» در پایگاه نیست ← none
     assert body["items"][2]["food_id"] is None
     assert body["items"][2]["match"] == "none"
-    assert body["quota"] == {"used": 1, "limit": 3, "remaining": 2, "day": body["quota"]["day"]}
+    q = body["quota"]
+    assert (q["used"], q["limit"], q["remaining"]) == (1, 3, 2)
+    assert q["premium"] is False and q["rewards_left"] == 5
 
 
 def test_fourth_scan_rejected(client):

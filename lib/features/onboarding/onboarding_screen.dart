@@ -7,6 +7,7 @@ import '../../core/nutrition/nutrition_calculator.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/choice_card.dart';
+import '../monetization/paywall_screen.dart';
 import '../common/wheel_pickers.dart';
 import '../profile/profile_draft.dart';
 import '../profile/profile_labels.dart';
@@ -86,6 +87,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await ref
         .read(profileRepositoryProvider)
         .saveOnboarding(d.toInput(), d.plan(_now));
+    await ref
+        .read(databaseProvider)
+        .setSetting(SoftPaywallGate.pendingKey, 'pending');
     if (!mounted) return;
     ref.read(onboardingDoneProvider.notifier).markDone();
   }

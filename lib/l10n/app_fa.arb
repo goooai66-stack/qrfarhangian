@@ -603,5 +603,36 @@
   "rateNever": "نه، ممنون",
   "storeBazaar": "کافه‌بازار",
   "storeMyket": "مایکت",
-  "storeGeneric": "فروشگاه"
+  "storeGeneric": "فروشگاه",
+  "adLabel": "تبلیغ",
+  "premiumTitle": "کالری‌لنز ویژه 💎",
+  "premiumBenefitScan": "اسکن نامحدود عکس (سقف منصفانه‌ی ۳۰ در روز)",
+  "premiumBenefitNoAds": "بدون هیچ تبلیغی",
+  "premiumBenefitMore": "امکانات ویژه‌ی بعدی هم برای تو باز می‌شوند",
+  "planMonthly": "ماهانه",
+  "planQuarterly": "سه‌ماهه",
+  "planYearly": "سالانه",
+  "bestValue": "به‌صرفه‌ترین",
+  "priceInStore": "قیمت در فروشگاه",
+  "buy": "خرید",
+  "notNow": "فعلاً نه",
+  "restorePurchases": "بازیابی خرید",
+  "purchaseSuccess": "اشتراک ویژه فعال شد 💎",
+  "purchaseUnavailable": "پرداخت هنوز فعال نشده است.",
+  "purchaseFailed": "خرید تأیید نشد. اگر مبلغی کم شده، «بازیابی خرید» را بزن.",
+  "restoreNone": "خریدی برای بازیابی پیدا نشد.",
+  "premiumActiveUntil": "ویژه تا {date}",
+  "@premiumActiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "upgradePremium": "ارتقا به ویژه 💎",
+  "rewardGranted": "۱ اسکن به سهمیه‌ات اضافه شد",
+  "rewardNotCompleted": "ویدیو کامل دیده نشد؛ اسکنی اضافه نشد.",
+  "rewardUnavailable": "الان ویدیویی برای نمایش نیست.",
+  "rewardLimit": "سقف ویدیوی امروز پر شده است.",
+  "rewardFailed": "ثبت پاداش انجام نشد. دوباره امتحان کن."
 }

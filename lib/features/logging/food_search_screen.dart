@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/nutrition/nutrition_types.dart';
+import '../../core/ads/ad_service.dart';
 import '../../data/foods/food.dart';
+import '../monetization/ad_coordinator.dart';
 import '../../data/foods/food_repository.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -77,6 +79,10 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
           onChanged: (v) => setState(() => _query = v),
         ),
       ),
+      // بنر فقط اینجا (بخش ۹-۲).
+      bottomNavigationBar: widget.pickMode
+          ? null
+          : const SafeArea(child: AdSlot(AdPlacement.bannerSearch)),
       body: repo.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),

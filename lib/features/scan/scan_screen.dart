@@ -18,6 +18,7 @@ import '../../data/foods/food_repository.dart';
 import '../../data/scan/pending_scan_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../logging/logging_labels.dart';
+import '../monetization/ad_coordinator.dart';
 import 'photo_source.dart';
 import 'scan_service.dart';
 
@@ -244,6 +245,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     if (_pending != null) {
       await ref.read(pendingScanRepositoryProvider).delete(_pending!.id);
     }
+    await ref.read(adCoordinatorProvider).afterLogSaved();
     if (!mounted) return;
     ref.read(selectedDayProvider.notifier).select(_day);
     final t = AppLocalizations.of(context);
@@ -261,6 +263,23 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
 
   void _manualLog() =>
       context.pushReplacement(Routes.searchFor(meal: _meal, day: _day));
+
+  /// «دیدن ویدیو = ۱ اسکن» (فقط با انتخاب کاربر) ← دوباره همان عکس.
+  Future<void> _watchVideo() async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final r = await ref.read(adCoordinatorProvider).watchVideoForScan();
+    if (!mounted) return;
+    final msg = switch (r) {
+      RewardFlowResult.granted => t.rewardGranted,
+      RewardFlowResult.notCompleted => t.rewardNotCompleted,
+      RewardFlowResult.unavailable => t.rewardUnavailable,
+      RewardFlowResult.limitReached => t.rewardLimit,
+      RewardFlowResult.failed => t.rewardFailed,
+    };
+    messenger.showSnackBar(SnackBar(content: Text(msg)));
+    if (r == RewardFlowResult.granted && _jpeg != null) await _analyze();
+  }
 
   Future<void> _markGuideSeen() async {
     await ref.read(databaseProvider).setSetting(_guideSeenKey, '1');
@@ -643,16 +662,17 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         title: t.scanQuotaTitle,
         body: t.scanQuotaHint,
         primary: (t.manualLog, _manualLog),
-        // ویدیوی جایزه‌دار و اشتراک در مرحله‌ی ۵.
         extra: [
           OutlinedButton(
-            onPressed: null,
-            child: Text('${t.scanQuotaVideo} (${t.comingSoon})'),
+            key: const Key('quota-video'),
+            onPressed: _watchVideo,
+            child: Text(t.scanQuotaVideo),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
-            onPressed: null,
-            child: Text('${t.scanQuotaPremium} (${t.comingSoon})'),
+            key: const Key('quota-premium'),
+            onPressed: () => context.push(Routes.paywall),
+            child: Text(t.scanQuotaPremium),
           ),
         ],
       );

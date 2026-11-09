@@ -4,20 +4,22 @@ import 'package:calorie_lens/core/recognition/food_recognizer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('FakeAdService نتیجه‌ی تنظیم‌شده را برمی‌گرداند', () async {
-    final ads = FakeAdService(rewardResult: RewardResult.skipped);
-    expect(
-      await ads.showRewarded(AdPlacement.rewardedScan),
-      RewardResult.skipped,
-    );
-    expect(ads.rewardedShown, 1);
+  test('FakeAdService: پاداش فقط با دیدن کامل', () async {
+    final skipped = await FakeAdService(rewardResult: RewardResult.skipped)
+        .showRewarded(AdPlacement.rewardedScan);
+    expect(skipped.rewarded, isFalse);
+    final done = await FakeAdService().showRewarded(AdPlacement.rewardedScan);
+    expect(done.rewarded, isTrue);
+    expect(done.rewardToken, isNotEmpty);
   });
 
   test('FakeBillingService خرید و بازیابی', () async {
     final b = FakeBillingService();
     final r = await b.purchase(SubscriptionPlan.yearly);
     expect(r.success, isTrue);
+    expect(r.purchaseToken, startsWith('test-'));
     expect((await b.restorePurchases()).single.plan, SubscriptionPlan.yearly);
+    expect(productIdOf(SubscriptionPlan.yearly), 'premium_yearly');
   });
 
   test('RecognitionResult.fromJson طبق اسکیمای بخش ۸-۲', () {

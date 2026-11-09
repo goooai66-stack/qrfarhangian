@@ -10,6 +10,7 @@ import '../../core/utils/persian_digits.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/app_localizations.dart';
 import '../logging/log_food_sheet.dart';
+import '../monetization/paywall_screen.dart';
 import 'calorie_ring.dart';
 import 'rating_prompt.dart';
 import 'date_strip.dart';
@@ -68,6 +69,7 @@ class TodayScreen extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 96),
         children: [
           const RatingPromptGate(),
+          const SoftPaywallGate(),
           DateStrip(
             selected: day,
             today: today,

@@ -27,6 +27,15 @@ enum ApiErrorKind {
   /// عکس قابل قبول نیست (حجم/قالب).
   badImage,
 
+  /// سقف ویدیوی جایزه‌دار امروز پر شد.
+  rewardLimit,
+
+  /// خرید تأیید نشد (توکن نامعتبر یا منقضی).
+  invalidPurchase,
+
+  /// اعتبارسنجی خرید فعلاً در دسترس نیست.
+  verificationUnavailable,
+
   /// سایر خطاها.
   server,
 }
@@ -98,6 +107,38 @@ class ApiClient {
     (t) => _http.get(_uri('/quota'), headers: {'Authorization': 'Bearer $t'}),
   );
 
+  /// ویدیوی جایزه‌دار کامل دیده شد ← ۱ اسکن بیشتر؛ سهمیه‌ی جدید.
+  Future<Map<String, dynamic>> rewardScan(String rewardToken) => _authed(
+    (t) => _http.post(
+      _uri('/quota/reward'),
+      headers: {
+        'Authorization': 'Bearer $t',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'reward_token': rewardToken}),
+    ),
+  );
+
+  /// اعتبارسنجی خرید سمت سرور ← فعال‌سازی ویژه؛ سهمیه‌ی جدید.
+  Future<Map<String, dynamic>> verifyPurchase({
+    required String store,
+    required String productId,
+    required String purchaseToken,
+  }) => _authed(
+    (t) => _http.post(
+      _uri('/purchase/verify'),
+      headers: {
+        'Authorization': 'Bearer $t',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'store': store,
+        'product_id': productId,
+        'purchase_token': purchaseToken,
+      }),
+    ),
+  );
+
   /// عکس فشرده ← JSON نتیجه (بخش ۸-۲).
   Future<Map<String, dynamic>> scan(List<int> jpeg) => _authed((t) async {
     final req = http.MultipartRequest('POST', _uri('/scan'))
@@ -152,6 +193,9 @@ class ApiClient {
     } catch (_) {}
     return switch ((res.statusCode, code)) {
       (429, 'quota_exceeded') => ApiErrorKind.quotaExceeded,
+      (429, 'reward_limit') => ApiErrorKind.rewardLimit,
+      (402, _) => ApiErrorKind.invalidPurchase,
+      (503, 'verification_unavailable') => ApiErrorKind.verificationUnavailable,
       (429, _) => ApiErrorKind.rateLimited,
       (413 || 415, _) => ApiErrorKind.badImage,
       (504, _) => ApiErrorKind.timeout,

@@ -2,7 +2,7 @@
 
 کالری‌شمار عکسی غذاهای ایرانی — Flutter، اندروید (کافه‌بازار و مایکت).
 
-وضعیت: مرحله‌های **۰ تا ۴** انجام شده است (اسکلت، آنبوردینگ و هدف، پایگاه غذا و داشبورد، سرور واسط و اسکن عکس، پیشرفت و یادآورها و نگه‌داشت کاربر).
+وضعیت: مرحله‌های **۰ تا ۵** انجام شده است. در مرحله‌ی ۵ منطق تبلیغات، اشتراک و سهمیه کامل است؛ اتصال SDK تپسل، بازار و مایکت بعد از ساخت حساب‌ها (پایین).
 
 ## پیش‌نیازها
 
@@ -38,6 +38,21 @@ flutter run --flavor bazaar --dart-define=FAKE_SCAN=true
 ```
 
 نسخه‌ی release فقط با HTTPS به سرور وصل می‌شود (`--dart-define=API_BASE_URL=https://...`).
+
+## درآمد: آنچه بعد از ساخت حساب‌ها باید وصل شود (مرحله‌ی ۵)
+
+منطق کامل و تست‌شده است (قوانین تکرار تبلیغ در `lib/core/ads/ad_policy.dart`، Paywall، سهمیه و پاداش سمت سرور).
+تا وقتی SDKها اضافه نشده‌اند: در debug تبلیغ و خرید **آزمایشی** فعال است (توکن `test-…`)،
+در release تبلیغی نیست و پرداخت پیام «هنوز فعال نشده» می‌دهد.
+
+| کار | کجا |
+|---|---|
+| SDK تپسل‌پلاس + `TapsellAdService` (پیاده‌سازی `AdService`) | `lib/core/ads/` و `adServiceProvider`؛ کلید با `--dart-define=TAPSELL_KEY=…` |
+| Poolakey (بازار) و Myket Billing ← `BazaarBilling` و `MyketBilling` (پیاده‌سازی `BillingService`) | `lib/core/billing/` و `billingServiceProvider` (بر اساس Flavor) |
+| ساخت محصولات `premium_monthly`، `premium_quarterly`، `premium_yearly` در پنل فروشگاه‌ها | باید با `PRODUCT_DAYS` سرور یکی باشد |
+| اعتبارسنجی خرید با API توسعه‌دهنده‌ی بازار و مایکت | `server/app/billing/verifiers.py` و `PURCHASE_VERIFIER=stores` |
+| تأیید پاداش ویدیو با callback تپسل (در صورت امکان) | `TrustingRewardVerifier` در همان فایل |
+| بلاک دسته‌های نامناسب (قرص لاغری، شرط‌بندی) | پنل تپسل |
 
 ## تست و بررسی
 

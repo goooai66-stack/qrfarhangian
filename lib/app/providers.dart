@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/ad_service.dart';
 import 'config.dart';
+import 'flavor.dart';
 import '../core/billing/billing_service.dart';
 import '../core/nutrition/serving.dart';
 import '../core/platform/home_widget_service.dart';
@@ -21,6 +23,8 @@ import '../data/api/api_client.dart';
 import '../data/db/app_database.dart';
 import '../data/foods/food_repository.dart';
 import '../data/logs/food_log_repository.dart';
+import '../data/monetization/monetization.dart';
+import '../features/monetization/ad_coordinator.dart';
 import '../data/progress/progress_repository.dart';
 import '../data/scan/pending_scan_repository.dart';
 import '../data/scan/photo_store.dart';
@@ -37,9 +41,19 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 // تا مرحله‌ی ۳ و ۵ پیاده‌سازی‌های Fake استفاده می‌شوند.
-final adServiceProvider = Provider<AdService>((ref) => FakeAdService());
+/// تا وقتی SDK تپسل و کلیدش اضافه نشده: debug ← تبلیغ نمونه، release ← بدون تبلیغ.
+final adServiceProvider = Provider<AdService>(
+  (ref) => kDebugMode ? FakeAdService(placeholders: true) : const NoAdService(),
+);
+
+String get _storeId => currentStore == Store.myket ? 'myket' : 'bazaar';
+
+/// تا وقتی Poolakey/Myket Billing اضافه نشده: debug ← خرید آزمایشی
+/// (توکن test- که سرور توسعه می‌پذیرد)، release ← «پرداخت فعال نیست».
 final billingServiceProvider = Provider<BillingService>(
-  (ref) => FakeBillingService(),
+  (ref) => kDebugMode
+      ? FakeBillingService(storeId: _storeId)
+      : UnavailableBillingService(_storeId),
 );
 final apiClientProvider = Provider<ApiClient>(
   (ref) =>
@@ -375,3 +389,52 @@ final widgetSnapshotProvider = Provider<WidgetSnapshot?>((ref) {
     ),
   );
 });
+
+// ---- درآمد: تبلیغات، اشتراک، سهمیه (مرحله‌ی ۵) ----
+
+/// ساعت (در تست جابه‌جا می‌شود).
+final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
+
+final monetizationApiProvider = Provider<MonetizationApi>(
+  (ref) => ServerMonetizationApi(ref.watch(apiClientProvider)),
+);
+
+/// وضعیت ویژه و سهمیه. اول از کش محلی (آفلاین)، بعد از سرور.
+class EntitlementNotifier extends AsyncNotifier<QuotaStatus> {
+  PremiumCache get _cache => PremiumCache(ref.read(databaseProvider));
+
+  @override
+  Future<QuotaStatus> build() async {
+    final until = await _cache.read();
+    final now = ref.read(clockProvider)();
+    Future.microtask(refresh);
+    return until != null && until.isAfter(now)
+        ? QuotaStatus(premium: true, premiumUntil: until)
+        : QuotaStatus.free;
+  }
+
+  /// از سرور؛ خطای شبکه نادیده گرفته می‌شود (کش می‌ماند).
+  Future<void> refresh() async {
+    try {
+      apply(await ref.read(monetizationApiProvider).quota());
+    } catch (_) {}
+  }
+
+  void apply(QuotaStatus q) {
+    state = AsyncData(q);
+    _cache.write(q.premium ? q.premiumUntil : null);
+  }
+}
+
+final entitlementProvider =
+    AsyncNotifierProvider<EntitlementNotifier, QuotaStatus>(
+      EntitlementNotifier.new,
+    );
+
+final isPremiumProvider = Provider<bool>(
+  (ref) => ref.watch(entitlementProvider).value?.premium ?? false,
+);
+
+final adCoordinatorProvider = Provider<AdCoordinator>(
+  (ref) => AdCoordinator(ref),
+);

@@ -1905,6 +1905,150 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'فروشگاه'**
   String get storeGeneric;
+
+  /// No description provided for @adLabel.
+  ///
+  /// In fa, this message translates to:
+  /// **'تبلیغ'**
+  String get adLabel;
+
+  /// No description provided for @premiumTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری‌لنز ویژه 💎'**
+  String get premiumTitle;
+
+  /// No description provided for @premiumBenefitScan.
+  ///
+  /// In fa, this message translates to:
+  /// **'اسکن نامحدود عکس (سقف منصفانه‌ی ۳۰ در روز)'**
+  String get premiumBenefitScan;
+
+  /// No description provided for @premiumBenefitNoAds.
+  ///
+  /// In fa, this message translates to:
+  /// **'بدون هیچ تبلیغی'**
+  String get premiumBenefitNoAds;
+
+  /// No description provided for @premiumBenefitMore.
+  ///
+  /// In fa, this message translates to:
+  /// **'امکانات ویژه‌ی بعدی هم برای تو باز می‌شوند'**
+  String get premiumBenefitMore;
+
+  /// No description provided for @planMonthly.
+  ///
+  /// In fa, this message translates to:
+  /// **'ماهانه'**
+  String get planMonthly;
+
+  /// No description provided for @planQuarterly.
+  ///
+  /// In fa, this message translates to:
+  /// **'سه‌ماهه'**
+  String get planQuarterly;
+
+  /// No description provided for @planYearly.
+  ///
+  /// In fa, this message translates to:
+  /// **'سالانه'**
+  String get planYearly;
+
+  /// No description provided for @bestValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'به‌صرفه‌ترین'**
+  String get bestValue;
+
+  /// No description provided for @priceInStore.
+  ///
+  /// In fa, this message translates to:
+  /// **'قیمت در فروشگاه'**
+  String get priceInStore;
+
+  /// No description provided for @buy.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرید'**
+  String get buy;
+
+  /// No description provided for @notNow.
+  ///
+  /// In fa, this message translates to:
+  /// **'فعلاً نه'**
+  String get notNow;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In fa, this message translates to:
+  /// **'بازیابی خرید'**
+  String get restorePurchases;
+
+  /// No description provided for @purchaseSuccess.
+  ///
+  /// In fa, this message translates to:
+  /// **'اشتراک ویژه فعال شد 💎'**
+  String get purchaseSuccess;
+
+  /// No description provided for @purchaseUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'پرداخت هنوز فعال نشده است.'**
+  String get purchaseUnavailable;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'خرید تأیید نشد. اگر مبلغی کم شده، «بازیابی خرید» را بزن.'**
+  String get purchaseFailed;
+
+  /// No description provided for @restoreNone.
+  ///
+  /// In fa, this message translates to:
+  /// **'خریدی برای بازیابی پیدا نشد.'**
+  String get restoreNone;
+
+  /// No description provided for @premiumActiveUntil.
+  ///
+  /// In fa, this message translates to:
+  /// **'ویژه تا {date}'**
+  String premiumActiveUntil(String date);
+
+  /// No description provided for @upgradePremium.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارتقا به ویژه 💎'**
+  String get upgradePremium;
+
+  /// No description provided for @rewardGranted.
+  ///
+  /// In fa, this message translates to:
+  /// **'۱ اسکن به سهمیه‌ات اضافه شد'**
+  String get rewardGranted;
+
+  /// No description provided for @rewardNotCompleted.
+  ///
+  /// In fa, this message translates to:
+  /// **'ویدیو کامل دیده نشد؛ اسکنی اضافه نشد.'**
+  String get rewardNotCompleted;
+
+  /// No description provided for @rewardUnavailable.
+  ///
+  /// In fa, this message translates to:
+  /// **'الان ویدیویی برای نمایش نیست.'**
+  String get rewardUnavailable;
+
+  /// No description provided for @rewardLimit.
+  ///
+  /// In fa, this message translates to:
+  /// **'سقف ویدیوی امروز پر شده است.'**
+  String get rewardLimit;
+
+  /// No description provided for @rewardFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت پاداش انجام نشد. دوباره امتحان کن.'**
+  String get rewardFailed;
 }
 
 class _AppLocalizationsDelegate

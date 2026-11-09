@@ -92,6 +92,8 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
         nutrients: s.nutrients,
       );
       ref.read(selectedDayProvider.notifier).select(day);
+      // تمام‌صفحه فقط بعد از ذخیره و طبق قوانین بخش ۹-۲.
+      await ref.read(adCoordinatorProvider).afterLogSaved();
     }
     if (!mounted) return;
     final t = AppLocalizations.of(context);

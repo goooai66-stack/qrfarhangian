@@ -24,6 +24,14 @@ CREATE TABLE IF NOT EXISTS usage (
   scans INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (device_id, day)
 );
+CREATE TABLE IF NOT EXISTS purchases (
+  token TEXT PRIMARY KEY,
+  store TEXT NOT NULL,
+  product_id TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  verified_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS scan_cache (
   image_hash TEXT PRIMARY KEY,
   result_json TEXT NOT NULL,
@@ -61,6 +69,13 @@ class Database:
         self._tz = ZoneInfo(timezone)
         with self._lock:
             self._conn.executescript(SCHEMA)
+            self._migrate()
+
+    def _migrate(self) -> None:
+        """افزودن ستون‌های جدید به دیتابیس‌های قدیمی (بدون از دست رفتن داده)."""
+        cols = {r["name"] for r in self._conn.execute("PRAGMA table_info(usage)")}
+        if "rewards" not in cols:
+            self._conn.execute("ALTER TABLE usage ADD COLUMN rewards INTEGER NOT NULL DEFAULT 0")
 
     def today(self) -> str:
         """روز سهمیه بر اساس ساعت ایران (ریست نیمه‌شب تهران)."""
@@ -84,6 +99,10 @@ class Database:
                 "SELECT * FROM devices WHERE token_hash = ?", (hash_token(token),)
             ).fetchone()
 
+    def device_by_id(self, device_id: str) -> sqlite3.Row | None:
+        with self._lock:
+            return self._conn.execute("SELECT * FROM devices WHERE id = ?", (device_id,)).fetchone()
+
     def is_premium(self, device: sqlite3.Row) -> bool:
         until = device["premium_until"]
         return until is not None and until > time.time()
@@ -91,11 +110,54 @@ class Database:
     # ---- سهمیه (سمت سرور، بخش ۹-۱) ----
 
     def used_today(self, device_id: str) -> int:
+        return self.usage_today(device_id)[0]
+
+    def usage_today(self, device_id: str) -> tuple[int, int]:
+        """(اسکن‌های امروز، ویدیوهای جایزه‌دار امروز)"""
         with self._lock:
             row = self._conn.execute(
-                "SELECT scans FROM usage WHERE device_id = ? AND day = ?", (device_id, self.today())
+                "SELECT scans, rewards FROM usage WHERE device_id = ? AND day = ?",
+                (device_id, self.today()),
             ).fetchone()
-        return row["scans"] if row else 0
+        return (row["scans"], row["rewards"]) if row else (0, 0)
+
+    def try_add_reward(self, device_id: str, max_per_day: int) -> bool:
+        """یک ویدیوی کامل‌دیده‌شده = ۱ اسکن بیشتر، تا سقف روزانه (اتمیک)."""
+        day = self.today()
+        with self._lock:
+            self._conn.execute(
+                "INSERT OR IGNORE INTO usage (device_id, day, scans) VALUES (?, ?, 0)", (device_id, day)
+            )
+            cur = self._conn.execute(
+                "UPDATE usage SET rewards = rewards + 1 WHERE device_id = ? AND day = ? AND rewards < ?",
+                (device_id, day, max_per_day),
+            )
+            return cur.rowcount == 1
+
+    # ---- خرید اشتراک ----
+
+    def apply_purchase(self, token: str, store: str, product_id: str, device_id: str, expires_at: int) -> int:
+        """ثبت خرید و فعال‌سازی ویژه. همان توکن روی دستگاه جدید (نصب دوباره)
+        به آن دستگاه منتقل می‌شود. مقدار برگشتی: premium_until."""
+        now = int(time.time())
+        with self._lock:
+            old = self._conn.execute("SELECT device_id FROM purchases WHERE token = ?", (token,)).fetchone()
+            self._conn.execute(
+                "INSERT INTO purchases (token, store, product_id, device_id, expires_at, verified_at) "
+                "VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(token) DO UPDATE SET device_id = excluded.device_id, "
+                "expires_at = excluded.expires_at, verified_at = excluded.verified_at",
+                (token, store, product_id, device_id, expires_at, now),
+            )
+            if old is not None and old["device_id"] != device_id:
+                self._conn.execute(
+                    "UPDATE devices SET premium_until = NULL WHERE id = ? AND premium_until <= ?",
+                    (old["device_id"], expires_at),
+                )
+            self._conn.execute(
+                "UPDATE devices SET premium_until = MAX(COALESCE(premium_until, 0), ?) WHERE id = ?",
+                (expires_at, device_id),
+            )
+            return self._conn.execute("SELECT premium_until FROM devices WHERE id = ?", (device_id,)).fetchone()[0]
 
     def try_reserve_scan(self, device_id: str, limit: int) -> bool:
         """یک اسکن رزرو می‌کند اگر زیر سقف باشد (اتمیک)."""

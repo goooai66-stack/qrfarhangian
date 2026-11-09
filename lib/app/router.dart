@@ -6,6 +6,7 @@ import '../core/utils/jalali_date.dart';
 import '../features/home/today_screen.dart';
 import '../features/logging/food_detail_screen.dart';
 import '../features/logging/food_search_screen.dart';
+import '../features/monetization/paywall_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/plans/plans_screen.dart';
 import '../features/profile/profile_edit_screen.dart';
@@ -47,6 +48,8 @@ abstract final class Routes {
   static const pickFood = '$search?pick=1';
 
   static const scan = '/scan';
+  static const paywall = '/paywall';
+  static const paywallSoft = '/paywall?soft=1';
 
   static String scanFor({
     required ScanSource source,
@@ -105,6 +108,11 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
         day: _day(state.uri.queryParameters['date']),
         pickMode: state.uri.queryParameters['pick'] == '1',
       ),
+    ),
+    GoRoute(
+      path: Routes.paywall,
+      builder: (_, state) =>
+          PaywallScreen(soft: state.uri.queryParameters['soft'] == '1'),
     ),
     GoRoute(
       path: Routes.scan,

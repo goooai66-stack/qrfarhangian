@@ -20,6 +20,8 @@ import '../common/wheel_pickers.dart';
 import '../profile/profile_draft.dart';
 import '../profile/profile_labels.dart';
 import '../scan/photo_source.dart';
+import '../../core/ads/ad_service.dart';
+import '../monetization/ad_coordinator.dart';
 import 'progress_labels.dart';
 import 'share_card.dart';
 
@@ -34,12 +36,14 @@ class ProgressScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(t.tabProgress)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 24),
-        children: const [
-          _StreakCard(),
-          _WeightCard(),
-          _CaloriesCard(),
-          _BadgesCard(),
-          _BeforeAfterCard(),
+        children: [
+          const _StreakCard(),
+          const _WeightCard(),
+          const _CaloriesCard(),
+          // نیتیو با برچسب «تبلیغ»، هم‌شکل کارت‌ها (بخش ۹-۲).
+          AdSlot(AdPlacement.nativeProgress, label: t.adLabel),
+          const _BadgesCard(),
+          const _BeforeAfterCard(),
         ],
       ),
     );

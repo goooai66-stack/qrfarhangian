@@ -6,7 +6,9 @@ import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
 import '../../core/utils/persian_digits.dart';
+import '../../app/theme.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/date_names.dart';
 import 'profile_labels.dart';
 
 /// تب «پروفایل»: خلاصه‌ی برنامه، ویرایش، تم و سلب مسئولیت.
@@ -20,6 +22,7 @@ class ProfileScreen extends ConsumerWidget {
     final profile = ref.watch(profileProvider).value;
     final goal = ref.watch(activeGoalProvider).value;
     final weight = ref.watch(currentWeightProvider).value;
+    final ent = ref.watch(entitlementProvider).value;
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -81,6 +84,21 @@ class ProfileScreen extends ConsumerWidget {
             label: Text(t.profileEdit),
           ),
           const SizedBox(height: 8),
+          Card(
+            color: BrandColors.orange.withValues(alpha: 0.12),
+            child: ListTile(
+              key: const Key('premium-card'),
+              leading: const Text('💎', style: TextStyle(fontSize: 24)),
+              title: Text(
+                ent?.premium == true && ent?.premiumUntil != null
+                    ? t.premiumActiveUntil(t.formatDateLong(ent!.premiumUntil!))
+                    : t.upgradePremium,
+              ),
+              onTap: ent?.premium == true
+                  ? null
+                  : () => context.push(Routes.paywall),
+            ),
+          ),
           Card(
             child: ListTile(
               key: const Key('open-reminders'),

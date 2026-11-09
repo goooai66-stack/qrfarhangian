@@ -15,6 +15,14 @@ from fastapi import Depends, FastAPI, File, Header, Request, UploadFile
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from .billing.verifiers import (
+    FakePurchaseVerifier,
+    InvalidPurchase,
+    NotConfiguredPurchaseVerifier,
+    TrustingRewardVerifier,
+    VerifierUnavailable,
+    parse_product_days,
+)
 from .config import Settings
 from .db import Database
 from .foods import FoodDB
@@ -49,12 +57,33 @@ class DeviceIn(BaseModel):
     device_id: str
 
 
-def create_app(settings: Settings | None = None, provider: VisionProvider | None = None) -> FastAPI:
+class RewardIn(BaseModel):
+    reward_token: str
+
+
+class PurchaseIn(BaseModel):
+    store: str
+    product_id: str
+    purchase_token: str
+
+
+def create_app(
+    settings: Settings | None = None,
+    provider: VisionProvider | None = None,
+    purchase_verifier=None,
+) -> FastAPI:
     s = settings or Settings.from_env()
     foods = FoodDB.load(s.foods_path)
     db = Database(s.db_path, s.quota_timezone)
     vision = provider or build_provider(s)
     system_prompt = build_system_prompt(foods)
+    product_days = parse_product_days(s.product_days)
+    purchases = (
+        FakePurchaseVerifier(product_days) if s.purchase_verifier == "fake" else NotConfiguredPurchaseVerifier()
+    )
+    if purchase_verifier is not None:
+        purchases = purchase_verifier
+    rewards = TrustingRewardVerifier()
     scan_limiter = RateLimiter(s.scans_per_minute, 60)
     register_limiter = RateLimiter(s.device_registrations_per_hour_per_ip, 3600)
     if vision.name == "fake":
@@ -71,12 +100,27 @@ def create_app(settings: Settings | None = None, provider: VisionProvider | None
         )
 
     def limit_for(device) -> int:
-        return s.premium_scans_per_day if db.is_premium(device) else s.free_scans_per_day
+        if db.is_premium(device):
+            return s.premium_scans_per_day
+        return s.free_scans_per_day + db.usage_today(device["id"])[1]
 
     def quota_body(device) -> dict:
         limit = limit_for(device)
-        used = db.used_today(device["id"])
-        return {"used": used, "limit": limit, "remaining": max(0, limit - used), "day": db.today()}
+        used, rewards = db.usage_today(device["id"])
+        premium = db.is_premium(device)
+        return {
+            "used": used,
+            "limit": limit,
+            "remaining": max(0, limit - used),
+            "day": db.today(),
+            "premium": premium,
+            "premium_until": device["premium_until"] if premium else None,
+            "rewards_left": 0 if premium else max(0, s.rewards_per_day - rewards),
+        }
+
+    def fresh(device):
+        """ردیف دستگاه بعد از تغییر (مثلاً خرید)."""
+        return db.device_by_id(device["id"])
 
     async def current_device(authorization: str | None = Header(default=None)):
         if not authorization or not authorization.startswith("Bearer "):
@@ -170,6 +214,34 @@ def create_app(settings: Settings | None = None, provider: VisionProvider | None
             latency_ms=int((time.monotonic() - started) * 1000),
         )
         return {"scan_id": scan_id, **result, "quota": quota_body(device)}
+
+    @app.post("/quota/reward")
+    async def quota_reward(body: RewardIn, device=Depends(current_device)):
+        """ویدیوی جایزه‌دار کامل دیده شد ← ۱ اسکن بیشتر (حداکثر N در روز)."""
+        if db.is_premium(device):
+            raise ApiError(409, "premium_user", "premium users have no ads")
+        if not await rewards.verify(body.reward_token):
+            raise ApiError(400, "invalid_reward", "reward not verified")
+        if not db.try_add_reward(device["id"], s.rewards_per_day):
+            raise ApiError(429, "reward_limit", "daily reward limit reached")
+        return quota_body(device)
+
+    @app.post("/purchase/verify")
+    async def purchase_verify(body: PurchaseIn, device=Depends(current_device)):
+        """اعتبارسنجی خرید بازار/مایکت سمت سرور ← فعال‌سازی ویژه (بخش ۹-۳).
+        بازیابی خرید بعد از نصب دوباره هم از همین مسیر است."""
+        if body.store not in ("bazaar", "myket"):
+            raise ApiError(400, "invalid_store", "store must be bazaar or myket")
+        try:
+            p = await purchases.verify(body.store, body.product_id, body.purchase_token)
+        except InvalidPurchase:
+            raise ApiError(402, "invalid_purchase", "purchase could not be verified")
+        except VerifierUnavailable:
+            raise ApiError(503, "verification_unavailable", "purchase verification is not available")
+        if p.expires_at <= time.time():
+            raise ApiError(402, "purchase_expired", "subscription has expired")
+        db.apply_purchase(body.purchase_token, body.store, p.product_id, device["id"], p.expires_at)
+        return quota_body(fresh(device))
 
     @app.get("/admin/stats")
     async def admin_stats(days: int = 30, x_admin_token: str | None = Header(default=None)):

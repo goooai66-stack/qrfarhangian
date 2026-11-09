@@ -51,6 +51,12 @@ class Settings:
     max_image_bytes: int = 1_000_000
     cache_ttl_days: int = 7
 
+    # پاداش ویدیو: هر ویدیو = ۱ اسکن، حداکثر چند ویدیو در روز (بخش ۹-۱)
+    rewards_per_day: int = 5
+    # fake (توسعه) | stores (API فروشگاه‌ها؛ هنوز وصل نشده)
+    purchase_verifier: str = "fake"
+    product_days: str = "premium_monthly=30,premium_quarterly=90,premium_yearly=365"
+
     # خالی = /admin غیرفعال
     admin_token: str = ""
 
@@ -78,6 +84,11 @@ class Settings:
             max_image_bytes=_int("MAX_IMAGE_BYTES", 1_000_000),
             cache_ttl_days=_int("CACHE_TTL_DAYS", 7),
             admin_token=e.get("ADMIN_TOKEN", ""),
+            rewards_per_day=_int("REWARDS_PER_DAY", 5),
+            purchase_verifier=e.get("PURCHASE_VERIFIER", "fake"),
+            product_days=e.get(
+                "PRODUCT_DAYS", "premium_monthly=30,premium_quarterly=90,premium_yearly=365"
+            ),
         )
         if "FOODS_PATH" in e:
             s.foods_path = Path(e["FOODS_PATH"])

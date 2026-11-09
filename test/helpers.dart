@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:calorie_lens/app/app.dart';
 import 'package:calorie_lens/app/providers.dart';
 import 'package:calorie_lens/data/db/app_database.dart';
+import 'package:calorie_lens/core/ads/ad_service.dart';
+import 'package:calorie_lens/core/billing/billing_service.dart';
 import 'package:calorie_lens/core/platform/home_widget_service.dart';
+import 'package:calorie_lens/data/monetization/monetization.dart';
 import 'package:calorie_lens/core/platform/share_service.dart';
 import 'package:calorie_lens/core/platform/store_rating.dart';
 import 'package:calorie_lens/core/reminders/reminder_scheduler.dart';
@@ -25,6 +28,10 @@ Future<void> pumpApp(
   FakeHomeWidgetService? homeWidget,
   FakeShareService? share,
   FakeStoreRating? rating,
+  FakeAdService? ads,
+  FakeBillingService? billing,
+  FakeMonetizationApi? monetization,
+  bool overridesBilling = false,
 }) async {
   final foodRepo = foods ?? loadAppFoods();
   RatingPromptGate.checkedThisSession = false;
@@ -47,6 +54,14 @@ Future<void> pumpApp(
         ),
         shareServiceProvider.overrideWithValue(share ?? FakeShareService()),
         storeRatingProvider.overrideWithValue(rating ?? FakeStoreRating()),
+        adServiceProvider.overrideWithValue(ads ?? FakeAdService()),
+        if (billing != null || !overridesBilling)
+          billingServiceProvider.overrideWithValue(
+            billing ?? FakeBillingService(),
+          ),
+        monetizationApiProvider.overrideWithValue(
+          monetization ?? FakeMonetizationApi(),
+        ),
         ...overrides,
       ],
       child: const CalorieLensApp(),
