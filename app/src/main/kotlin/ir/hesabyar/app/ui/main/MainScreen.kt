@@ -1,6 +1,12 @@
 package ir.hesabyar.app.ui.main
 
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.speech.RecognizerIntent
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
@@ -17,6 +23,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -44,7 +51,8 @@ import ir.hesabyar.app.ui.dashboard.DashboardScreen
 import ir.hesabyar.app.ui.dashboard.DashboardViewModel
 import ir.hesabyar.app.ui.theme.Gold
 import ir.hesabyar.app.ui.theme.Navy
-import ir.hesabyar.app.ui.tools.DueDatesScreen
+import ir.hesabyar.app.ui.due.DueDatesScreen
+import ir.hesabyar.app.ui.due.DueDatesViewModel
 import ir.hesabyar.app.ui.tools.ReportsScreen
 import ir.hesabyar.app.ui.tools.ToolsScreen
 import ir.hesabyar.app.ui.transaction.AddTransactionSheet
@@ -65,13 +73,18 @@ enum class Tab(val label: String, val icon: ImageVector) {
 private const val EXIT_WINDOW_MS = 2_000L
 
 @Composable
-fun MainScreen(onExit: () -> Unit) {
+fun MainScreen(requestedTab: Tab?, onTabRequestHandled: () -> Unit, onExit: () -> Unit) {
     val context = LocalContext.current
     val container = context.appContainer
     var tab by rememberSaveable { mutableStateOf(Tab.DASHBOARD) }
     var addKind by remember { mutableStateOf<DraftKind?>(null) }
     var askVoice by remember { mutableStateOf(false) }
     var lastBack by remember { mutableLongStateOf(0L) }
+
+    // Deep link from a reminder notification → open that tab.
+    LaunchedEffect(requestedTab) {
+        if (requestedTab != null) { tab = requestedTab; onTabRequestHandled() }
+    }
 
     // ---- Back button: sheets/dialogs consume it first (own windows). Then: any tab → dashboard;
     // dashboard → «press again to exit». The app never closes on a single accidental press.
@@ -97,8 +110,30 @@ fun MainScreen(onExit: () -> Unit) {
     val dashboardVm: DashboardViewModel = viewModel(factory = AppViewModels.Factory)
     val addVm: AddTransactionViewModel = viewModel(factory = AppViewModels.Factory)
     val txVm: TransactionsViewModel = viewModel(factory = AppViewModels.Factory)
+    val dueVm: DueDatesViewModel = viewModel(factory = AppViewModels.Factory)
     // start() resets the form synchronously, before the sheet's first frame.
     val openAdd: (DraftKind) -> Unit = { kind -> addVm.start(kind); addKind = kind }
+
+    // ---- Voice: platform speech recognizer (fa-IR) → VoiceTransactionParser → pre-filled form.
+    val speech = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+        if (result.resultCode == Activity.RESULT_OK && !text.isNullOrBlank()) {
+            addVm.start(DraftKind.EXPENSE, voiceTranscript = text)
+            addKind = DraftKind.EXPENSE
+        }
+    }
+    val startVoice: () -> Unit = {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "fa-IR")
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "fa-IR")
+            .putExtra(RecognizerIntent.EXTRA_PROMPT, "مثلاً: «پانصد هزار تومان خرید میوه از کارت ملت»")
+        try {
+            speech.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, "سرویس تشخیص گفتار روی این گوشی فعال نیست", Toast.LENGTH_LONG).show()
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -138,9 +173,7 @@ fun MainScreen(onExit: () -> Unit) {
                         onSelectLedger = dashboardVm::selectLedger,
                         onAdd = openAdd,
                         onVoice = {
-                            if (container.ads.isUnlocked(RewardedFeature.VOICE_ASSISTANT)) {
-                                Toast.makeText(context, "دستیار صوتی فعال است (پیاده‌سازی در گام ۲)", Toast.LENGTH_SHORT).show()
-                            } else askVoice = true
+                            if (container.ads.isUnlocked(RewardedFeature.VOICE_ASSISTANT)) startVoice() else askVoice = true
                         },
                         onConfirmSms = { id, cat -> dashboardVm.confirmSms(id, cat) },
                         onDismissSms = { dashboardVm.dismissSms(it) },
@@ -152,7 +185,7 @@ fun MainScreen(onExit: () -> Unit) {
                 )
             }
             Tab.TRANSACTIONS -> TransactionsScreen(txVm, padding)
-            Tab.DUE -> DueDatesScreen(padding)
+            Tab.DUE -> DueDatesScreen(dueVm, padding)
             Tab.TOOLS -> ToolsScreen(padding)
             Tab.REPORTS -> ReportsScreen(padding)
         }
@@ -169,7 +202,10 @@ fun MainScreen(onExit: () -> Unit) {
                 askVoice = false
                 context.findActivity()?.let { activity ->
                     container.ads.watchToUnlock(activity, RewardedFeature.VOICE_ASSISTANT, AppSurface.DASHBOARD) { ok ->
-                        if (ok) Toast.makeText(context, "دستیار صوتی برای ۲۴ ساعت فعال شد", Toast.LENGTH_SHORT).show()
+                        if (ok) {
+                            Toast.makeText(context, "دستیار صوتی برای ۲۴ ساعت فعال شد", Toast.LENGTH_SHORT).show()
+                            startVoice()
+                        }
                     }
                 }
             },

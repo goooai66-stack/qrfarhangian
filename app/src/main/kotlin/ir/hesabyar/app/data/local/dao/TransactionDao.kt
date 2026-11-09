@@ -49,6 +49,37 @@ interface TransactionDao {
     )
     fun observeRows(ledgerId: Long, query: String, limit: Int): Flow<List<TransactionRow>>
 
+    /**
+     * Advanced search. Every filter is optional through a sentinel: empty text, full time /
+     * amount range, or the `all…` flag for list filters (Room cannot bind an "optional IN").
+     */
+    @Query(
+        """
+        SELECT t.*, c.name AS category_name, c.icon AS category_icon, c.colorArgb AS category_color,
+               a.name AS account_name,
+               (SELECT a2.name FROM transactions t2 JOIN accounts a2 ON a2.id = t2.accountId
+                 WHERE t.transferGroupId IS NOT NULL AND t2.transferGroupId = t.transferGroupId AND t2.id != t.id
+                 LIMIT 1) AS counter_account_name
+        FROM transactions t
+        JOIN accounts a ON a.id = t.accountId
+        LEFT JOIN categories c ON c.id = t.categoryId
+        WHERE t.ledgerId = :ledgerId AND t.type != 'TRANSFER_IN'
+          AND (:query = '' OR t.note LIKE '%' || :query || '%' OR c.name LIKE '%' || :query || '%' OR a.name LIKE '%' || :query || '%')
+          AND t.occurredAt >= :fromMillis AND t.occurredAt < :toMillis
+          AND t.amountRial >= :minRial AND t.amountRial <= :maxRial
+          AND (:allTypes = 1 OR t.type IN (:types))
+          AND (:allCategories = 1 OR t.categoryId IN (:categoryIds))
+          AND (:allAccounts = 1 OR t.accountId IN (:accountIds))
+        ORDER BY t.occurredAt DESC, t.id DESC
+        LIMIT :limit
+        """,
+    )
+    fun observeFiltered(
+        ledgerId: Long, query: String, fromMillis: Long, toMillis: Long, minRial: Long, maxRial: Long,
+        allTypes: Boolean, types: List<String>, allCategories: Boolean, categoryIds: List<Long>,
+        allAccounts: Boolean, accountIds: List<Long>, limit: Int,
+    ): Flow<List<TransactionRow>>
+
     @Query(
         """
         SELECT COALESCE(SUM(amountRial), 0) FROM transactions

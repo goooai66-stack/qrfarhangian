@@ -14,7 +14,11 @@ import ir.hesabyar.app.data.repository.TransactionRepository
 import ir.hesabyar.app.sms.SmsInboxImporter
 import ir.hesabyar.app.sms.SmsIngestor
 import ir.hesabyar.app.sms.SmsNotifier
+import ir.hesabyar.app.reminders.ReminderEngine
+import ir.hesabyar.app.reminders.ReminderNotifier
+import ir.hesabyar.app.reminders.ReminderScheduler
 import ir.hesabyar.app.usecase.ConfirmBankSmsUseCase
+import ir.hesabyar.app.usecase.DueUseCases
 import ir.hesabyar.domain.sms.BankSmsParser
 import ir.hesabyar.domain.sms.SelfTransferDetector
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +33,10 @@ class HesabyarApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
-        container.appScope.launch { DatabaseSeeder(container.db).seedIfEmpty() }
+        container.appScope.launch {
+            DatabaseSeeder(container.db).seedIfEmpty()
+            container.reminderScheduler.scheduleNext() // idempotent: (re)arms the one daily alarm
+        }
     }
 }
 
@@ -52,6 +59,11 @@ class AppContainer(context: Context) {
     val smsIngestor by lazy { SmsIngestor(db, BankSmsParser(), SelfTransferDetector()) }
     val smsImporter by lazy { SmsInboxImporter(app, smsIngestor) }
     val smsNotifier by lazy { SmsNotifier(app) }
+
+    val reminderNotifier by lazy { ReminderNotifier(app) }
+    val reminderEngine by lazy { ReminderEngine(db, prefs, reminderNotifier) }
+    val reminderScheduler by lazy { ReminderScheduler(app) { prefs.reminderHour } }
+    val dues by lazy { DueUseCases(db, transactions) { reminderEngine.runCheck() } }
 
     val ads by lazy {
         AdsController(PolicedAdProvider(if (BuildConfig.DEBUG) FakeAdProvider() else NoAdProvider), prefs)

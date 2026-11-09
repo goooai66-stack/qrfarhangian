@@ -38,6 +38,16 @@ class TransactionRepository(private val db: AppDatabase) {
     fun observeRows(ledgerId: Long, query: String = "", limit: Int = 500): Flow<List<TransactionRow>> =
         txDao.observeRows(ledgerId, query.trim(), limit)
 
+    fun observeFiltered(ledgerId: Long, f: TransactionFilter, limit: Int = 2_000): Flow<List<TransactionRow>> =
+        txDao.observeFiltered(
+            ledgerId = ledgerId, query = f.query.trim(), fromMillis = f.fromMillis, toMillis = f.toMillisExclusive,
+            minRial = f.minRial, maxRial = f.maxRial,
+            allTypes = f.kinds.isEmpty(), types = f.kinds.flatMap { k -> k.types.map { it.name } },
+            allCategories = f.categoryIds.isEmpty(), categoryIds = f.categoryIds.toList(),
+            allAccounts = f.accountIds.isEmpty(), accountIds = f.accountIds.toList(),
+            limit = limit,
+        )
+
     /** Income/expense of the current Jalali month (transfers excluded by construction). */
     fun observeMonthTotals(ledgerId: Long, nowMillis: Long = System.currentTimeMillis()): Flow<LedgerMath.PeriodTotals> {
         val today = JalaliDate.fromEpochMillis(nowMillis)

@@ -72,17 +72,3 @@ fun ReportsScreen(contentPadding: PaddingValues) {
         )
     }
 }
-
-@Composable
-fun DueDatesScreen(contentPadding: PaddingValues) {
-    Column(
-        Modifier.fillMaxSize().statusBarsPadding().padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = contentPadding.calculateBottomPadding()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text("سررسیدها", style = MaterialTheme.typography.titleLarge)
-        AppCard {
-            Text("تقویم شمسی چک‌های صیادی، اقساط و طلب و بدهی", style = MaterialTheme.typography.titleSmall)
-            Text("جدول‌های دیتابیس آماده است؛ صفحه و یادآورها در گام ۲.", style = MaterialTheme.typography.bodySmall, color = AppTheme.money.muted)
-        }
-    }
-}

@@ -25,6 +25,22 @@ class AppPreferences(context: Context) {
         get() = sp.getBoolean(KEY_ONBOARDING, false)
         set(v) { sp.edit().putBoolean(KEY_ONBOARDING, v).apply() }
 
+    /** Hour (Tehran) of the single daily due-date check. */
+    var reminderHour: Int
+        get() = sp.getInt(KEY_REMINDER_HOUR, 9)
+        set(v) { sp.edit().putInt(KEY_REMINDER_HOUR, v.coerceIn(0, 23)).apply() }
+
+    /**
+     * Reminder de-duplication: "epochDay|key" entries. A reminder fires once per item, due date
+     * and offset, no matter how often the check runs (alarm, boot, after editing a cheque).
+     */
+    fun wasNotified(key: String): Boolean = sp.getStringSet(KEY_NOTIFIED, emptySet())!!.any { it.substringAfter('|') == key }
+
+    fun markNotified(key: String, todayEpochDay: Long) {
+        val keep = sp.getStringSet(KEY_NOTIFIED, emptySet())!!.filter { (it.substringBefore('|').toLongOrNull() ?: 0) >= todayEpochDay - 7 }
+        sp.edit().putStringSet(KEY_NOTIFIED, (keep + "$todayEpochDay|$key").toSet()).apply()
+    }
+
     private val _entitlements = MutableStateFlow(readEntitlements())
     val entitlements: StateFlow<Entitlements> = _entitlements.asStateFlow()
 
@@ -55,6 +71,8 @@ class AppPreferences(context: Context) {
     private companion object {
         const val KEY_LEDGER = "active_ledger"
         const val KEY_ONBOARDING = "onboarding_done"
+        const val KEY_REMINDER_HOUR = "reminder_hour"
+        const val KEY_NOTIFIED = "reminders_notified"
         const val KEY_ENT_EXPIRES = "ent_expires"
         const val KEY_ENT_CREDITS = "ent_credits"
         const val KEY_ENT_SLOTS = "ent_slots"

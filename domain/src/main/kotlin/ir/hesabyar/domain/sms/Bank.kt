@@ -54,16 +54,34 @@ enum class Bank(val persianName: String, vararg val nameKeywords: String) {
             return UNKNOWN
         }
 
+        /**
+         * Every bank named in [text] (normalized, lowercase), ordered by first position.
+         * Used by voice input: «از ملت به بلو» → [MELLAT, BLU].
+         */
+        fun mentions(text: String): List<Bank> {
+            val lower = text.lowercase()
+            return entries.asSequence()
+                .filter { it != UNKNOWN }
+                .mapNotNull { bank ->
+                    bank.nameKeywords.map { indexOfWord(lower, it.lowercase()) }.filter { it >= 0 }.minOrNull()?.let { it to bank }
+                }
+                .sortedBy { it.first }
+                .map { it.second }
+                .toList()
+        }
+
         /** Whole-word contains: avoids matching "ملت" inside an unrelated longer word. */
-        private fun containsWord(haystack: String, word: String): Boolean {
+        private fun containsWord(haystack: String, word: String): Boolean = indexOfWord(haystack, word) >= 0
+
+        internal fun indexOfWord(haystack: String, word: String): Int {
             var from = 0
             while (true) {
                 val idx = haystack.indexOf(word, from)
-                if (idx < 0) return false
+                if (idx < 0) return -1
                 val before = if (idx == 0) ' ' else haystack[idx - 1]
                 val afterIdx = idx + word.length
                 val after = if (afterIdx >= haystack.length) ' ' else haystack[afterIdx]
-                if (!before.isLetter() && !after.isLetter()) return true
+                if (!before.isLetter() && !after.isLetter()) return idx
                 from = idx + 1
             }
         }

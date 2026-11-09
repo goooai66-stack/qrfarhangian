@@ -83,6 +83,13 @@ fun AddTransactionSheet(vm: AddTransactionViewModel, onDismiss: () -> Unit) {
             Column(
                 Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             ) {
+                s.voiceTranscript?.let {
+                    Text(
+                        "🎙 «$it» — موارد را بررسی و ثبت کنید",
+                        style = MaterialTheme.typography.bodySmall, color = AppTheme.money.gold,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
                 KindSelector(s.kind, vm::setKind)
                 Spacer(Modifier.height(16.dp))
 
