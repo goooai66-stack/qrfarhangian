@@ -28,7 +28,16 @@ jobs:
         run: ./gradlew :domain:test --no-daemon --stacktrace
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew :app:assembleDebug --no-daemon 2>&1 | tee build.log
+
+      - name: Compiler errors (summary)
+        if: failure()
+        shell: bash
+        run: |
+          grep -E "^e: |error:|What went wrong" -A4 build.log | grep -v "^--$" | head -300 || true
 
       - name: Name the APK
         run: |
