@@ -40,7 +40,36 @@ docker run --env-file server/.env -p 8000:8000 -v cl-data:/data calorielens-api
 
 افزودن ارائه‌دهنده‌ی جدید: یک کلاس با متد `recognize` در `app/providers/` + یک خط در `build_provider`.
 
-**پیش از انتخاب نهایی (بخش ۸-۵):** روی ۵۰ عکس غذای ایرانی مقایسه کنید (دقت، زمان، هزینه از `/admin/stats`).
+### OpenRouter
+
+```env
+VISION_PROVIDER=openai_compatible
+OPENAI_COMPAT_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_COMPAT_API_KEY=...            # فقط روی سرور
+OPENAI_COMPAT_MODEL=...              # مدلی با ورودی تصویر از openrouter.ai/models
+OPENAI_COMPAT_REFERER=https://...    # اختیاری
+OPENAI_COMPAT_TITLE=CalorieLens      # اختیاری
+PRICE_INPUT_PER_MTOK=...             # از صفحه‌ی همان مدل
+PRICE_OUTPUT_PER_MTOK=...
+```
+
+اگر مدلی `json_schema` را نپذیرد، آداپتر خودکار به `json_object` برمی‌گردد (اسکیما در پرامپت)؛
+خروجی در هر حال سخت‌گیرانه بررسی می‌شود.
+
+### انتخاب مدل: مقایسه روی عکس واقعی (بخش ۸-۵)
+
+۱۰ تا ۵۰ عکس واقعی غذای ایرانی را در یک پوشه بگذارید و چند مدل را مقایسه کنید:
+
+```bash
+pip install -r requirements-dev.txt
+python -m tools.eval_photos --photos ./photos \
+    --models "model-a,model-b,model-c" \
+    --prices "model-a=0.10:0.40,model-b=1.00:4.00,model-c=3:15" --out ./eval
+```
+
+خروجی `eval/results.md`: جدول خلاصه (موفق، JSON نامعتبر، آیتم تطبیق‌نخورده، زمان میانگین و p90،
+درصد زیر ۸ ثانیه، هزینه‌ی هر اسکن) و جدول جزئیات با ستون «درست؟» برای بررسی چشمی.
+ارزان‌ترین مدلی را انتخاب کنید که دقتش قابل قبول است. سهمیه و دیتابیس سرور درگیر نمی‌شوند.
 
 ## API
 

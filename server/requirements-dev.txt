@@ -1,2 +1,3 @@
 -r requirements.txt
 pytest==9.2.0
+pillow==13.0.0           # فقط برای tools/eval_photos.py (کوچک کردن عکس‌های گوشی)

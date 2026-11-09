@@ -30,6 +30,9 @@ class Settings:
     openai_compat_base_url: str = ""
     openai_compat_api_key: str = ""
     openai_compat_model: str = ""
+    # هدرهای اختیاری OpenRouter
+    openai_compat_referer: str = ""
+    openai_compat_title: str = "CalorieLens"
 
     # قیمت هر میلیون توکن (دلار) برای لاگ هزینه؛ ۰ = نامعلوم
     price_input_per_mtok: float = 0.0
@@ -61,6 +64,8 @@ class Settings:
             openai_compat_base_url=e.get("OPENAI_COMPAT_BASE_URL", ""),
             openai_compat_api_key=e.get("OPENAI_COMPAT_API_KEY", ""),
             openai_compat_model=e.get("OPENAI_COMPAT_MODEL", ""),
+            openai_compat_referer=e.get("OPENAI_COMPAT_REFERER", ""),
+            openai_compat_title=e.get("OPENAI_COMPAT_TITLE", "CalorieLens"),
             price_input_per_mtok=_float("PRICE_INPUT_PER_MTOK", 0.0),
             price_output_per_mtok=_float("PRICE_OUTPUT_PER_MTOK", 0.0),
             provider_timeout_seconds=_float("PROVIDER_TIMEOUT_SECONDS", 20.0),

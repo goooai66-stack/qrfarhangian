@@ -123,3 +123,41 @@ def test_openai_compatible_errors(status, exc):
 def test_openai_compatible_requires_config():
     with pytest.raises(ValueError):
         OpenAICompatibleProvider("", "", "", 5)
+
+
+def test_openai_compatible_falls_back_to_json_object_once():
+    bodies = []
+
+    def handler(req: httpx.Request):
+        body = json.loads(req.content)
+        bodies.append(body)
+        if body["response_format"]["type"] == "json_schema":
+            return httpx.Response(400, json={"error": {"message": "response_format not supported"}})
+        return httpx.Response(200, json={"choices": [{"message": {"content": RESULT}}]})
+
+    p = openai_with(handler)
+    r = run(p.recognize(IMG, "image/jpeg", "SYS", "USER", OUTPUT_SCHEMA))
+    assert r.text == RESULT
+    assert [b["response_format"]["type"] for b in bodies] == ["json_schema", "json_object"]
+    assert "اسکیمای JSON خروجی" in bodies[1]["messages"][0]["content"]
+    # دفعه‌ی بعد مستقیم json_object.
+    run(p.recognize(IMG, "image/jpeg", "SYS", "USER", OUTPUT_SCHEMA))
+    assert bodies[2]["response_format"]["type"] == "json_object"
+
+
+def test_openai_compatible_extra_headers():
+    seen = {}
+
+    def handler(req: httpx.Request):
+        seen.update(req.headers)
+        return httpx.Response(200, json={"choices": [{"message": {"content": RESULT}}]})
+
+    p = OpenAICompatibleProvider(
+        "https://openrouter.ai/api/v1", "k", "m", 5,
+        extra_headers={"HTTP-Referer": "https://calorielens.ir", "X-Title": "CalorieLens", "X-Empty": ""},
+    )
+    p._client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    run(p.recognize(IMG, "image/jpeg", "S", "U", OUTPUT_SCHEMA))
+    assert seen["http-referer"] == "https://calorielens.ir"
+    assert seen["x-title"] == "CalorieLens"
+    assert "x-empty" not in seen

@@ -24,5 +24,9 @@ def build_provider(s: Settings) -> VisionProvider:
                 s.openai_compat_api_key,
                 s.openai_compat_model,
                 s.provider_timeout_seconds,
+                extra_headers={
+                    "HTTP-Referer": s.openai_compat_referer,
+                    "X-Title": s.openai_compat_title,
+                },
             )
     raise ValueError(f"VISION_PROVIDER ناشناخته: {s.vision_provider}")
