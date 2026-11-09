@@ -11,8 +11,6 @@ export '../../core/nutrition/nutrition_types.dart';
 
 // enumها به‌صورت متن (نام) ذخیره می‌شوند تا تغییر ترتیبشان داده را خراب نکند.
 
-enum MealType { breakfast, lunch, dinner, snack }
-
 enum LogSource { photo, search, voice, text }
 
 enum PendingScanStatus { queued, processing, failed, done }
@@ -42,6 +40,8 @@ class Goals extends Table {
 }
 
 /// مقادیر تغذیه‌ای در لحظه‌ی ثبت snapshot می‌شوند.
+/// null یعنی داده‌ی غذا (یا وزن واحد) هنوز از منبع پر نشده است (بخش ۷-۱)؛
+/// هرگز به‌جای null عدد ساختگی (مثل صفر) ذخیره نمی‌شود. (طرح نسخه‌ی ۲)
 class FoodLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get date => text()(); // YYYY-MM-DD محلی
@@ -50,11 +50,11 @@ class FoodLogs extends Table {
   TextColumn get customName => text().nullable()();
   RealColumn get quantity => real()();
   TextColumn get unit => text()();
-  RealColumn get grams => real()();
-  RealColumn get kcal => real()();
-  RealColumn get protein => real()();
-  RealColumn get carbs => real()();
-  RealColumn get fat => real()();
+  RealColumn get grams => real().nullable()();
+  RealColumn get kcal => real().nullable()();
+  RealColumn get protein => real().nullable()();
+  RealColumn get carbs => real().nullable()();
+  RealColumn get fat => real().nullable()();
   TextColumn get source => textEnum<LogSource>()();
   TextColumn get photoPath => text().nullable()();
   TextColumn get scanId => text().nullable()();

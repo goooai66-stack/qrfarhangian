@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:calorie_lens/app/app.dart';
 import 'package:calorie_lens/app/providers.dart';
 import 'package:calorie_lens/data/db/app_database.dart';
+import 'package:calorie_lens/data/foods/food_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 
 /// اپ کامل با دیتابیس تست.
@@ -10,7 +14,10 @@ Future<void> pumpApp(
   WidgetTester tester,
   AppDatabase db, {
   required bool onboardingDone,
+  List<Override> overrides = const [],
+  FoodRepository? foods,
 }) async {
+  final foodRepo = foods ?? loadAppFoods();
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.5;
   addTearDown(tester.view.reset);
@@ -20,6 +27,8 @@ Future<void> pumpApp(
       overrides: [
         databaseProvider.overrideWithValue(db),
         initialOnboardingDoneProvider.overrideWithValue(onboardingDone),
+        foodRepositoryProvider.overrideWith((ref) => foodRepo),
+        ...overrides,
       ],
       child: const CalorieLensApp(),
     ),
@@ -42,3 +51,8 @@ Future<void> disposeApp(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump(Duration.zero);
 }
+
+/// پایگاه غذای واقعی اپ (assets/data/foods.json) از روی دیسک.
+FoodRepository loadAppFoods() => FoodRepository.fromJsonString(
+  File(FoodRepository.assetPath).readAsStringSync(),
+);

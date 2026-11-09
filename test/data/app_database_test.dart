@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calorie_lens/data/db/app_database.dart';
 import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
@@ -9,8 +11,8 @@ void main() {
   setUp(() => db = AppDatabase(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  test('نسخه‌ی طرح ۱ است و همه‌ی جدول‌ها ساخته می‌شوند', () async {
-    expect(db.schemaVersion, 1);
+  test('نسخه‌ی طرح ۲ است و همه‌ی جدول‌ها ساخته می‌شوند', () async {
+    expect(db.schemaVersion, 2);
     final rows = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();
@@ -53,11 +55,8 @@ void main() {
             mealType: MealType.lunch,
             quantity: 1,
             unit: 'gram',
-            grams: 100,
-            kcal: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
+            grams: const Value(100),
+            kcal: const Value(null),
             source: LogSource.search,
             createdAt: DateTime.utc(2026, 11, 9),
             customName: const Value('تست'),
@@ -66,5 +65,64 @@ void main() {
     final row = await db.select(db.foodLogs).getSingle();
     expect(row.mealType, MealType.lunch);
     expect(row.source, LogSource.search);
+    // داده‌ی ناقص null می‌ماند، صفر نمی‌شود.
+    expect(row.kcal, isNull);
+  });
+
+  test('مهاجرت v1 ← v2: داده حفظ و ستون‌ها nullable می‌شوند', () async {
+    await db.close();
+    // ۱) پایگاه کامل روی دیسک بساز، ۲) جدول food_logs را به طرح دقیق
+    // نسخه‌ی ۱ (از sqlite_master نسخه‌ی ۱) برگردان و user_version=1 کن.
+    final dir = Directory.systemTemp.createTempSync('cl_mig');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File('${dir.path}/db.sqlite');
+    final fresh = AppDatabase(NativeDatabase(file));
+    await fresh.customSelect('SELECT 1').get();
+    await fresh.close();
+
+    var downgraded = false;
+    final v1 = AppDatabase(
+      NativeDatabase(
+        file,
+        setup: (raw) {
+          if (downgraded) return;
+          downgraded = true;
+          raw.execute('DROP TABLE food_logs');
+          raw.execute(
+            'CREATE TABLE "food_logs" ("id" INTEGER NOT NULL PRIMARY KEY '
+            'AUTOINCREMENT, "date" TEXT NOT NULL, "meal_type" TEXT NOT NULL, '
+            '"food_id" TEXT NULL, "custom_name" TEXT NULL, "quantity" REAL '
+            'NOT NULL, "unit" TEXT NOT NULL, "grams" REAL NOT NULL, "kcal" '
+            'REAL NOT NULL, "protein" REAL NOT NULL, "carbs" REAL NOT NULL, '
+            '"fat" REAL NOT NULL, "source" TEXT NOT NULL, "photo_path" TEXT '
+            'NULL, "scan_id" TEXT NULL, "created_at" INTEGER NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO food_logs (date, meal_type, food_id, quantity, unit, "
+            "grams, kcal, protein, carbs, fat, source, created_at) VALUES "
+            "('2026-11-01', 'lunch', 'chelo', 1, 'kafgir', 120, 200, 4, 40, "
+            "1, 'search', 0)",
+          );
+          raw.execute('PRAGMA user_version = 1');
+        },
+      ),
+    );
+    db = v1;
+    final rows = await db.select(db.foodLogs).get();
+    expect(rows.single.kcal, 200);
+    expect(rows.single.foodId, 'chelo');
+    await db
+        .into(db.foodLogs)
+        .insert(
+          FoodLogsCompanion.insert(
+            date: '2026-11-02',
+            mealType: MealType.snack,
+            quantity: 1,
+            unit: 'piece',
+            source: LogSource.search,
+            createdAt: DateTime.utc(2026),
+          ),
+        );
+    expect((await db.select(db.foodLogs).get()).last.grams, isNull);
   });
 }

@@ -35,6 +35,23 @@ class ProfileRepository {
             ..limit(1))
           .watchSingleOrNull();
 
+  /// هدف معتبر در روز [day]: آخرین هدفی که تا پایان آن روز شروع شده؛
+  /// اگر روز قبل از اولین هدف است، اولین هدف.
+  Stream<Goal?> watchGoalOn(DateTime day) {
+    final end = DateTime(day.year, day.month, day.day + 1);
+    final q = _db.select(_db.goals)
+      ..orderBy([
+        (t) => OrderingTerm.desc(t.validFrom),
+        (t) => OrderingTerm.desc(t.id),
+      ]);
+    return q.watch().map((goals) {
+      for (final g in goals) {
+        if (g.validFrom.isBefore(end)) return g;
+      }
+      return goals.isEmpty ? null : goals.last;
+    });
+  }
+
   /// وزن فعلی = آخرین ثبت وزن؛ اگر نبود، وزن شروع.
   Stream<double?> watchCurrentWeight() {
     final q = _db.select(_db.weightLogs)

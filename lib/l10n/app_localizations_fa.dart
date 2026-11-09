@@ -25,9 +25,6 @@ class AppLocalizationsFa extends AppLocalizations {
   String get tabProfile => 'پروفایل';
 
   @override
-  String get todayPlaceholder => 'داشبورد روزانه در مرحله‌ی ۲ ساخته می‌شود.';
-
-  @override
   String get progressPlaceholder =>
       'ثبت وزن و نمودارها در مرحله‌ی ۴ ساخته می‌شود.';
 
@@ -357,4 +354,187 @@ class AppLocalizationsFa extends AppLocalizations {
   String editPreview(String kcal) {
     return 'کالری روزانه با این تغییرات: $kcal';
   }
+
+  @override
+  String get goToToday => 'برو به امروز';
+
+  @override
+  String get prevWeek => 'هفته‌ی قبل';
+
+  @override
+  String get nextWeek => 'هفته‌ی بعد';
+
+  @override
+  String get kcalConsumed => 'خورده‌شده';
+
+  @override
+  String get kcalRemaining => 'باقی‌مانده';
+
+  @override
+  String get kcalGoal => 'هدف';
+
+  @override
+  String kcalValue(String kcal) {
+    return '$kcal کالری';
+  }
+
+  @override
+  String kcalOver(String kcal) {
+    return 'امروز $kcal کالری بیشتر شد؛ فردا جبرانش آسان است.';
+  }
+
+  @override
+  String incompleteItems(String count) {
+    return '$count مورد بدون داده‌ی کامل؛ جمع‌ها تقریبی‌اند.';
+  }
+
+  @override
+  String get noGoal => 'هنوز هدفی تعیین نشده است.';
+
+  @override
+  String get mealBreakfast => 'صبحانه';
+
+  @override
+  String get mealLunch => 'ناهار';
+
+  @override
+  String get mealDinner => 'شام';
+
+  @override
+  String get mealSnack => 'میان‌وعده';
+
+  @override
+  String get mealEmpty => 'هنوز چیزی ثبت نشده';
+
+  @override
+  String addToMeal(String meal) {
+    return 'افزودن به $meal';
+  }
+
+  @override
+  String get water => 'آب';
+
+  @override
+  String waterGlasses(String count) {
+    return '$count لیوان';
+  }
+
+  @override
+  String get waterAdd => 'یک لیوان بیشتر';
+
+  @override
+  String get waterRemove => 'یک لیوان کمتر';
+
+  @override
+  String get searchHint => 'جستجوی غذا… (مثلاً قورمه‌سبزی)';
+
+  @override
+  String get searchNoResult => 'غذایی با این نام پیدا نشد.';
+
+  @override
+  String get sectionFavorites => 'علاقه‌مندی‌ها';
+
+  @override
+  String get sectionRecent => 'اخیر';
+
+  @override
+  String get sectionFrequent => 'پرتکرار';
+
+  @override
+  String get sectionAll => 'همه‌ی غذاها';
+
+  @override
+  String get dataIncomplete => 'داده ناقص';
+
+  @override
+  String get dataApprox => 'تقریبی';
+
+  @override
+  String get dataIncompleteHint =>
+      'ارزش غذایی این غذا هنوز از منبع معتبر وارد نشده است. ثبت می‌شود، ولی در جمع کالری حساب نمی‌شود.';
+
+  @override
+  String get unitWeightUnknown =>
+      'وزن این واحد هنوز اندازه‌گیری نشده است؛ «گرم» را انتخاب کن تا عدد دقیق ببینی.';
+
+  @override
+  String get quantity => 'مقدار';
+
+  @override
+  String get unit => 'واحد';
+
+  @override
+  String get meal => 'وعده';
+
+  @override
+  String logToMeal(String meal) {
+    return 'ثبت در $meal';
+  }
+
+  @override
+  String get logged => 'ثبت شد';
+
+  @override
+  String get deleteItem => 'حذف';
+
+  @override
+  String get deleteConfirm => 'این مورد حذف شود؟';
+
+  @override
+  String get deleted => 'حذف شد';
+
+  @override
+  String get favoriteAdd => 'افزودن به علاقه‌مندی‌ها';
+
+  @override
+  String get favoriteRemove => 'حذف از علاقه‌مندی‌ها';
+
+  @override
+  String get unknownFood => 'غذای ناشناخته';
+
+  @override
+  String get foodNotFound =>
+      'این غذا در پایگاه داده نیست؛ فقط می‌توانی حذفش کنی.';
+
+  @override
+  String get noValue => '—';
+
+  @override
+  String get enterQuantity => 'مقدار را وارد کن';
+
+  @override
+  String get increase => 'بیشتر';
+
+  @override
+  String get decrease => 'کمتر';
+
+  @override
+  String get uKafgir => 'کفگیر';
+
+  @override
+  String get uLadle => 'ملاقه';
+
+  @override
+  String get uPlate => 'بشقاب';
+
+  @override
+  String get uBowl => 'کاسه';
+
+  @override
+  String get uGlass => 'لیوان';
+
+  @override
+  String get uTablespoon => 'قاشق غذاخوری';
+
+  @override
+  String get uPalm => 'کف دست';
+
+  @override
+  String get uPiece => 'عدد';
+
+  @override
+  String get uGram => 'گرم';
+
+  @override
+  String get uSlice => 'برش';
 }

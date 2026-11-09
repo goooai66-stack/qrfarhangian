@@ -124,12 +124,6 @@ abstract class AppLocalizations {
   /// **'پروفایل'**
   String get tabProfile;
 
-  /// No description provided for @todayPlaceholder.
-  ///
-  /// In fa, this message translates to:
-  /// **'داشبورد روزانه در مرحله‌ی ۲ ساخته می‌شود.'**
-  String get todayPlaceholder;
-
   /// No description provided for @progressPlaceholder.
   ///
   /// In fa, this message translates to:
@@ -711,6 +705,342 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'کالری روزانه با این تغییرات: {kcal}'**
   String editPreview(String kcal);
+
+  /// No description provided for @goToToday.
+  ///
+  /// In fa, this message translates to:
+  /// **'برو به امروز'**
+  String get goToToday;
+
+  /// No description provided for @prevWeek.
+  ///
+  /// In fa, this message translates to:
+  /// **'هفته‌ی قبل'**
+  String get prevWeek;
+
+  /// No description provided for @nextWeek.
+  ///
+  /// In fa, this message translates to:
+  /// **'هفته‌ی بعد'**
+  String get nextWeek;
+
+  /// No description provided for @kcalConsumed.
+  ///
+  /// In fa, this message translates to:
+  /// **'خورده‌شده'**
+  String get kcalConsumed;
+
+  /// No description provided for @kcalRemaining.
+  ///
+  /// In fa, this message translates to:
+  /// **'باقی‌مانده'**
+  String get kcalRemaining;
+
+  /// No description provided for @kcalGoal.
+  ///
+  /// In fa, this message translates to:
+  /// **'هدف'**
+  String get kcalGoal;
+
+  /// No description provided for @kcalValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'{kcal} کالری'**
+  String kcalValue(String kcal);
+
+  /// No description provided for @kcalOver.
+  ///
+  /// In fa, this message translates to:
+  /// **'امروز {kcal} کالری بیشتر شد؛ فردا جبرانش آسان است.'**
+  String kcalOver(String kcal);
+
+  /// No description provided for @incompleteItems.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} مورد بدون داده‌ی کامل؛ جمع‌ها تقریبی‌اند.'**
+  String incompleteItems(String count);
+
+  /// No description provided for @noGoal.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز هدفی تعیین نشده است.'**
+  String get noGoal;
+
+  /// No description provided for @mealBreakfast.
+  ///
+  /// In fa, this message translates to:
+  /// **'صبحانه'**
+  String get mealBreakfast;
+
+  /// No description provided for @mealLunch.
+  ///
+  /// In fa, this message translates to:
+  /// **'ناهار'**
+  String get mealLunch;
+
+  /// No description provided for @mealDinner.
+  ///
+  /// In fa, this message translates to:
+  /// **'شام'**
+  String get mealDinner;
+
+  /// No description provided for @mealSnack.
+  ///
+  /// In fa, this message translates to:
+  /// **'میان‌وعده'**
+  String get mealSnack;
+
+  /// No description provided for @mealEmpty.
+  ///
+  /// In fa, this message translates to:
+  /// **'هنوز چیزی ثبت نشده'**
+  String get mealEmpty;
+
+  /// No description provided for @addToMeal.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن به {meal}'**
+  String addToMeal(String meal);
+
+  /// No description provided for @water.
+  ///
+  /// In fa, this message translates to:
+  /// **'آب'**
+  String get water;
+
+  /// No description provided for @waterGlasses.
+  ///
+  /// In fa, this message translates to:
+  /// **'{count} لیوان'**
+  String waterGlasses(String count);
+
+  /// No description provided for @waterAdd.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک لیوان بیشتر'**
+  String get waterAdd;
+
+  /// No description provided for @waterRemove.
+  ///
+  /// In fa, this message translates to:
+  /// **'یک لیوان کمتر'**
+  String get waterRemove;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'جستجوی غذا… (مثلاً قورمه‌سبزی)'**
+  String get searchHint;
+
+  /// No description provided for @searchNoResult.
+  ///
+  /// In fa, this message translates to:
+  /// **'غذایی با این نام پیدا نشد.'**
+  String get searchNoResult;
+
+  /// No description provided for @sectionFavorites.
+  ///
+  /// In fa, this message translates to:
+  /// **'علاقه‌مندی‌ها'**
+  String get sectionFavorites;
+
+  /// No description provided for @sectionRecent.
+  ///
+  /// In fa, this message translates to:
+  /// **'اخیر'**
+  String get sectionRecent;
+
+  /// No description provided for @sectionFrequent.
+  ///
+  /// In fa, this message translates to:
+  /// **'پرتکرار'**
+  String get sectionFrequent;
+
+  /// No description provided for @sectionAll.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه‌ی غذاها'**
+  String get sectionAll;
+
+  /// No description provided for @dataIncomplete.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده ناقص'**
+  String get dataIncomplete;
+
+  /// No description provided for @dataApprox.
+  ///
+  /// In fa, this message translates to:
+  /// **'تقریبی'**
+  String get dataApprox;
+
+  /// No description provided for @dataIncompleteHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارزش غذایی این غذا هنوز از منبع معتبر وارد نشده است. ثبت می‌شود، ولی در جمع کالری حساب نمی‌شود.'**
+  String get dataIncompleteHint;
+
+  /// No description provided for @unitWeightUnknown.
+  ///
+  /// In fa, this message translates to:
+  /// **'وزن این واحد هنوز اندازه‌گیری نشده است؛ «گرم» را انتخاب کن تا عدد دقیق ببینی.'**
+  String get unitWeightUnknown;
+
+  /// No description provided for @quantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقدار'**
+  String get quantity;
+
+  /// No description provided for @unit.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد'**
+  String get unit;
+
+  /// No description provided for @meal.
+  ///
+  /// In fa, this message translates to:
+  /// **'وعده'**
+  String get meal;
+
+  /// No description provided for @logToMeal.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت در {meal}'**
+  String logToMeal(String meal);
+
+  /// No description provided for @logged.
+  ///
+  /// In fa, this message translates to:
+  /// **'ثبت شد'**
+  String get logged;
+
+  /// No description provided for @deleteItem.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف'**
+  String get deleteItem;
+
+  /// No description provided for @deleteConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'این مورد حذف شود؟'**
+  String get deleteConfirm;
+
+  /// No description provided for @deleted.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف شد'**
+  String get deleted;
+
+  /// No description provided for @favoriteAdd.
+  ///
+  /// In fa, this message translates to:
+  /// **'افزودن به علاقه‌مندی‌ها'**
+  String get favoriteAdd;
+
+  /// No description provided for @favoriteRemove.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف از علاقه‌مندی‌ها'**
+  String get favoriteRemove;
+
+  /// No description provided for @unknownFood.
+  ///
+  /// In fa, this message translates to:
+  /// **'غذای ناشناخته'**
+  String get unknownFood;
+
+  /// No description provided for @foodNotFound.
+  ///
+  /// In fa, this message translates to:
+  /// **'این غذا در پایگاه داده نیست؛ فقط می‌توانی حذفش کنی.'**
+  String get foodNotFound;
+
+  /// No description provided for @noValue.
+  ///
+  /// In fa, this message translates to:
+  /// **'—'**
+  String get noValue;
+
+  /// No description provided for @enterQuantity.
+  ///
+  /// In fa, this message translates to:
+  /// **'مقدار را وارد کن'**
+  String get enterQuantity;
+
+  /// No description provided for @increase.
+  ///
+  /// In fa, this message translates to:
+  /// **'بیشتر'**
+  String get increase;
+
+  /// No description provided for @decrease.
+  ///
+  /// In fa, this message translates to:
+  /// **'کمتر'**
+  String get decrease;
+
+  /// No description provided for @uKafgir.
+  ///
+  /// In fa, this message translates to:
+  /// **'کفگیر'**
+  String get uKafgir;
+
+  /// No description provided for @uLadle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ملاقه'**
+  String get uLadle;
+
+  /// No description provided for @uPlate.
+  ///
+  /// In fa, this message translates to:
+  /// **'بشقاب'**
+  String get uPlate;
+
+  /// No description provided for @uBowl.
+  ///
+  /// In fa, this message translates to:
+  /// **'کاسه'**
+  String get uBowl;
+
+  /// No description provided for @uGlass.
+  ///
+  /// In fa, this message translates to:
+  /// **'لیوان'**
+  String get uGlass;
+
+  /// No description provided for @uTablespoon.
+  ///
+  /// In fa, this message translates to:
+  /// **'قاشق غذاخوری'**
+  String get uTablespoon;
+
+  /// No description provided for @uPalm.
+  ///
+  /// In fa, this message translates to:
+  /// **'کف دست'**
+  String get uPalm;
+
+  /// No description provided for @uPiece.
+  ///
+  /// In fa, this message translates to:
+  /// **'عدد'**
+  String get uPiece;
+
+  /// No description provided for @uGram.
+  ///
+  /// In fa, this message translates to:
+  /// **'گرم'**
+  String get uGram;
+
+  /// No description provided for @uSlice.
+  ///
+  /// In fa, this message translates to:
+  /// **'برش'**
+  String get uSlice;
 }
 
 class _AppLocalizationsDelegate

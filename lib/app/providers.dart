@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/ads/ad_service.dart';
 import '../core/billing/billing_service.dart';
 import '../core/recognition/food_recognizer.dart';
+import '../core/utils/jalali_date.dart';
 import '../data/db/app_database.dart';
+import '../data/foods/food_repository.dart';
+import '../data/logs/food_log_repository.dart';
 import '../data/profile/profile_repository.dart';
 
 /// دیتابیس محلی. در main با نمونه‌ی واقعی override می‌شود؛ در تست با حافظه.
@@ -80,4 +83,57 @@ final activeGoalProvider = StreamProvider<Goal?>(
 
 final currentWeightProvider = StreamProvider<double?>(
   (ref) => ref.watch(profileRepositoryProvider).watchCurrentWeight(),
+);
+
+// ---- پایگاه غذا و ثبت غذا (مرحله‌ی ۲) ----
+
+/// پایگاه غذا از assets؛ یک‌بار بارگذاری و نگه‌داری می‌شود.
+final foodRepositoryProvider = FutureProvider<FoodRepository>(
+  (ref) => FoodRepository.loadFromAssets(),
+);
+
+final foodLogRepositoryProvider = Provider<FoodLogRepository>(
+  (ref) => FoodLogRepository(ref.watch(databaseProvider)),
+);
+
+/// روز انتخاب‌شده در داشبورد (فقط تاریخ، ساعت ۰۰:۰۰ محلی).
+class SelectedDayNotifier extends Notifier<DateTime> {
+  @override
+  DateTime build() => dateOnly(DateTime.now());
+
+  void select(DateTime day) {
+    final d = dateOnly(day);
+    // روز آینده انتخاب نمی‌شود.
+    state = d.isAfter(dateOnly(DateTime.now())) ? dateOnly(DateTime.now()) : d;
+  }
+
+  void today() => state = dateOnly(DateTime.now());
+}
+
+final selectedDayProvider = NotifierProvider<SelectedDayNotifier, DateTime>(
+  SelectedDayNotifier.new,
+);
+
+final dayLogsProvider = StreamProvider.family<List<FoodLog>, DateTime>(
+  (ref, day) => ref.watch(foodLogRepositoryProvider).watchDay(dayKey(day)),
+);
+
+final goalOnProvider = StreamProvider.family<Goal?, DateTime>(
+  (ref, day) => ref.watch(profileRepositoryProvider).watchGoalOn(day),
+);
+
+final waterProvider = StreamProvider.family<int, DateTime>(
+  (ref, day) => ref.watch(foodLogRepositoryProvider).watchWater(dayKey(day)),
+);
+
+final foodFrequencyProvider = StreamProvider<Map<String, int>>(
+  (ref) => ref.watch(foodLogRepositoryProvider).watchFrequency(),
+);
+
+final recentFoodIdsProvider = StreamProvider<List<String>>(
+  (ref) => ref.watch(foodLogRepositoryProvider).watchRecentFoodIds(),
+);
+
+final favoriteFoodIdsProvider = StreamProvider<Set<String>>(
+  (ref) => ref.watch(foodLogRepositoryProvider).watchFavorites(),
 );

@@ -24,26 +24,37 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'calorie_lens'));
 
-  /// نسخه‌ی ۱. هر تغییر جدول = افزایش این عدد + یک گام در [migration].
+  /// هر تغییر جدول = افزایش این عدد + یک گام در [migration].
+  /// v2: ستون‌های grams/kcal/protein/carbs/fat در food_logs nullable شدند.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_food_logs_date ON food_logs (date)',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs (date)',
-      );
+      await _createIndexes();
     },
     onUpgrade: (m, from, to) async {
-      // مهاجرت‌های نسخه‌های بعد اینجا اضافه می‌شوند:
-      // if (from < 2) { ... }
+      if (from < 2) {
+        // تغییر nullability در SQLite = بازسازی جدول با حفظ داده.
+        await m.alterTable(TableMigration(foodLogs));
+        await _createIndexes();
+      }
+    },
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
     },
   );
+
+  Future<void> _createIndexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_food_logs_date ON food_logs (date)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs (date)',
+    );
+  }
 
   // ---- تنظیمات کلید-مقدار ----
 

@@ -63,3 +63,28 @@ String dayKey(DateTime date) {
   String two(int n) => n.toString().padLeft(2, '0');
   return '${l.year.toString().padLeft(4, '0')}-${two(l.month)}-${two(l.day)}';
 }
+
+/// فقط تاریخ (ساعت ۰۰:۰۰ محلی).
+DateTime dateOnly(DateTime d) {
+  final l = d.toLocal();
+  return DateTime(l.year, l.month, l.day);
+}
+
+/// «YYYY-MM-DD» ← DateTime محلی؛ برعکس [dayKey].
+DateTime parseDayKey(String key) {
+  final p = key.split('-').map(int.parse).toList();
+  return DateTime(p[0], p[1], p[2]);
+}
+
+/// حرف اول نام روز (ش، ی، د، س، چ، پ، ج).
+String shortWeekday(DateTime date) =>
+    persianWeekDays[weekdayIndexFromSaturday(date)].substring(0, 1);
+
+/// روز شمسی ماه (۱ تا ۳۱).
+int jalaliDay(DateTime date) => Jalali.fromDateTime(date.toLocal()).day;
+
+/// «۱۸ آبان» (بدون سال).
+String formatJalaliDayMonth(DateTime date) {
+  final j = Jalali.fromDateTime(date.toLocal());
+  return toPersianDigits('${j.day} ${jalaliMonthName(j.month)}');
+}

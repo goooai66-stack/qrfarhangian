@@ -1157,18 +1157,18 @@ class $FoodLogsTable extends FoodLogs with TableInfo<$FoodLogsTable, FoodLog> {
   late final GeneratedColumn<double> grams = GeneratedColumn<double>(
     'grams',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _kcalMeta = const VerificationMeta('kcal');
   @override
   late final GeneratedColumn<double> kcal = GeneratedColumn<double>(
     'kcal',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _proteinMeta = const VerificationMeta(
     'protein',
@@ -1177,27 +1177,27 @@ class $FoodLogsTable extends FoodLogs with TableInfo<$FoodLogsTable, FoodLog> {
   late final GeneratedColumn<double> protein = GeneratedColumn<double>(
     'protein',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _carbsMeta = const VerificationMeta('carbs');
   @override
   late final GeneratedColumn<double> carbs = GeneratedColumn<double>(
     'carbs',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _fatMeta = const VerificationMeta('fat');
   @override
   late final GeneratedColumn<double> fat = GeneratedColumn<double>(
     'fat',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   @override
   late final GeneratedColumnWithTypeConverter<LogSource, String> source =
@@ -1314,40 +1314,30 @@ class $FoodLogsTable extends FoodLogs with TableInfo<$FoodLogsTable, FoodLog> {
         _gramsMeta,
         grams.isAcceptableOrUnknown(data['grams']!, _gramsMeta),
       );
-    } else if (isInserting) {
-      context.missing(_gramsMeta);
     }
     if (data.containsKey('kcal')) {
       context.handle(
         _kcalMeta,
         kcal.isAcceptableOrUnknown(data['kcal']!, _kcalMeta),
       );
-    } else if (isInserting) {
-      context.missing(_kcalMeta);
     }
     if (data.containsKey('protein')) {
       context.handle(
         _proteinMeta,
         protein.isAcceptableOrUnknown(data['protein']!, _proteinMeta),
       );
-    } else if (isInserting) {
-      context.missing(_proteinMeta);
     }
     if (data.containsKey('carbs')) {
       context.handle(
         _carbsMeta,
         carbs.isAcceptableOrUnknown(data['carbs']!, _carbsMeta),
       );
-    } else if (isInserting) {
-      context.missing(_carbsMeta);
     }
     if (data.containsKey('fat')) {
       context.handle(
         _fatMeta,
         fat.isAcceptableOrUnknown(data['fat']!, _fatMeta),
       );
-    } else if (isInserting) {
-      context.missing(_fatMeta);
     }
     if (data.containsKey('photo_path')) {
       context.handle(
@@ -1411,23 +1401,23 @@ class $FoodLogsTable extends FoodLogs with TableInfo<$FoodLogsTable, FoodLog> {
       grams: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}grams'],
-      )!,
+      ),
       kcal: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}kcal'],
-      )!,
+      ),
       protein: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}protein'],
-      )!,
+      ),
       carbs: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}carbs'],
-      )!,
+      ),
       fat: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}fat'],
-      )!,
+      ),
       source: $FoodLogsTable.$convertersource.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -1468,11 +1458,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
   final String? customName;
   final double quantity;
   final String unit;
-  final double grams;
-  final double kcal;
-  final double protein;
-  final double carbs;
-  final double fat;
+  final double? grams;
+  final double? kcal;
+  final double? protein;
+  final double? carbs;
+  final double? fat;
   final LogSource source;
   final String? photoPath;
   final String? scanId;
@@ -1485,11 +1475,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
     this.customName,
     required this.quantity,
     required this.unit,
-    required this.grams,
-    required this.kcal,
-    required this.protein,
-    required this.carbs,
-    required this.fat,
+    this.grams,
+    this.kcal,
+    this.protein,
+    this.carbs,
+    this.fat,
     required this.source,
     this.photoPath,
     this.scanId,
@@ -1513,11 +1503,21 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
     }
     map['quantity'] = Variable<double>(quantity);
     map['unit'] = Variable<String>(unit);
-    map['grams'] = Variable<double>(grams);
-    map['kcal'] = Variable<double>(kcal);
-    map['protein'] = Variable<double>(protein);
-    map['carbs'] = Variable<double>(carbs);
-    map['fat'] = Variable<double>(fat);
+    if (!nullToAbsent || grams != null) {
+      map['grams'] = Variable<double>(grams);
+    }
+    if (!nullToAbsent || kcal != null) {
+      map['kcal'] = Variable<double>(kcal);
+    }
+    if (!nullToAbsent || protein != null) {
+      map['protein'] = Variable<double>(protein);
+    }
+    if (!nullToAbsent || carbs != null) {
+      map['carbs'] = Variable<double>(carbs);
+    }
+    if (!nullToAbsent || fat != null) {
+      map['fat'] = Variable<double>(fat);
+    }
     {
       map['source'] = Variable<String>(
         $FoodLogsTable.$convertersource.toSql(source),
@@ -1546,11 +1546,17 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
           : Value(customName),
       quantity: Value(quantity),
       unit: Value(unit),
-      grams: Value(grams),
-      kcal: Value(kcal),
-      protein: Value(protein),
-      carbs: Value(carbs),
-      fat: Value(fat),
+      grams: grams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(grams),
+      kcal: kcal == null && nullToAbsent ? const Value.absent() : Value(kcal),
+      protein: protein == null && nullToAbsent
+          ? const Value.absent()
+          : Value(protein),
+      carbs: carbs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(carbs),
+      fat: fat == null && nullToAbsent ? const Value.absent() : Value(fat),
       source: Value(source),
       photoPath: photoPath == null && nullToAbsent
           ? const Value.absent()
@@ -1577,11 +1583,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
       customName: serializer.fromJson<String?>(json['customName']),
       quantity: serializer.fromJson<double>(json['quantity']),
       unit: serializer.fromJson<String>(json['unit']),
-      grams: serializer.fromJson<double>(json['grams']),
-      kcal: serializer.fromJson<double>(json['kcal']),
-      protein: serializer.fromJson<double>(json['protein']),
-      carbs: serializer.fromJson<double>(json['carbs']),
-      fat: serializer.fromJson<double>(json['fat']),
+      grams: serializer.fromJson<double?>(json['grams']),
+      kcal: serializer.fromJson<double?>(json['kcal']),
+      protein: serializer.fromJson<double?>(json['protein']),
+      carbs: serializer.fromJson<double?>(json['carbs']),
+      fat: serializer.fromJson<double?>(json['fat']),
       source: $FoodLogsTable.$convertersource.fromJson(
         serializer.fromJson<String>(json['source']),
       ),
@@ -1603,11 +1609,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
       'customName': serializer.toJson<String?>(customName),
       'quantity': serializer.toJson<double>(quantity),
       'unit': serializer.toJson<String>(unit),
-      'grams': serializer.toJson<double>(grams),
-      'kcal': serializer.toJson<double>(kcal),
-      'protein': serializer.toJson<double>(protein),
-      'carbs': serializer.toJson<double>(carbs),
-      'fat': serializer.toJson<double>(fat),
+      'grams': serializer.toJson<double?>(grams),
+      'kcal': serializer.toJson<double?>(kcal),
+      'protein': serializer.toJson<double?>(protein),
+      'carbs': serializer.toJson<double?>(carbs),
+      'fat': serializer.toJson<double?>(fat),
       'source': serializer.toJson<String>(
         $FoodLogsTable.$convertersource.toJson(source),
       ),
@@ -1625,11 +1631,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
     Value<String?> customName = const Value.absent(),
     double? quantity,
     String? unit,
-    double? grams,
-    double? kcal,
-    double? protein,
-    double? carbs,
-    double? fat,
+    Value<double?> grams = const Value.absent(),
+    Value<double?> kcal = const Value.absent(),
+    Value<double?> protein = const Value.absent(),
+    Value<double?> carbs = const Value.absent(),
+    Value<double?> fat = const Value.absent(),
     LogSource? source,
     Value<String?> photoPath = const Value.absent(),
     Value<String?> scanId = const Value.absent(),
@@ -1642,11 +1648,11 @@ class FoodLog extends DataClass implements Insertable<FoodLog> {
     customName: customName.present ? customName.value : this.customName,
     quantity: quantity ?? this.quantity,
     unit: unit ?? this.unit,
-    grams: grams ?? this.grams,
-    kcal: kcal ?? this.kcal,
-    protein: protein ?? this.protein,
-    carbs: carbs ?? this.carbs,
-    fat: fat ?? this.fat,
+    grams: grams.present ? grams.value : this.grams,
+    kcal: kcal.present ? kcal.value : this.kcal,
+    protein: protein.present ? protein.value : this.protein,
+    carbs: carbs.present ? carbs.value : this.carbs,
+    fat: fat.present ? fat.value : this.fat,
     source: source ?? this.source,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     scanId: scanId.present ? scanId.value : this.scanId,
@@ -1747,11 +1753,11 @@ class FoodLogsCompanion extends UpdateCompanion<FoodLog> {
   final Value<String?> customName;
   final Value<double> quantity;
   final Value<String> unit;
-  final Value<double> grams;
-  final Value<double> kcal;
-  final Value<double> protein;
-  final Value<double> carbs;
-  final Value<double> fat;
+  final Value<double?> grams;
+  final Value<double?> kcal;
+  final Value<double?> protein;
+  final Value<double?> carbs;
+  final Value<double?> fat;
   final Value<LogSource> source;
   final Value<String?> photoPath;
   final Value<String?> scanId;
@@ -1782,11 +1788,11 @@ class FoodLogsCompanion extends UpdateCompanion<FoodLog> {
     this.customName = const Value.absent(),
     required double quantity,
     required String unit,
-    required double grams,
-    required double kcal,
-    required double protein,
-    required double carbs,
-    required double fat,
+    this.grams = const Value.absent(),
+    this.kcal = const Value.absent(),
+    this.protein = const Value.absent(),
+    this.carbs = const Value.absent(),
+    this.fat = const Value.absent(),
     required LogSource source,
     this.photoPath = const Value.absent(),
     this.scanId = const Value.absent(),
@@ -1795,11 +1801,6 @@ class FoodLogsCompanion extends UpdateCompanion<FoodLog> {
        mealType = Value(mealType),
        quantity = Value(quantity),
        unit = Value(unit),
-       grams = Value(grams),
-       kcal = Value(kcal),
-       protein = Value(protein),
-       carbs = Value(carbs),
-       fat = Value(fat),
        source = Value(source),
        createdAt = Value(createdAt);
   static Insertable<FoodLog> custom({
@@ -1848,11 +1849,11 @@ class FoodLogsCompanion extends UpdateCompanion<FoodLog> {
     Value<String?>? customName,
     Value<double>? quantity,
     Value<String>? unit,
-    Value<double>? grams,
-    Value<double>? kcal,
-    Value<double>? protein,
-    Value<double>? carbs,
-    Value<double>? fat,
+    Value<double?>? grams,
+    Value<double?>? kcal,
+    Value<double?>? protein,
+    Value<double?>? carbs,
+    Value<double?>? fat,
     Value<LogSource>? source,
     Value<String?>? photoPath,
     Value<String?>? scanId,
@@ -3955,11 +3956,11 @@ typedef $$FoodLogsTableCreateCompanionBuilder = FoodLogsCompanion Function({
   Value<String?> customName,
   required double quantity,
   required String unit,
-  required double grams,
-  required double kcal,
-  required double protein,
-  required double carbs,
-  required double fat,
+  Value<double?> grams,
+  Value<double?> kcal,
+  Value<double?> protein,
+  Value<double?> carbs,
+  Value<double?> fat,
   required LogSource source,
   Value<String?> photoPath,
   Value<String?> scanId,
@@ -3973,11 +3974,11 @@ typedef $$FoodLogsTableUpdateCompanionBuilder = FoodLogsCompanion Function({
   Value<String?> customName,
   Value<double> quantity,
   Value<String> unit,
-  Value<double> grams,
-  Value<double> kcal,
-  Value<double> protein,
-  Value<double> carbs,
-  Value<double> fat,
+  Value<double?> grams,
+  Value<double?> kcal,
+  Value<double?> protein,
+  Value<double?> carbs,
+  Value<double?> fat,
   Value<LogSource> source,
   Value<String?> photoPath,
   Value<String?> scanId,
@@ -4261,11 +4262,11 @@ class $$FoodLogsTableTableManager
                 Value<String?> customName = const Value.absent(),
                 Value<double> quantity = const Value.absent(),
                 Value<String> unit = const Value.absent(),
-                Value<double> grams = const Value.absent(),
-                Value<double> kcal = const Value.absent(),
-                Value<double> protein = const Value.absent(),
-                Value<double> carbs = const Value.absent(),
-                Value<double> fat = const Value.absent(),
+                Value<double?> grams = const Value.absent(),
+                Value<double?> kcal = const Value.absent(),
+                Value<double?> protein = const Value.absent(),
+                Value<double?> carbs = const Value.absent(),
+                Value<double?> fat = const Value.absent(),
                 Value<LogSource> source = const Value.absent(),
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> scanId = const Value.absent(),
@@ -4297,11 +4298,11 @@ class $$FoodLogsTableTableManager
                 Value<String?> customName = const Value.absent(),
                 required double quantity,
                 required String unit,
-                required double grams,
-                required double kcal,
-                required double protein,
-                required double carbs,
-                required double fat,
+                Value<double?> grams = const Value.absent(),
+                Value<double?> kcal = const Value.absent(),
+                Value<double?> protein = const Value.absent(),
+                Value<double?> carbs = const Value.absent(),
+                Value<double?> fat = const Value.absent(),
                 required LogSource source,
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> scanId = const Value.absent(),
