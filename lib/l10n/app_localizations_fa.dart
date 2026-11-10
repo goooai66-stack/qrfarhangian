@@ -135,8 +135,17 @@ class AppLocalizationsFa extends AppLocalizations {
   String get unitKg => 'کیلوگرم';
 
   @override
-  String kgValue(String value) {
-    return '$value کیلوگرم';
+  String get unitKgShort => 'کیلو';
+
+  @override
+  String get unitLb => 'پوند';
+
+  @override
+  String get weightUnitTitle => 'واحد وزن';
+
+  @override
+  String kgValue(String value, String unit) {
+    return '$value $unit';
   }
 
   @override
@@ -175,13 +184,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get qGoalWeight => 'وزن هدفت؟';
 
   @override
-  String goalWeightRange(String min, String max) {
-    return 'بین $min تا $max کیلوگرم';
+  String goalWeightRange(String min, String max, String unit) {
+    return 'بین $min تا $max $unit';
   }
 
   @override
-  String goalWeightDiff(String kg) {
-    return 'تغییر: $kg کیلوگرم';
+  String goalWeightDiff(String amount, String unit) {
+    return 'تغییر: $amount $unit';
   }
 
   @override
@@ -200,8 +209,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get rateFast => 'سریع';
 
   @override
-  String rateValue(String kg) {
-    return '$kg کیلو در هفته';
+  String rateValue(String amount, String unit) {
+    return '$amount $unit در هفته';
   }
 
   @override
@@ -270,8 +279,8 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String resultEta(String weight, String date) {
-    return 'رسیدن به $weight کیلو: حدود $date';
+  String resultEta(String weight, String unit, String date) {
+    return 'رسیدن به $weight $unit: حدود $date';
   }
 
   @override
@@ -809,8 +818,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get weightGoalLabel => 'هدف';
 
   @override
-  String weightChangeFromStart(String kg) {
-    return 'تغییر از شروع: $kg کیلوگرم';
+  String weightChangeFromStart(String amount, String unit) {
+    return 'تغییر از شروع: $amount $unit';
   }
 
   @override
@@ -909,8 +918,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get cardStreak => 'روز پیاپی';
 
   @override
-  String cardWeightChange(String kg, String days) {
-    return '$kg کیلو در $days روز';
+  String cardWeightChange(String amount, String unit, String days) {
+    return '$amount $unit در $days روز';
   }
 
   @override

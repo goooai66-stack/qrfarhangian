@@ -28,7 +28,12 @@
   - تأیید خرید سمت سرور با API هر فروشگاه (کلاس جدید در `server/app/billing/verifiers.py` به‌جای `NotConfiguredPurchaseVerifier` که فعلاً 503 می‌دهد)
   - SDK تپسل + `TapsellAdService` با `--dart-define=TAPSELL_KEY=…`
   - شناسه‌ی محصولات اشتراک در پنل فروشگاه دقیقاً برابر `productIdOf` در `lib/core/billing/`
-- [ ] **سرور** روی میزبانی که از داخل ایران پایدار است، با HTTPS و `ADMIN_TOKEN` و کلید OpenRouter در متغیر محیطی (هرگز در اپ).
+- [ ] **سرور** روی میزبانی که از داخل ایران پایدار است، با HTTPS و کلید OpenRouter در متغیر محیطی (هرگز در اپ):
+  - `APP_ENV=production`: با تنظیم ناامن، سرور بالا نمی‌آید (فهرست در `server/README.md`)
+  - `ADMIN_TOKEN=$(openssl rand -hex 32)`
+  - `REWARD_VERIFIER=disabled` تا تأیید تپسل وصل شود
+  - `PURCHASE_VERIFIER=stores` (تا وصل شدن API فروشگاه‌ها، خرید پیام «فعلاً در دسترس نیست» می‌دهد)
+  - `FORWARDED_ALLOW_IPS` = IP پروکسی HTTPS
 - [ ] **ارزیابی مدل** با `server/tools/eval_photos.py` روی ۵۰ عکس واقعی (بخش ۱۴-۳).
 
 ---
@@ -72,6 +77,7 @@ flutter build apk --release --flavor myket --split-per-abi --obfuscate \
 - [ ] ثبت صوتی (اجازه‌ی میکروفون فقط همان لحظه خواسته شود)
 - [ ] یادآور در زمان درست برسد، حتی بعد از ری‌استارت گوشی
 - [ ] ویجت صفحه‌ی اصلی به‌روز شود
+- [ ] واحد پوند در آنبوردینگ و تنظیمات پروفایل؛ ثبت وزن به پوند
 - [ ] فونت سیستم روی «بزرگ‌ترین» ← چیزی بیرون نزند
 - [ ] حالت تاریک
 - [ ] اسکرول صفحه‌ی امروز و پیشرفت روان باشد (`flutter run --profile` و Performance Overlay)
@@ -137,7 +143,7 @@ flutter build apk --release --flavor myket --split-per-abi --obfuscate \
   - «حذف همه‌ی داده‌ها» و بعد بازیابی (خرید باید برگردد)
   - خرید بی‌اینترنت (پیام درست)
 - [ ] تأیید خرید سمت سرور با API واقعی فروشگاه (نه توکن `test-`).
-- [ ] روی سرور اصلی `PURCHASE_VERIFIER=stores` باشد. با مقدار پیش‌فرض `fake`، هر توکن `test-…` اشتراک رایگان می‌دهد.
+- [ ] سرور اصلی با `APP_ENV=production` اجرا شود. در این حالت با `PURCHASE_VERIFIER=fake` اصلاً بالا نمی‌آید، پس توکن‌های `test-…` آنجا کار نمی‌کنند.
 
 ---
 

@@ -5,6 +5,7 @@ import 'package:shamsi_date/shamsi_date.dart';
 
 import '../../app/providers.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../common/wheel_pickers.dart';
@@ -96,6 +97,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
+    final unit = ref.watch(weightUnitProvider);
     final d = _d;
     if (d == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -163,14 +165,15 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           ),
           ListTile(
             title: Text(t.profileCurrentWeight),
-            trailing: Text(t.kg(d.weightKg)),
+            trailing: Text(t.weight(d.weightKg, unit)),
             onTap: () async {
               final v = await _wheelSheet<double>(
                 d.weightKg,
-                (onChanged) => _StatefulNumberWheel(
-                  values: steppedValues(minWeightKg, maxWeightKg, weightStep),
+                (onChanged) => _StatefulWeightWheel(
+                  unit: unit,
+                  minKg: minWeightKg,
+                  maxKg: maxWeightKg,
                   initial: d.weightKg,
-                  fractionDigits: 1,
                   onChanged: onChanged,
                 ),
               );
@@ -210,16 +213,17 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           if (d.goalType != GoalType.maintain) ...[
             ListTile(
               title: Text(t.profileGoalWeight),
-              trailing: Text(t.kg(d.goalWeightKg)),
+              trailing: Text(t.weight(d.goalWeightKg, unit)),
               onTap: () async {
                 final r = d.goalWeightRange();
                 if (r == null) return;
                 final v = await _wheelSheet<double>(
                   d.goalWeightKg,
-                  (onChanged) => _StatefulNumberWheel(
-                    values: steppedValues(r.min, r.max, weightStep),
+                  (onChanged) => _StatefulWeightWheel(
+                    unit: unit,
+                    minKg: r.min,
+                    maxKg: r.max,
                     initial: d.goalWeightKg,
-                    fractionDigits: 1,
                     onChanged: onChanged,
                   ),
                 );
@@ -237,7 +241,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   for (final r in allowedWeeklyRates)
                     ButtonSegment(
                       value: r,
-                      label: Text(formatPersianNumber(r, fractionDigits: 2)),
+                      label: Text(
+                        formatPersianNumber(
+                          unit.fromKg(r),
+                          fractionDigits: unit == WeightUnit.kg ? 2 : 1,
+                        ),
+                      ),
                     ),
                 ],
                 selected: {d.weeklyRateKg},
@@ -312,13 +321,11 @@ class _StatefulNumberWheel extends StatefulWidget {
     required this.values,
     required this.initial,
     required this.onChanged,
-    this.fractionDigits = 0,
   });
 
   final List<double> values;
   final double initial;
   final ValueChanged<double> onChanged;
-  final int fractionDigits;
 
   @override
   State<_StatefulNumberWheel> createState() => _StatefulNumberWheelState();
@@ -331,9 +338,43 @@ class _StatefulNumberWheelState extends State<_StatefulNumberWheel> {
   Widget build(BuildContext context) => NumberWheel(
     values: widget.values,
     value: _v,
-    fractionDigits: widget.fractionDigits,
     onChanged: (v) {
       setState(() => _v = v);
+      widget.onChanged(v);
+    },
+  );
+}
+
+class _StatefulWeightWheel extends StatefulWidget {
+  const _StatefulWeightWheel({
+    required this.unit,
+    required this.minKg,
+    required this.maxKg,
+    required this.initial,
+    required this.onChanged,
+  });
+
+  final WeightUnit unit;
+  final double minKg;
+  final double maxKg;
+  final double initial;
+  final ValueChanged<double> onChanged;
+
+  @override
+  State<_StatefulWeightWheel> createState() => _StatefulWeightWheelState();
+}
+
+class _StatefulWeightWheelState extends State<_StatefulWeightWheel> {
+  late double _kg = widget.initial;
+
+  @override
+  Widget build(BuildContext context) => WeightWheel(
+    unit: widget.unit,
+    minKg: widget.minKg,
+    maxKg: widget.maxKg,
+    valueKg: _kg,
+    onChanged: (v) {
+      setState(() => _kg = v);
       widget.onChanged(v);
     },
   );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
+import '../../core/units/weight_unit.dart';
 import '../../app/router.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
 import '../../core/utils/persian_digits.dart';
@@ -19,6 +20,7 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final mode = ref.watch(themeModeProvider);
+    final unit = ref.watch(weightUnitProvider);
     final profile = ref.watch(profileProvider).value;
     final goal = ref.watch(activeGoalProvider).value;
     final weight = ref.watch(currentWeightProvider).value;
@@ -65,9 +67,12 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ),
                     if (weight != null)
-                      _Row(t.profileCurrentWeight, t.kg(weight)),
+                      _Row(t.profileCurrentWeight, t.weight(weight, unit)),
                     if (profile.goalType != GoalType.maintain)
-                      _Row(t.profileGoalWeight, t.kg(profile.goalWeightKg)),
+                      _Row(
+                        t.profileGoalWeight,
+                        t.weight(profile.goalWeightKg, unit),
+                      ),
                     _Row(
                       t.profileActivity,
                       t.activityLabel(profile.activityLevel),
@@ -141,6 +146,19 @@ class ProfileScreen extends ConsumerWidget {
             selected: {mode},
             onSelectionChanged: (s) =>
                 ref.read(themeModeProvider.notifier).set(s.first),
+          ),
+          const SizedBox(height: 24),
+          Text(t.weightUnitTitle, style: tt.titleMedium),
+          const SizedBox(height: 8),
+          SegmentedButton<WeightUnit>(
+            key: const Key('settings-weight-unit'),
+            segments: [
+              for (final u in WeightUnit.values)
+                ButtonSegment(value: u, label: Text(t.unitName(u))),
+            ],
+            selected: {unit},
+            onSelectionChanged: (s) =>
+                ref.read(weightUnitProvider.notifier).set(s.first),
           ),
           const SizedBox(height: 32),
           Card(

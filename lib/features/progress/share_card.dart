@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../app/theme.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
+import '../profile/profile_labels.dart';
 
 /// اندازه‌ی منطقی کارت؛ خروجی ۱۰۸۰×۱۳۵۰ (۴:۵، مناسب اینستاگرام و تلگرام).
 const shareCardSize = Size(300, 375);
@@ -20,7 +22,8 @@ class ShareCard extends StatelessWidget {
     : before = null,
       after = null,
       weightChangeKg = null,
-      days = null;
+      days = null,
+      unit = WeightUnit.kg;
 
   const ShareCard.beforeAfter({
     super.key,
@@ -28,6 +31,7 @@ class ShareCard extends StatelessWidget {
     required String this.after,
     this.weightChangeKg,
     this.days,
+    this.unit = WeightUnit.kg,
   }) : streak = null;
 
   final int? streak;
@@ -35,6 +39,7 @@ class ShareCard extends StatelessWidget {
   final String? after;
   final double? weightChangeKg;
   final int? days;
+  final WeightUnit unit;
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +93,10 @@ class ShareCard extends StatelessWidget {
                               child: Text(
                                 t.cardWeightChange(
                                   formatPersianNumber(
-                                    weightChangeKg!.abs(),
+                                    unit.display(weightChangeKg!.abs()),
                                     fractionDigits: 1,
                                   ),
+                                  t.unitShort(unit),
                                   formatPersianNumber(days!),
                                 ),
                                 style: title.copyWith(fontSize: 22),

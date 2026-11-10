@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/date_names.dart';
@@ -121,6 +122,46 @@ class NumberWheel extends StatelessWidget {
 
   static double _nearest(List<double> values, double v) =>
       values.reduce((a, b) => (a - v).abs() <= (b - v).abs() ? a : b);
+}
+
+/// چرخ وزن در واحد انتخابی؛ ورودی و خروجی همیشه کیلوگرم.
+class WeightWheel extends StatelessWidget {
+  const WeightWheel({
+    super.key,
+    required this.unit,
+    required this.minKg,
+    required this.maxKg,
+    required this.valueKg,
+    required this.onChanged,
+    this.descending = false,
+    this.step,
+  });
+
+  final WeightUnit unit;
+
+  /// گام در همان واحد؛ پیش‌فرض [WeightUnit.step].
+  final double? step;
+  final double minKg;
+  final double maxKg;
+  final double valueKg;
+  final ValueChanged<double> onChanged;
+
+  /// نزولی (برای کاهش وزن: نزدیک‌ترین به وزن فعلی بالا).
+  final bool descending;
+
+  @override
+  Widget build(BuildContext context) {
+    var wheel = unit.wheelValues(minKg, maxKg, step: step);
+    if (descending) wheel = wheel.reversed.toList();
+    return ValueWheel<double>(
+      // با عوض شدن واحد، چرخ از نو ساخته می‌شود.
+      key: ValueKey(unit),
+      values: wheel,
+      value: unit.nearestOnWheel(wheel, valueKg),
+      label: (v) => formatPersianNumber(v, fractionDigits: 1),
+      onChanged: (v) => onChanged(unit.toKg(v)),
+    );
+  }
 }
 
 /// انتخابگر تاریخ شمسی با سه چرخ (روز، ماه، سال — از راست به چپ).

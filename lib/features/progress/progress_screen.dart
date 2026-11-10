@@ -10,6 +10,7 @@ import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../../core/nutrition/serving.dart';
 import '../../core/progress/badges.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/image_compress.dart';
 import '../../core/utils/jalali_date.dart';
 import '../../core/utils/persian_digits.dart';
@@ -100,6 +101,7 @@ class _WeightCard extends ConsumerWidget {
     double initial,
   ) async {
     final t = AppLocalizations.of(context);
+    final unit = ref.read(weightUnitProvider);
     var value = initial;
     final ok = await showModalBottomSheet<bool>(
       context: context,
@@ -112,14 +114,16 @@ class _WeightCard extends ConsumerWidget {
             children: [
               Text(t.logWeight, style: Theme.of(c).textTheme.titleLarge),
               StatefulBuilder(
-                builder: (c, setState) => NumberWheel(
-                  values: steppedValues(minWeightKg, maxWeightKg, 0.1),
-                  value: value,
-                  fractionDigits: 1,
+                builder: (c, setState) => WeightWheel(
+                  unit: unit,
+                  step: unit.fineStep,
+                  minKg: minWeightKg,
+                  maxKg: maxWeightKg,
+                  valueKg: value,
                   onChanged: (v) => setState(() => value = v),
                 ),
               ),
-              Text(t.unitKg),
+              Text(t.unitName(unit)),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -137,7 +141,7 @@ class _WeightCard extends ConsumerWidget {
     if (ok == true) {
       await ref
           .read(progressRepositoryProvider)
-          .setWeight(ref.read(todayProvider), (value * 10).round() / 10);
+          .setWeight(ref.read(todayProvider), (value * 100).round() / 100);
     }
   }
 
@@ -145,6 +149,7 @@ class _WeightCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final tt = Theme.of(context).textTheme;
+    final unit = ref.watch(weightUnitProvider);
     final profile = ref.watch(profileProvider).value;
     final weights = ref.watch(weightsProvider).value ?? const <WeightLog>[];
     final current = weights.isEmpty ? null : weights.last.weightKg;
@@ -172,14 +177,20 @@ class _WeightCard extends ConsumerWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                _Stat(t.weightStart, start == null ? t.noValue : t.kg(start)),
+                _Stat(
+                  t.weightStart,
+                  start == null ? t.noValue : t.weight(start, unit),
+                ),
                 _Stat(
                   t.weightCurrent,
-                  current == null ? t.noValue : t.kg(current),
+                  current == null ? t.noValue : t.weight(current, unit),
                   key: const Key('weight-current'),
                 ),
                 if (showGoal)
-                  _Stat(t.weightGoalLabel, t.kg(profile.goalWeightKg)),
+                  _Stat(
+                    t.weightGoalLabel,
+                    t.weight(profile.goalWeightKg, unit),
+                  ),
               ],
             ),
             if (start != null && current != null && current != start)
@@ -187,7 +198,11 @@ class _WeightCard extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   t.weightChangeFromStart(
-                    formatPersianNumber(current - start, fractionDigits: 1),
+                    formatPersianNumber(
+                      unit.display(current - start),
+                      fractionDigits: 1,
+                    ),
+                    t.unitName(unit),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -199,6 +214,7 @@ class _WeightCard extends ConsumerWidget {
                 child: _WeightChart(
                   weights: weights,
                   goalKg: showGoal ? profile.goalWeightKg : null,
+                  unit: unit,
                 ),
               )
             else if (weights.isEmpty)
@@ -212,7 +228,7 @@ class _WeightCard extends ConsumerWidget {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(t.kg(w.weightKg)),
+                    Text(t.weight(w.weightKg, unit)),
                     IconButton(
                       tooltip: t.deleteItem,
                       icon: const Icon(Icons.delete_outline, size: 20),
@@ -272,10 +288,15 @@ class _Stat extends StatelessWidget {
 
 /// نمودار وزن با خط هدف (محور زمان چپ‌به‌راست، برچسب‌ها فارسی).
 class _WeightChart extends StatelessWidget {
-  const _WeightChart({required this.weights, this.goalKg});
+  const _WeightChart({
+    required this.weights,
+    this.goalKg,
+    this.unit = WeightUnit.kg,
+  });
 
   final List<WeightLog> weights;
   final double? goalKg;
+  final WeightUnit unit;
 
   @override
   Widget build(BuildContext context) {
@@ -286,11 +307,13 @@ class _WeightChart extends StatelessWidget {
       for (final w in weights)
         FlSpot(
           parseDayKey(w.date).difference(first).inDays.toDouble(),
-          w.weightKg,
+          unit.fromKg(w.weightKg),
         ),
     ];
-    final ys = [...spots.map((s) => s.y), ?goalKg];
-    final lo = ys.reduce(math.min) - 1, hi = ys.reduce(math.max) + 1;
+    final goal = goalKg == null ? null : unit.fromKg(goalKg!);
+    final ys = [...spots.map((s) => s.y), ?goal];
+    final pad = unit.fromKg(1);
+    final lo = ys.reduce(math.min) - pad, hi = ys.reduce(math.max) + pad;
     final maxX = math.max(1.0, spots.last.x);
     final label = Theme.of(context).textTheme.bodySmall;
     return Directionality(
@@ -343,9 +366,9 @@ class _WeightChart extends StatelessWidget {
             ),
             extraLinesData: ExtraLinesData(
               horizontalLines: [
-                if (goalKg != null)
+                if (goal != null)
                   HorizontalLine(
-                    y: goalKg!,
+                    y: goal,
                     color: BrandColors.orangeDeep,
                     strokeWidth: 1.5,
                     dashArray: [6, 4],
@@ -714,6 +737,7 @@ class _BeforeAfterCard extends ConsumerWidget {
                       after: a.path,
                       weightChangeKg: change == 0 ? null : change,
                       days: a.date.difference(b.date).inDays.abs(),
+                      unit: ref.read(weightUnitProvider),
                     ),
                   );
                 },

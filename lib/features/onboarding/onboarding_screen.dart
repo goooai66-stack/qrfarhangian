@@ -4,6 +4,7 @@ import 'package:shamsi_date/shamsi_date.dart';
 
 import '../../app/providers.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/analytics/analytics.dart';
@@ -133,7 +134,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: KeyedSubtree(
               key: ValueKey(_step),
               child: isResult
-                  ? PlanResultView(draft: _d, plan: _d.plan(_now), now: _now)
+                  ? PlanResultView(
+                      draft: _d,
+                      plan: _d.plan(_now),
+                      now: _now,
+                      unit: _unit,
+                    )
                   : _buildQuestion(context, t),
             ),
           ),
@@ -248,16 +254,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     ],
   );
 
+  WeightUnit get _unit => ref.watch(weightUnitProvider);
+
   Widget _weight(AppLocalizations t) => Column(
     children: [
-      NumberWheel(
-        values: steppedValues(minWeightKg, maxWeightKg, weightStep),
-        value: _d.weightKg,
-        fractionDigits: 1,
+      SegmentedButton<WeightUnit>(
+        key: const Key('weight-unit'),
+        segments: [
+          for (final u in WeightUnit.values)
+            ButtonSegment(value: u, label: Text(t.unitName(u))),
+        ],
+        selected: {_unit},
+        onSelectionChanged: (s) =>
+            ref.read(weightUnitProvider.notifier).set(s.first),
+      ),
+      const SizedBox(height: 12),
+      WeightWheel(
+        unit: _unit,
+        minKg: minWeightKg,
+        maxKg: maxWeightKg,
+        valueKg: _d.weightKg,
         onChanged: (v) => _update(_d.copyWith(weightKg: v)),
       ),
       const SizedBox(height: 8),
-      Text(t.unitKg),
+      Text(t.unitName(_unit)),
       const SizedBox(height: 16),
       Text(t.bmiValue(formatPersianNumber(_d.bmi, fractionDigits: 1))),
     ],
@@ -296,31 +316,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (r == null) return Text(t.invalidGoalWeight);
     return Column(
       children: [
-        NumberWheel(
+        WeightWheel(
           // ترتیب: نزدیک‌ترین به وزن فعلی بالا.
-          values: _d.goalType == GoalType.lose
-              ? steppedValues(r.min, r.max, weightStep).reversed.toList()
-              : steppedValues(r.min, r.max, weightStep),
-          value: _d.goalWeightKg,
-          fractionDigits: 1,
+          descending: _d.goalType == GoalType.lose,
+          unit: _unit,
+          minKg: r.min,
+          maxKg: r.max,
+          valueKg: _d.goalWeightKg,
           onChanged: (v) => _update(_d.copyWith(goalWeightKg: v)),
         ),
         const SizedBox(height: 8),
-        Text(t.unitKg),
+        Text(t.unitName(_unit)),
         const SizedBox(height: 16),
         Text(
           t.goalWeightDiff(
             formatPersianNumber(
-              (_d.goalWeightKg - _d.weightKg).abs(),
+              _unit.display((_d.goalWeightKg - _d.weightKg).abs()),
               fractionDigits: 1,
             ),
+            t.unitName(_unit),
           ),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         Text(
           t.goalWeightRange(
-            formatPersianNumber(r.min, fractionDigits: 1),
-            formatPersianNumber(r.max, fractionDigits: 1),
+            t.weightNumber(r.min, _unit),
+            t.weightNumber(r.max, _unit),
+            t.unitName(_unit),
           ),
         ),
       ],
@@ -335,7 +357,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             final p = _d.copyWith(weeklyRateKg: rate).plan(_now);
             final floored = p.warnings.contains(PlanWarning.hitSafetyFloor);
             return ChoiceCard(
-              title: '${t.rateName(rate)} · ${t.rate(rate)}',
+              title: '${t.rateName(rate)} · ${t.rate(rate, _unit)}',
               subtitle: floored
                   ? t.rateFloorHint
                   : t.rateKcal(formatPersianNumber(p.targetKcal)),

@@ -322,11 +322,29 @@ abstract class AppLocalizations {
   /// **'کیلوگرم'**
   String get unitKg;
 
+  /// No description provided for @unitKgShort.
+  ///
+  /// In fa, this message translates to:
+  /// **'کیلو'**
+  String get unitKgShort;
+
+  /// No description provided for @unitLb.
+  ///
+  /// In fa, this message translates to:
+  /// **'پوند'**
+  String get unitLb;
+
+  /// No description provided for @weightUnitTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'واحد وزن'**
+  String get weightUnitTitle;
+
   /// No description provided for @kgValue.
   ///
   /// In fa, this message translates to:
-  /// **'{value} کیلوگرم'**
-  String kgValue(String value);
+  /// **'{value} {unit}'**
+  String kgValue(String value, String unit);
 
   /// No description provided for @bmiValue.
   ///
@@ -391,14 +409,14 @@ abstract class AppLocalizations {
   /// No description provided for @goalWeightRange.
   ///
   /// In fa, this message translates to:
-  /// **'بین {min} تا {max} کیلوگرم'**
-  String goalWeightRange(String min, String max);
+  /// **'بین {min} تا {max} {unit}'**
+  String goalWeightRange(String min, String max, String unit);
 
   /// No description provided for @goalWeightDiff.
   ///
   /// In fa, this message translates to:
-  /// **'تغییر: {kg} کیلوگرم'**
-  String goalWeightDiff(String kg);
+  /// **'تغییر: {amount} {unit}'**
+  String goalWeightDiff(String amount, String unit);
 
   /// No description provided for @invalidGoalWeight.
   ///
@@ -433,8 +451,8 @@ abstract class AppLocalizations {
   /// No description provided for @rateValue.
   ///
   /// In fa, this message translates to:
-  /// **'{kg} کیلو در هفته'**
-  String rateValue(String kg);
+  /// **'{amount} {unit} در هفته'**
+  String rateValue(String amount, String unit);
 
   /// No description provided for @rateKcal.
   ///
@@ -559,8 +577,8 @@ abstract class AppLocalizations {
   /// No description provided for @resultEta.
   ///
   /// In fa, this message translates to:
-  /// **'رسیدن به {weight} کیلو: حدود {date}'**
-  String resultEta(String weight, String date);
+  /// **'رسیدن به {weight} {unit}: حدود {date}'**
+  String resultEta(String weight, String unit, String date);
 
   /// No description provided for @resultEtaWeeks.
   ///
@@ -1537,8 +1555,8 @@ abstract class AppLocalizations {
   /// No description provided for @weightChangeFromStart.
   ///
   /// In fa, this message translates to:
-  /// **'تغییر از شروع: {kg} کیلوگرم'**
-  String weightChangeFromStart(String kg);
+  /// **'تغییر از شروع: {amount} {unit}'**
+  String weightChangeFromStart(String amount, String unit);
 
   /// No description provided for @noWeights.
   ///
@@ -1723,8 +1741,8 @@ abstract class AppLocalizations {
   /// No description provided for @cardWeightChange.
   ///
   /// In fa, this message translates to:
-  /// **'{kg} کیلو در {days} روز'**
-  String cardWeightChange(String kg, String days);
+  /// **'{amount} {unit} در {days} روز'**
+  String cardWeightChange(String amount, String unit, String days);
 
   /// No description provided for @cardTagline.
   ///

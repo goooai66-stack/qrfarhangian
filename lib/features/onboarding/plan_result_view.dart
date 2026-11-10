@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../core/nutrition/nutrition_calculator.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 import '../profile/profile_draft.dart';
@@ -16,11 +17,13 @@ class PlanResultView extends StatelessWidget {
     required this.draft,
     required this.plan,
     required this.now,
+    this.unit = WeightUnit.kg,
   });
 
   final ProfileDraft draft;
   final NutritionPlan plan;
   final DateTime now;
+  final WeightUnit unit;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +95,8 @@ class PlanResultView extends StatelessWidget {
             leading: const Icon(Icons.event_available_outlined),
             title: Text(
               t.resultEta(
-                formatPersianNumber(draft.goalWeightKg, fractionDigits: 1),
+                t.weightNumber(draft.goalWeightKg, unit),
+                t.unitShort(unit),
                 t.formatDateLong(eta),
               ),
               style: theme.textTheme.titleMedium,
@@ -110,6 +114,7 @@ class PlanResultView extends StatelessWidget {
               startKg: draft.weightKg,
               goalKg: draft.goalWeightKg,
               weeklyRateKg: plan.effectiveWeeklyRateKg,
+              unit: unit,
             ),
           ),
         ],
@@ -173,11 +178,15 @@ class WeightProjectionChart extends StatelessWidget {
     required this.startKg,
     required this.goalKg,
     required this.weeklyRateKg,
+    this.unit = WeightUnit.kg,
   });
 
   final double startKg;
   final double goalKg;
   final double weeklyRateKg;
+
+  /// نمودار در واحد نمایش رسم می‌شود (محاسبه همچنان کیلوگرم).
+  final WeightUnit unit;
 
   @override
   Widget build(BuildContext context) {
@@ -188,8 +197,11 @@ class WeightProjectionChart extends StatelessWidget {
       goalKg: goalKg,
       weeklyRateKg: weeklyRateKg,
     );
-    final lo = (startKg < goalKg ? startKg : goalKg) - 2;
-    final hi = (startKg > goalKg ? startKg : goalKg) + 2;
+    final start = unit.fromKg(startKg);
+    final goal = unit.fromKg(goalKg);
+    final pad = unit.fromKg(2);
+    final lo = (start < goal ? start : goal) - pad;
+    final hi = (start > goal ? start : goal) + pad;
     final maxX = pts.last.week <= 0 ? 1.0 : pts.last.week;
     final xInterval = (maxX / 4).clamp(1, double.infinity).toDouble();
     final labelStyle = Theme.of(context).textTheme.bodySmall;
@@ -241,7 +253,7 @@ class WeightProjectionChart extends StatelessWidget {
           extraLinesData: ExtraLinesData(
             horizontalLines: [
               HorizontalLine(
-                y: goalKg,
+                y: goal,
                 color: BrandColors.orangeDeep,
                 strokeWidth: 1.5,
                 dashArray: [6, 4],
@@ -250,7 +262,9 @@ class WeightProjectionChart extends StatelessWidget {
           ),
           lineBarsData: [
             LineChartBarData(
-              spots: [for (final p in pts) FlSpot(p.week, p.weightKg)],
+              spots: [
+                for (final p in pts) FlSpot(p.week, unit.fromKg(p.weightKg)),
+              ],
               color: cs.primary,
               barWidth: 3,
               dotData: const FlDotData(show: false),

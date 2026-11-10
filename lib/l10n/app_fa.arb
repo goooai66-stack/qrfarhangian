@@ -75,10 +75,16 @@
   },
   "qWeight": "وزن فعلی‌ات؟",
   "unitKg": "کیلوگرم",
-  "kgValue": "{value} کیلوگرم",
+  "unitKgShort": "کیلو",
+  "unitLb": "پوند",
+  "weightUnitTitle": "واحد وزن",
+  "kgValue": "{value} {unit}",
   "@kgValue": {
     "placeholders": {
       "value": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }
@@ -100,7 +106,7 @@
   "goalBlockedPregnancy": "در دوران بارداری و شیردهی، کاهش کالری فقط با نظر پزشک.",
   "goalBlockedLowBmi": "وزنت در محدوده‌ی کم است؛ کاهش وزن برایت مناسب نیست.",
   "qGoalWeight": "وزن هدفت؟",
-  "goalWeightRange": "بین {min} تا {max} کیلوگرم",
+  "goalWeightRange": "بین {min} تا {max} {unit}",
   "@goalWeightRange": {
     "placeholders": {
       "min": {
@@ -108,13 +114,19 @@
       },
       "max": {
         "type": "String"
+      },
+      "unit": {
+        "type": "String"
       }
     }
   },
-  "goalWeightDiff": "تغییر: {kg} کیلوگرم",
+  "goalWeightDiff": "تغییر: {amount} {unit}",
   "@goalWeightDiff": {
     "placeholders": {
-      "kg": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }
@@ -124,10 +136,13 @@
   "rateSlow": "آرام",
   "rateNormal": "متعادل",
   "rateFast": "سریع",
-  "rateValue": "{kg} کیلو در هفته",
+  "rateValue": "{amount} {unit} در هفته",
   "@rateValue": {
     "placeholders": {
-      "kg": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }
@@ -166,10 +181,13 @@
       }
     }
   },
-  "resultEta": "رسیدن به {weight} کیلو: حدود {date}",
+  "resultEta": "رسیدن به {weight} {unit}: حدود {date}",
   "@resultEta": {
     "placeholders": {
       "weight": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       },
       "date": {
@@ -475,10 +493,13 @@
   "weightStart": "شروع",
   "weightCurrent": "فعلی",
   "weightGoalLabel": "هدف",
-  "weightChangeFromStart": "تغییر از شروع: {kg} کیلوگرم",
+  "weightChangeFromStart": "تغییر از شروع: {amount} {unit}",
   "@weightChangeFromStart": {
     "placeholders": {
-      "kg": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }
@@ -533,10 +554,13 @@
   "shareStreak": "اشتراک زنجیره",
   "shareNow": "اشتراک‌گذاری",
   "cardStreak": "روز پیاپی",
-  "cardWeightChange": "{kg} کیلو در {days} روز",
+  "cardWeightChange": "{amount} {unit} در {days} روز",
   "@cardWeightChange": {
     "placeholders": {
-      "kg": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       },
       "days": {

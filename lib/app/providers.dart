@@ -21,6 +21,7 @@ import '../core/utils/persian_digits.dart';
 import '../core/platform/speech_service.dart';
 import '../core/recognition/food_recognizer.dart';
 import '../core/recognition/text_parser.dart';
+import '../core/units/weight_unit.dart';
 import '../core/utils/jalali_date.dart';
 import '../data/api/api_client.dart';
 import '../data/community/community_api.dart';
@@ -96,6 +97,31 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
   ThemeModeNotifier.new,
+);
+
+const _weightUnitKey = 'weight_unit';
+
+/// واحد نمایش وزن (کیلوگرم/پوند). ذخیره‌ی وزن‌ها همیشه کیلوگرم است.
+class WeightUnitNotifier extends Notifier<WeightUnit> {
+  @override
+  WeightUnit build() {
+    _load();
+    return WeightUnit.kg;
+  }
+
+  Future<void> _load() async {
+    final v = await ref.read(databaseProvider).getSetting(_weightUnitKey);
+    if (v != null && ref.mounted) state = WeightUnit.fromName(v);
+  }
+
+  Future<void> set(WeightUnit unit) async {
+    state = unit;
+    await ref.read(databaseProvider).setSetting(_weightUnitKey, unit.name);
+  }
+}
+
+final weightUnitProvider = NotifierProvider<WeightUnitNotifier, WeightUnit>(
+  WeightUnitNotifier.new,
 );
 
 // ---- پروفایل و آنبوردینگ ----

@@ -1,4 +1,5 @@
 import '../../core/nutrition/nutrition_calculator.dart';
+import '../../core/units/weight_unit.dart';
 import '../../core/utils/persian_digits.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -52,8 +53,33 @@ extension ProfileLabels on AppLocalizations {
     PlanWarning.consultDoctor => warnConsultDoctor,
   };
 
-  String kg(double v) => kgValue(formatPersianNumber(v, fractionDigits: 1));
+  String unitName(WeightUnit u) => switch (u) {
+    WeightUnit.kg => unitKg,
+    WeightUnit.lb => unitLb,
+  };
+
+  /// شکل کوتاه در جمله‌ها («۵ کیلو در هفته»).
+  String unitShort(WeightUnit u) => switch (u) {
+    WeightUnit.kg => unitKgShort,
+    WeightUnit.lb => unitLb,
+  };
+
+  /// فقط عدد وزن در واحد انتخابی (ورودی همیشه کیلوگرم).
+  String weightNumber(double kg, WeightUnit u) =>
+      formatPersianNumber(u.display(kg), fractionDigits: u.fractionDigits);
+
+  /// «۷۰٫۵ کیلوگرم» یا «۱۵۵ پوند».
+  String weight(double kg, WeightUnit u) =>
+      kgValue(weightNumber(kg, u), unitName(u));
   String cm(double v) => cmValue(formatPersianNumber(v));
   String grams(double v) => gramsValue(formatPersianNumber(v));
-  String rate(double v) => rateValue(formatPersianNumber(v, fractionDigits: 2));
+
+  /// سرعت هفتگی؛ [kg] کیلوگرم در هفته.
+  String rate(double kg, WeightUnit u) => rateValue(
+    formatPersianNumber(
+      u.fromKg(kg),
+      fractionDigits: u == WeightUnit.kg ? 2 : 1,
+    ),
+    unitShort(u),
+  );
 }

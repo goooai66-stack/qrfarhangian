@@ -205,6 +205,7 @@ Future<bool> wipeAllData(WidgetRef ref) async {
     ..invalidate(reminderSettingsProvider)
     ..invalidate(beforeAfterProvider)
     ..invalidate(themeModeProvider)
+    ..invalidate(weightUnitProvider)
     ..invalidate(selectedDayProvider);
   ref.read(onboardingDoneProvider.notifier).reset();
   return serverOk;
