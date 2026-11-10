@@ -62,14 +62,27 @@ flutter test
 cd server && pytest -q
 ```
 
-## ساخت APK
+پوشش تست: `flutter test --coverage` ← `coverage/lcov.info`.
+آخرین اندازه‌گیری:
+
+| بخش | پوشش |
+|---|---|
+| `lib/core` (منطق اصلی) | ٪۸۵ |
+| `lib/features` | ٪۸۹ |
+| `lib/data` (بدون کد تولیدی Drift) | ٪۷۸ |
+
+فایل‌های کم‌پوشش `lib/core` فقط پوسته‌ی پلاگین‌های اندرویدی‌اند (اعلان، ویجت، گفتار، اشتراک‌گذاری) که در تست با Fake جایگزین می‌شوند.
+
+## ساخت APK و انتشار
 
 ```bash
-flutter build apk --release --flavor bazaar --split-per-abi
-flutter build apk --release --flavor myket  --split-per-abi
+cp android/key.properties.example android/key.properties   # یک بار؛ راهنما داخل فایل
+flutter build apk --release --flavor bazaar --split-per-abi --obfuscate \
+  --split-debug-info=build/symbols/bazaar --dart-define=API_BASE_URL=https://...
 ```
-خروجی: `build/app/outputs/flutter-apk/`.
-امضای release فعلاً با کلید debug است؛ امضای واقعی در مرحله‌ی ۷.
+خروجی: `build/app/outputs/flutter-apk/`. بدون `key.properties`، release با کلید debug امضا می‌شود (قابل انتشار نیست).
+چک‌لیست کامل انتشار، ASO و اسکرین‌شات‌ها: [`docs/RELEASE.md`](docs/RELEASE.md).
+صفحه‌ی حریم خصوصی برای لینک فروشگاه: `python server/tools/export_privacy.py` ← `docs/privacy.html`.
 
 ## ساختار
 

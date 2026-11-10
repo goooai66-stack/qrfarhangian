@@ -155,3 +155,13 @@ def test_events_whitelist_and_stats(make_client):
     scan = next(e for e in stats if e["name"] == "scan")
     assert (scan["total"], scan["devices"]) == (4, 1)
     assert c.get("/admin/events").status_code == 404
+
+
+def test_admin_feedback_lists_reports_without_device(make_client):
+    c = make_client(admin_token="secret")
+    h = register(c)
+    c.post("/feedback/scan", headers=h, json={"scan_id": "s9", "original": [], "corrected": [], "note": "کته بود"})
+    assert c.get("/admin/feedback").status_code == 404
+    rows = c.get("/admin/feedback", headers={"X-Admin-Token": "secret"}).json()["feedback"]
+    assert rows[0]["scan_id"] == "s9" and rows[0]["note"] == "کته بود"
+    assert "device_id" not in rows[0]

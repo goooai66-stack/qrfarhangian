@@ -1,0 +1,8 @@
+# این فایل را به android/key.properties کپی کن و مقادیر را پر کن (در git نمی‌رود).
+# ساخت کلید (یک بار؛ فایل و رمزها را جای امن پشتیبان بگیر):
+#   keytool -genkey -v -keystore ~/calorielens-upload.jks -keyalg RSA -keysize 2048 \
+#     -validity 10000 -alias calorielens
+storeFile=/home/YOU/calorielens-upload.jks
+storePassword=CHANGE_ME
+keyAlias=calorielens
+keyPassword=CHANGE_ME

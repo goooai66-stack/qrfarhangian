@@ -354,6 +354,16 @@ class Database:
                 (device_id, scan_id, original, corrected, note, int(time.time())),
             )
 
+    def recent_feedback(self, limit: int) -> list[dict]:
+        """برای بازبینی دستی گزارش‌های «تشخیص اشتباه بود» (بدون شناسه‌ی دستگاه)."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT scan_id, original_json, corrected_json, note, created_at "
+                "FROM scan_feedback ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [dict(r) for r in rows]
+
     # ---- آنالیتیکس بی‌نام (بخش ۱۱) ----
 
     def add_events(self, device_id: str, events: list[tuple[str, str, int]]) -> None:

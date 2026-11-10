@@ -363,6 +363,12 @@ def create_app(
             raise ApiError(404, "not_found", "not found")
         return {"events": db.event_stats(min(max(days, 1), 365))}
 
+    @app.get("/admin/feedback")
+    async def admin_feedback(limit: int = 100, x_admin_token: str | None = Header(default=None)):
+        if not s.admin_token or x_admin_token != s.admin_token:
+            raise ApiError(404, "not_found", "not found")
+        return {"feedback": db.recent_feedback(min(max(limit, 1), 1000))}
+
     @app.delete("/device")
     async def delete_device(device=Depends(current_device)):
         """«حذف همه‌ی داده‌ها» (بخش ۴-۷): داده‌های این دستگاه روی سرور پاک می‌شود."""
