@@ -134,6 +134,7 @@ void main() {
           clockProvider.overrideWithValue(() => now),
           adServiceProvider.overrideWithValue(ads),
           monetizationApiProvider.overrideWithValue(api),
+          monetizationEnabledProvider.overrideWithValue(true),
         ],
       );
       addTearDown(c.dispose);

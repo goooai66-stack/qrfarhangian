@@ -38,7 +38,9 @@ class AdCoordinator {
   static const _dayKey = 'ads_day';
   static const _countKey = 'ads_count';
 
-  bool get _premium => _ref.read(isPremiumProvider);
+  /// کاربر ویژه یا انتشار رایگان (درآمدزایی خاموش) ← بدون تبلیغ.
+  bool get _premium =>
+      _ref.read(isPremiumProvider) || !_ref.read(monetizationEnabledProvider);
   AdService get _ads => _ref.read(adServiceProvider);
   DateTime _now() => _ref.read(clockProvider)();
 

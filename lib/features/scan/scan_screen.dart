@@ -767,19 +767,21 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         title: t.scanQuotaTitle,
         body: t.scanQuotaHint,
         primary: (t.manualLog, _manualLog),
-        extra: [
-          OutlinedButton(
-            key: const Key('quota-video'),
-            onPressed: _watchVideo,
-            child: Text(t.scanQuotaVideo),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            key: const Key('quota-premium'),
-            onPressed: () => context.push(Routes.paywall),
-            child: Text(t.scanQuotaPremium),
-          ),
-        ],
+        extra: !ref.read(monetizationEnabledProvider)
+            ? const []
+            : [
+                OutlinedButton(
+                  key: const Key('quota-video'),
+                  onPressed: _watchVideo,
+                  child: Text(t.scanQuotaVideo),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  key: const Key('quota-premium'),
+                  onPressed: () => context.push(Routes.paywall),
+                  child: Text(t.scanQuotaPremium),
+                ),
+              ],
       );
     }
     final (msg, canRetry) = switch (_error) {

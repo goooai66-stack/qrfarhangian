@@ -469,6 +469,12 @@ final isPremiumProvider = Provider<bool>(
   (ref) => ref.watch(entitlementProvider).value?.premium ?? false,
 );
 
+/// خاموش ← هیچ اثری از اشتراک، تبلیغ و دعوت در اپ نیست (انتشار رایگان).
+/// سهمیه‌ی روزانه‌ی سرور همچنان برقرار است تا هزینه‌ی مدل مهار شود.
+final monetizationEnabledProvider = Provider<bool>(
+  (ref) => AppConfig.monetization,
+);
+
 final adCoordinatorProvider = Provider<AdCoordinator>(
   (ref) => AdCoordinator(ref),
 );

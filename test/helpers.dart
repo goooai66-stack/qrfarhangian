@@ -40,6 +40,7 @@ Future<void> pumpApp(
   FakeSpeechService? speech,
   FakeCommunityApi? community,
   FakeEventSender? events,
+  bool paid = true,
 }) async {
   final foodRepo = foods ?? loadAppFoods();
   RatingPromptGate.checkedThisSession = false;
@@ -75,6 +76,8 @@ Future<void> pumpApp(
         ),
         speechServiceProvider.overrideWithValue(speech ?? FakeSpeechService()),
         communityApiProvider.overrideWithValue(community ?? FakeCommunityApi()),
+        // بیشتر تست‌ها مسیر اشتراک و تبلیغ را می‌سنجند؛ پیش‌فرض اپ خاموش است.
+        monetizationEnabledProvider.overrideWithValue(paid),
         ...overrides,
       ],
       child: const CalorieLensApp(),

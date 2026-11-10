@@ -21,6 +21,7 @@ class ProfileScreen extends ConsumerWidget {
     final t = AppLocalizations.of(context);
     final mode = ref.watch(themeModeProvider);
     final unit = ref.watch(weightUnitProvider);
+    final paid = ref.watch(monetizationEnabledProvider);
     final profile = ref.watch(profileProvider).value;
     final goal = ref.watch(activeGoalProvider).value;
     final weight = ref.watch(currentWeightProvider).value;
@@ -89,30 +90,34 @@ class ProfileScreen extends ConsumerWidget {
             label: Text(t.profileEdit),
           ),
           const SizedBox(height: 8),
-          Card(
-            color: BrandColors.orange.withValues(alpha: 0.12),
-            child: ListTile(
-              key: const Key('premium-card'),
-              leading: const Text('💎', style: TextStyle(fontSize: 24)),
-              title: Text(
-                ent?.premium == true && ent?.premiumUntil != null
-                    ? t.premiumActiveUntil(t.formatDateLong(ent!.premiumUntil!))
-                    : t.upgradePremium,
+          if (paid) ...[
+            Card(
+              color: BrandColors.orange.withValues(alpha: 0.12),
+              child: ListTile(
+                key: const Key('premium-card'),
+                leading: const Text('💎', style: TextStyle(fontSize: 24)),
+                title: Text(
+                  ent?.premium == true && ent?.premiumUntil != null
+                      ? t.premiumActiveUntil(
+                          t.formatDateLong(ent!.premiumUntil!),
+                        )
+                      : t.upgradePremium,
+                ),
+                onTap: ent?.premium == true
+                    ? null
+                    : () => context.push(Routes.paywall),
               ),
-              onTap: ent?.premium == true
-                  ? null
-                  : () => context.push(Routes.paywall),
             ),
-          ),
-          Card(
-            child: ListTile(
-              key: const Key('open-invite'),
-              leading: const Icon(Icons.card_giftcard_outlined),
-              title: Text(t.inviteTitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(Routes.invite),
+            Card(
+              child: ListTile(
+                key: const Key('open-invite'),
+                leading: const Icon(Icons.card_giftcard_outlined),
+                title: Text(t.inviteTitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(Routes.invite),
+              ),
             ),
-          ),
+          ],
           Card(
             child: ListTile(
               key: const Key('open-reminders'),

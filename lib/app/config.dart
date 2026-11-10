@@ -14,6 +14,10 @@ abstract final class AppConfig {
   /// `--dart-define=FAKE_SCAN=true` ← تشخیص جعلی بدون سرور (توسعه‌ی UI).
   static const fakeScan = bool.fromEnvironment('FAKE_SCAN');
 
+  /// درآمدزایی (اشتراک، تبلیغ، دعوت). پیش‌فرض خاموش: انتشار اول رایگان است.
+  /// برای روشن کردن: `--dart-define=MONETIZATION=true`
+  static const monetization = bool.fromEnvironment('MONETIZATION');
+
   /// کلید تپسل‌پلاس (بعد از ساخت حساب). خالی ← بدون تبلیغ در release
   /// و تبلیغ نمونه در debug.
   static const tapsellKey = String.fromEnvironment('TAPSELL_KEY');

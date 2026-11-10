@@ -256,6 +256,8 @@ class _SoftPaywallGateState extends ConsumerState<SoftPaywallGate> {
   }
 
   Future<void> _check() async {
+    // انتشار رایگان: «pending» می‌ماند تا اگر بعداً اشتراک روشن شد، یک بار نشان داده شود.
+    if (!ref.read(monetizationEnabledProvider)) return;
     final db = ref.read(databaseProvider);
     if (await db.getSetting(SoftPaywallGate.pendingKey) != 'pending') return;
     await db.setSetting(SoftPaywallGate.pendingKey, 'shown');
