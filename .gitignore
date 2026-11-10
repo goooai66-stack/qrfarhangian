@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# تنظیمات نصب سرور (شامل کد راه‌اندازی مدیر)
+deploy/.env

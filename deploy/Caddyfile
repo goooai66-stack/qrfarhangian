@@ -1,0 +1,9 @@
+# گواهی HTTPS خودکار از Let's Encrypt برای دامنه‌ی شما.
+{$DOMAIN} {
+	encode gzip
+	request_body {
+		max_size 2MB
+	}
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy api:8000
+}
