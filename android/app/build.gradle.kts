@@ -43,6 +43,11 @@ android {
         versionName = flutter.versionName
     }
 
+    buildFeatures {
+        // برای resValue نام اپ در هر Flavor (در AGP 9 پیش‌فرض خاموش است).
+        resValues = true
+    }
+
     // دو فروشگاه: کافه‌بازار و مایکت (بخش ۹-۳).
     flavorDimensions += "store"
     productFlavors {
