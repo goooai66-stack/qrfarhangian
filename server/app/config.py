@@ -19,6 +19,9 @@ def _float(name: str, default: float) -> float:
 
 @dataclass
 class Settings:
+    # development | production — در production تنظیمات ناامن، سرور را بالا نمی‌آورد.
+    app_env: str = "development"
+
     # fake | anthropic | openai_compatible
     vision_provider: str = "fake"
 
@@ -64,13 +67,51 @@ class Settings:
     purchase_verifier: str = "fake"
     product_days: str = "premium_monthly=30,premium_quarterly=90,premium_yearly=365"
 
+    # trusting = هر توکن پاداش پذیرفته می‌شود (فقط توسعه) | disabled = پاداش ویدیو خاموش
+    # (تا وقتی تأیید سمت سرور تپسل وصل نشده، در production باید disabled باشد)
+    reward_verifier: str = "trusting"
+
     # خالی = /admin غیرفعال
     admin_token: str = ""
+
+    @property
+    def production(self) -> bool:
+        return self.app_env == "production"
+
+    def problems(self) -> list[str]:
+        """تنظیمات ناامن یا ناقص. در production هر کدام جلوی بالا آمدن سرور را می‌گیرد."""
+        p: list[str] = []
+        if self.app_env not in ("development", "production"):
+            p.append(f"APP_ENV={self.app_env!r} نامعتبر است (development یا production)")
+        if self.vision_provider not in ("fake", "anthropic", "openai_compatible"):
+            p.append(f"VISION_PROVIDER={self.vision_provider!r} نامعتبر است")
+        if self.purchase_verifier not in ("fake", "stores"):
+            p.append(f"PURCHASE_VERIFIER={self.purchase_verifier!r} نامعتبر است (fake یا stores)")
+        if self.reward_verifier not in ("trusting", "disabled"):
+            p.append(f"REWARD_VERIFIER={self.reward_verifier!r} نامعتبر است (trusting یا disabled)")
+        if self.admin_token and len(self.admin_token) < 32:
+            p.append("ADMIN_TOKEN کوتاه است (حداقل ۳۲ نویسه؛ مثلاً: openssl rand -hex 32)")
+        if self.vision_provider == "openai_compatible" and not (
+            self.openai_compat_base_url and self.openai_compat_api_key and self.openai_compat_model
+        ):
+            p.append("OPENAI_COMPAT_BASE_URL، OPENAI_COMPAT_API_KEY و OPENAI_COMPAT_MODEL لازم است")
+        if self.vision_provider == "anthropic" and not os.environ.get("ANTHROPIC_API_KEY"):
+            p.append("ANTHROPIC_API_KEY تنظیم نشده")
+        if self.production:
+            if self.vision_provider == "fake":
+                p.append("VISION_PROVIDER=fake در production: پاسخ‌ها ساختگی‌اند")
+            if self.purchase_verifier == "fake":
+                p.append("PURCHASE_VERIFIER=fake در production: هر توکن test- اشتراک رایگان می‌گیرد")
+            if self.reward_verifier == "trusting":
+                p.append("REWARD_VERIFIER=trusting در production: اسکن پاداش بدون دیدن تبلیغ")
+        return p
 
     @classmethod
     def from_env(cls) -> "Settings":
         e = os.environ
         s = cls(
+            app_env=e.get("APP_ENV", "development"),
+            reward_verifier=e.get("REWARD_VERIFIER", "trusting"),
             vision_provider=e.get("VISION_PROVIDER", "fake"),
             anthropic_model=e.get("ANTHROPIC_MODEL", "claude-opus-5-5"),
             anthropic_effort=e.get("ANTHROPIC_EFFORT", "low"),

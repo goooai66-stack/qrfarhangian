@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import logging
 import re
@@ -115,6 +116,11 @@ def create_app(
     purchase_verifier=None,
 ) -> FastAPI:
     s = settings or Settings.from_env()
+    problems = s.problems()
+    if problems and s.production:
+        raise RuntimeError("تنظیمات ناامن برای production:\n- " + "\n- ".join(problems))
+    for msg in problems:
+        log.warning("تنظیمات: %s", msg)
     foods = FoodDB.load(s.foods_path)
     db = Database(s.db_path, s.quota_timezone)
     vision = provider or build_provider(s)
@@ -126,7 +132,7 @@ def create_app(
     )
     if purchase_verifier is not None:
         purchases = purchase_verifier
-    rewards = TrustingRewardVerifier()
+    rewards = TrustingRewardVerifier() if s.reward_verifier == "trusting" else None
     scan_limiter = RateLimiter(s.scans_per_minute, 60)
     register_limiter = RateLimiter(s.device_registrations_per_hour_per_ip, 3600)
     if vision.name == "fake":
@@ -135,9 +141,24 @@ def create_app(
             vision.text_parser = KeywordTextParser(foods)
         log.warning("VISION_PROVIDER=fake — پاسخ‌ها ساختگی‌اند؛ فقط برای توسعه.")
 
-    app = FastAPI(title="CalorieLens API", version="1.0")
+    # در production مستندات خودکار API (فهرست همه‌ی مسیرها) منتشر نمی‌شود.
+    hidden = {"docs_url": None, "redoc_url": None, "openapi_url": None} if s.production else {}
+    app = FastAPI(title="CalorieLens API", version="1.0", **hidden)
     app.state.db = db
     app.state.provider = vision
+
+    @app.middleware("http")
+    async def _security_headers(request: Request, call_next):
+        res = await call_next(request)
+        res.headers["X-Content-Type-Options"] = "nosniff"
+        res.headers["Cache-Control"] = "no-store"
+        res.headers["Referrer-Policy"] = "no-referrer"
+        return res
+
+    def require_admin(token: str | None) -> None:
+        # مقایسه‌ی زمان‌ثابت؛ بدون توکن پیکربندی‌شده، /admin وجود ندارد.
+        if not s.admin_token or not token or not hmac.compare_digest(token.encode(), s.admin_token.encode()):
+            raise ApiError(404, "not_found", "not found")
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, e: ApiError):
@@ -150,6 +171,8 @@ def create_app(
             return s.premium_scans_per_day
         return s.free_scans_per_day + db.usage_today(device["id"])[1]
 
+    rewards_off = rewards is None
+
     def quota_body(device) -> dict:
         limit = limit_for(device)
         used, rewards = db.usage_today(device["id"])
@@ -161,7 +184,7 @@ def create_app(
             "day": db.today(),
             "premium": premium,
             "premium_until": device["premium_until"] if premium else None,
-            "rewards_left": 0 if premium else max(0, s.rewards_per_day - rewards),
+            "rewards_left": 0 if premium or rewards_off else max(0, s.rewards_per_day - rewards),
             "voice_remaining": max(0, voice_limit_for(device) - db.voice_today(device["id"])),
         }
 
@@ -359,14 +382,12 @@ def create_app(
 
     @app.get("/admin/events")
     async def admin_events(days: int = 30, x_admin_token: str | None = Header(default=None)):
-        if not s.admin_token or x_admin_token != s.admin_token:
-            raise ApiError(404, "not_found", "not found")
+        require_admin(x_admin_token)
         return {"events": db.event_stats(min(max(days, 1), 365))}
 
     @app.get("/admin/feedback")
     async def admin_feedback(limit: int = 100, x_admin_token: str | None = Header(default=None)):
-        if not s.admin_token or x_admin_token != s.admin_token:
-            raise ApiError(404, "not_found", "not found")
+        require_admin(x_admin_token)
         return {"feedback": db.recent_feedback(min(max(limit, 1), 1000))}
 
     @app.delete("/device")
@@ -380,6 +401,8 @@ def create_app(
         """ویدیوی جایزه‌دار کامل دیده شد ← ۱ اسکن بیشتر (حداکثر N در روز)."""
         if db.is_premium(device):
             raise ApiError(409, "premium_user", "premium users have no ads")
+        if rewards is None:
+            raise ApiError(503, "reward_unavailable", "rewarded ads are not enabled")
         if not await rewards.verify(body.reward_token):
             raise ApiError(400, "invalid_reward", "reward not verified")
         if not db.try_add_reward(device["id"], s.rewards_per_day):
@@ -405,8 +428,7 @@ def create_app(
 
     @app.get("/admin/stats")
     async def admin_stats(days: int = 30, x_admin_token: str | None = Header(default=None)):
-        if not s.admin_token or x_admin_token != s.admin_token:
-            raise ApiError(404, "not_found", "not found")
+        require_admin(x_admin_token)
         return {"days": db.stats(min(max(days, 1), 365))}
 
     return app
