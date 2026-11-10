@@ -17,7 +17,8 @@ val hasReleaseKey = keystoreProperties.getProperty("storeFile") != null
 
 android {
     namespace = "ir.calorielens.calorie_lens"
-    compileSdk = flutter.compileSdkVersion
+    // androidx.core 1.19 (وابستگی پلاگین‌ها) کامپایل با API 37 می‌خواهد.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
