@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
+import '../../core/analytics/analytics.dart';
 import '../../core/recognition/food_recognizer.dart';
 import '../../data/db/app_database.dart';
 import '../../l10n/app_localizations.dart';
@@ -74,6 +75,7 @@ class _VoiceLogScreenState extends ConsumerState<VoiceLogScreen> {
       if (!result.isFood || result.items.isEmpty) {
         messenger.showSnackBar(SnackBar(content: Text(t.voiceNotFood)));
       } else {
+        ref.read(analyticsProvider).track(AnalyticsEvent.voiceLog);
         final meal = result.meal ?? widget.meal;
         context.pushReplacement(
           Routes.scanPreset(meal: meal, day: widget.day),

@@ -27,6 +27,9 @@ abstract interface class CommunityApi {
     required List<Map<String, dynamic>> corrected,
     String? note,
   });
+
+  /// حذف داده‌های این دستگاه روی سرور.
+  Future<void> deleteServerData();
 }
 
 class ServerCommunityApi implements CommunityApi {
@@ -49,6 +52,9 @@ class ServerCommunityApi implements CommunityApi {
       QuotaStatus.fromJson(await _api.redeemInvite(code));
 
   @override
+  Future<void> deleteServerData() => _api.deleteDevice();
+
+  @override
   Future<void> sendScanFeedback({
     String? scanId,
     required List<Map<String, dynamic>> original,
@@ -63,6 +69,15 @@ class ServerCommunityApi implements CommunityApi {
 }
 
 class FakeCommunityApi implements CommunityApi {
+  bool serverDeleted = false;
+  bool failDelete = false;
+
+  @override
+  Future<void> deleteServerData() async {
+    if (failDelete) throw ApiException(ApiErrorKind.offline);
+    serverDeleted = true;
+  }
+
   FakeCommunityApi({this.code = 'ABC234', DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
 

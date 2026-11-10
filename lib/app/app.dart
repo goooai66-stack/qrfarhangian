@@ -32,10 +32,16 @@ class _CalorieLensAppState extends ConsumerState<CalorieLensApp> {
   void initState() {
     super.initState();
     // صف اسکن آفلاین: هنگام باز شدن، برگشت به اپ و هر دقیقه.
-    _lifecycle = AppLifecycleListener(onResume: _tick);
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        _tick();
+        _analyticsOnOpen();
+      },
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tick();
       _reapplyReminders();
+      _analyticsOnOpen();
     });
     _queueTimer = Timer.periodic(const Duration(minutes: 1), (_) => _tick());
     ref.listenManual(
@@ -50,6 +56,17 @@ class _CalorieLensAppState extends ConsumerState<CalorieLensApp> {
     if (!mounted) return;
     ref.read(todayProvider.notifier).refresh();
     _processQueue();
+  }
+
+  Future<void> _analyticsOnOpen() async {
+    if (!mounted || !ref.read(onboardingDoneProvider)) return;
+    try {
+      final a = ref.read(analyticsProvider);
+      await a.onAppOpen();
+      await a.flush();
+    } catch (e) {
+      debugPrint('analytics: $e');
+    }
   }
 
   /// یادآورها با منطقه‌ی زمانی فعلی گوشی دوباره زمان‌بندی می‌شوند.

@@ -46,6 +46,13 @@ CREATE TABLE IF NOT EXISTS scan_feedback (
   note TEXT,
   created_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS events (
+  day TEXT NOT NULL,
+  name TEXT NOT NULL,
+  device_id TEXT NOT NULL,
+  count INTEGER NOT NULL,
+  PRIMARY KEY (day, name, device_id)
+);
 CREATE TABLE IF NOT EXISTS scan_cache (
   image_hash TEXT PRIMARY KEY,
   result_json TEXT NOT NULL,
@@ -346,3 +353,37 @@ class Database:
                 "VALUES (?, ?, ?, ?, ?, ?)",
                 (device_id, scan_id, original, corrected, note, int(time.time())),
             )
+
+    # ---- آنالیتیکس بی‌نام (بخش ۱۱) ----
+
+    def add_events(self, device_id: str, events: list[tuple[str, str, int]]) -> None:
+        with self._lock:
+            for day, name, count in events:
+                self._conn.execute(
+                    "INSERT INTO events (day, name, device_id, count) VALUES (?, ?, ?, ?) "
+                    "ON CONFLICT(day, name, device_id) DO UPDATE SET count = count + excluded.count",
+                    (day, name, device_id, count),
+                )
+
+    def event_stats(self, days: int) -> list[dict]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT day, name, SUM(count) AS total, COUNT(DISTINCT device_id) AS devices "
+                "FROM events WHERE day >= date('now', ?) GROUP BY day, name ORDER BY day DESC, name",
+                (f"-{days} days",),
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    # ---- حذف داده‌های دستگاه (درخواست کاربر) ----
+
+    def delete_device(self, device_id: str) -> None:
+        """همه‌ی داده‌های این دستگاه پاک می‌شود. سابقه‌ی خرید (توکن فروشگاه) برای
+        بازیابی اشتراک می‌ماند ولی از دستگاه جدا می‌شود؛ لاگ هزینه بی‌نام می‌شود."""
+        with self._lock:
+            self._conn.execute("DELETE FROM usage WHERE device_id = ?", (device_id,))
+            self._conn.execute("DELETE FROM events WHERE device_id = ?", (device_id,))
+            self._conn.execute("DELETE FROM scan_feedback WHERE device_id = ?", (device_id,))
+            self._conn.execute("DELETE FROM invites WHERE invitee_id = ? OR inviter_id = ?", (device_id, device_id))
+            self._conn.execute("UPDATE purchases SET device_id = '' WHERE device_id = ?", (device_id,))
+            self._conn.execute("UPDATE scan_log SET device_id = 'deleted' WHERE device_id = ?", (device_id,))
+            self._conn.execute("DELETE FROM devices WHERE id = ?", (device_id,))

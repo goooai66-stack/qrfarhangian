@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 abstract final class BrandColors {
   static const green = Color(0xFF2EAD5B);
   static const orange = Color(0xFFF08A24);
+
+  /// نارنجی پررنگ برای زمینه‌ی متن/آیکون سفید (کنتراست ≥ ۴٫۵، WCAG AA).
+  /// نارنجی روشن فقط برای تزئین بدون متن روی آن.
+  static const orangeDeep = Color(0xFFB85C00);
+
+  /// سبزهای پررنگ برای زمینه‌ی متن سفید (کارت اشتراک).
+  static const greenDeep = Color(0xFF1E7A40);
+  static const greenDarker = Color(0xFF145A2E);
 }
 
 const _fontFamily = 'Vazirmatn';
@@ -33,7 +41,7 @@ ThemeData _build(Brightness brightness) {
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: BrandColors.orange,
+      backgroundColor: BrandColors.orangeDeep,
       foregroundColor: Colors.white,
       extendedTextStyle: TextStyle(
         fontFamily: _fontFamily,

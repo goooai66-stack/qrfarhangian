@@ -80,6 +80,7 @@ flutter:
 
   assets:
     - assets/data/
+    - assets/fonts/Vazirmatn/OFL.txt
     # - assets/lottie/   # از مرحله‌های بعد
 
   fonts:

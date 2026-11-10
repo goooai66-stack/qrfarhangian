@@ -10,6 +10,7 @@ import '../../core/utils/persian_digits.dart';
 import '../../data/db/app_database.dart';
 import '../../data/foods/food.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/analytics/analytics.dart';
 import 'logging_labels.dart';
 
 /// جزئیات غذا: واحد و مقدار ← محاسبه‌ی زنده؛ ثبت در وعده یا ویرایش ثبت قبلی.
@@ -94,6 +95,7 @@ class _FoodDetailScreenState extends ConsumerState<FoodDetailScreen> {
         nutrients: s.nutrients,
       );
       ref.read(selectedDayProvider.notifier).select(day);
+      await ref.read(analyticsProvider).track(AnalyticsEvent.logFood);
       // تمام‌صفحه فقط بعد از ذخیره و طبق قوانین بخش ۹-۲.
       await ref.read(adCoordinatorProvider).afterLogSaved();
     }

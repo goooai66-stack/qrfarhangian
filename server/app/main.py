@@ -38,6 +38,7 @@ from .text_parser import KeywordTextParser
 log = logging.getLogger("calorielens")
 
 _DEVICE_ID = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
+_DAY = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 class ApiError(Exception):
@@ -61,6 +62,30 @@ class DeviceIn(BaseModel):
 
 class RewardIn(BaseModel):
     reward_token: str
+
+
+# رویدادهای مجاز آنالیتیکس (بخش ۱۱)؛ هیچ داده‌ی شخصی یا غذایی.
+ANALYTICS_EVENTS = {
+    "onboarding_completed",
+    "scan",
+    "voice_log",
+    "log_food",
+    "paywall_view",
+    "purchase",
+    "retention_d1",
+    "retention_d7",
+    "retention_d30",
+}
+
+
+class EventIn(BaseModel):
+    name: str
+    day: str
+    count: int = 1
+
+
+class EventsIn(BaseModel):
+    events: list[EventIn]
 
 
 class VoiceIn(BaseModel):
@@ -319,6 +344,29 @@ def create_app(
         if len(original) + len(corrected) > 20_000 or (body.note and len(body.note) > 500):
             raise ApiError(413, "feedback_too_large", "feedback too large")
         db.add_feedback(device["id"], body.scan_id, original, corrected, body.note)
+        return {"ok": True}
+
+    @app.post("/events")
+    async def events(body: EventsIn, device=Depends(current_device)):
+        """شمارش رویدادها (بدون داده‌ی شخصی). نام‌های ناشناخته نادیده گرفته می‌شوند."""
+        ok = [
+            (e.day, e.name, min(max(e.count, 0), 1000))
+            for e in body.events[:200]
+            if e.name in ANALYTICS_EVENTS and _DAY.match(e.day) and e.count > 0
+        ]
+        db.add_events(device["id"], ok)
+        return {"accepted": len(ok)}
+
+    @app.get("/admin/events")
+    async def admin_events(days: int = 30, x_admin_token: str | None = Header(default=None)):
+        if not s.admin_token or x_admin_token != s.admin_token:
+            raise ApiError(404, "not_found", "not found")
+        return {"events": db.event_stats(min(max(days, 1), 365))}
+
+    @app.delete("/device")
+    async def delete_device(device=Depends(current_device)):
+        """«حذف همه‌ی داده‌ها» (بخش ۴-۷): داده‌های این دستگاه روی سرور پاک می‌شود."""
+        db.delete_device(device["id"])
         return {"ok": True}
 
     @app.post("/quota/reward")

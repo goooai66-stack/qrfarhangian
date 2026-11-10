@@ -19,6 +19,7 @@ import '../../data/scan/pending_scan_repository.dart';
 import '../../l10n/app_localizations.dart';
 import '../logging/logging_labels.dart';
 import '../monetization/ad_coordinator.dart';
+import '../../core/analytics/analytics.dart';
 import 'photo_source.dart';
 import 'scan_service.dart';
 import '../common/persian_counter.dart';
@@ -202,6 +203,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     setState(() {
       switch (outcome) {
         case ScanSucceeded(:final result):
+          ref.read(analyticsProvider).track(AnalyticsEvent.scan);
           _show(result, foods);
         case ScanQueued():
           _phase = _Phase.queued;
@@ -260,6 +262,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     if (_pending != null) {
       await ref.read(pendingScanRepositoryProvider).delete(_pending!.id);
     }
+    await ref.read(analyticsProvider).track(AnalyticsEvent.logFood);
     await ref.read(adCoordinatorProvider).afterLogSaved();
     if (!mounted) return;
     ref.read(selectedDayProvider.notifier).select(_day);

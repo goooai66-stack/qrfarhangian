@@ -149,6 +149,15 @@ class ProfileScreen extends ConsumerWidget {
               title: Text(t.medicalDisclaimer),
             ),
           ),
+          Card(
+            child: ListTile(
+              key: const Key('open-info'),
+              leading: const Icon(Icons.info_outline),
+              title: Text(t.openSettingsInfo),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(Routes.info),
+            ),
+          ),
         ],
       ),
     );

@@ -16,6 +16,7 @@ import '../features/plans/plans_screen.dart';
 import '../features/profile/profile_edit_screen.dart';
 import '../features/scan/photo_source.dart';
 import '../features/scan/scan_screen.dart';
+import '../features/settings/info_screen.dart';
 import '../features/settings/reminders_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/progress/progress_screen.dart';
@@ -55,6 +56,7 @@ abstract final class Routes {
   static const paywall = '/paywall';
   static const voice = '/voice';
   static const invite = '/profile/invite';
+  static const info = '/profile/info';
 
   static String voiceFor({required MealType meal, required DateTime day}) =>
       Uri(
@@ -217,6 +219,7 @@ GoRouter buildRouter(ValueListenable<bool> onboardingDone) => GoRouter(
                   path: 'invite',
                   builder: (_, _) => const InviteScreen(),
                 ),
+                GoRoute(path: 'info', builder: (_, _) => const InfoScreen()),
               ],
             ),
           ],

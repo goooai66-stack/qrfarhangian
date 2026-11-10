@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/ad_service.dart';
+import '../core/analytics/analytics.dart';
 import 'config.dart';
 import 'flavor.dart';
 import '../core/billing/billing_service.dart';
@@ -112,6 +113,9 @@ class OnboardingDoneNotifier extends Notifier<bool> {
   bool build() => ref.read(initialOnboardingDoneProvider);
 
   void markDone() => state = true;
+
+  /// بعد از «حذف همه‌ی داده‌ها» ← دوباره آنبوردینگ.
+  void reset() => state = false;
 }
 
 final onboardingDoneProvider = NotifierProvider<OnboardingDoneNotifier, bool>(
@@ -470,4 +474,30 @@ final customMealsProvider = StreamProvider<List<CustomMeal>>(
 /// حالت رمضان (از تنظیمات یادآورها).
 final ramadanProvider = Provider<bool>(
   (ref) => ref.watch(reminderSettingsProvider).value?.ramadan ?? false,
+);
+
+// ---- انتشار: آنالیتیکس بی‌نام (مرحله‌ی ۷) ----
+
+class _ServerEventSender implements EventSender {
+  _ServerEventSender(this._api);
+  final ApiClient _api;
+
+  @override
+  Future<void> send(List<({String name, String day, int count})> events) =>
+      _api.sendEvents([
+        for (final e in events)
+          {'name': e.name, 'day': e.day, 'count': e.count},
+      ]);
+}
+
+final eventSenderProvider = Provider<EventSender>(
+  (ref) => _ServerEventSender(ref.watch(apiClientProvider)),
+);
+
+final analyticsProvider = Provider<AnalyticsService>(
+  (ref) => AnalyticsService(
+    ref.watch(databaseProvider),
+    ref.watch(eventSenderProvider),
+    clock: ref.watch(clockProvider),
+  ),
 );

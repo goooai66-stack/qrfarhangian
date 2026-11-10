@@ -346,7 +346,7 @@ class _WeightChart extends StatelessWidget {
                 if (goalKg != null)
                   HorizontalLine(
                     y: goalKg!,
-                    color: BrandColors.orange,
+                    color: BrandColors.orangeDeep,
                     strokeWidth: 1.5,
                     dashArray: [6, 4],
                   ),
@@ -511,7 +511,7 @@ class _CaloriesChart extends StatelessWidget {
               if (goal != null)
                 HorizontalLine(
                   y: goal!.toDouble(),
-                  color: BrandColors.orange,
+                  color: BrandColors.orangeDeep,
                   strokeWidth: 1.5,
                   dashArray: [6, 4],
                 ),
@@ -575,7 +575,7 @@ class _BadgesCard extends ConsumerWidget {
                           CircleAvatar(
                             radius: 26,
                             backgroundColor: earned.contains(a)
-                                ? BrandColors.orange
+                                ? BrandColors.orangeDeep
                                 : cs.surfaceContainerHighest,
                             child: Icon(
                               achievementIcon(a),

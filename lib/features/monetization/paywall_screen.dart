@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/providers.dart';
 import '../../app/router.dart';
 import '../../app/theme.dart';
+import '../../core/analytics/analytics.dart';
 import '../../core/billing/billing_service.dart';
 import '../../data/api/api_client.dart';
 import '../../l10n/app_localizations.dart';
@@ -27,6 +28,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   void initState() {
     super.initState();
+    ref.read(analyticsProvider).track(AnalyticsEvent.paywallView);
     _load();
   }
 
@@ -84,6 +86,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     if (r.errorCode == 'unavailable') return t.purchaseUnavailable;
     if (!r.success) return null; // انصراف کاربر
     if (await _verify(r)) {
+      await ref.read(analyticsProvider).track(AnalyticsEvent.purchase);
       if (mounted) _close();
       return t.purchaseSuccess;
     }
@@ -188,7 +191,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: BrandColors.orange,
+                                    color: BrandColors.orangeDeep,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(

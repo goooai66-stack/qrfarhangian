@@ -31,6 +31,12 @@ class PhotoStore {
     return f.existsSync() ? f.readAsBytes() : null;
   }
 
+  /// همه‌ی عکس‌های ذخیره‌شده‌ی اپ (برای «حذف همه‌ی داده‌ها»).
+  Future<void> deleteAll() async {
+    final d = await _dir();
+    if (d.existsSync()) await d.delete(recursive: true);
+  }
+
   Future<void> delete(String path) async {
     final f = File(path);
     if (f.existsSync()) await f.delete();

@@ -10,6 +10,7 @@ import '../../core/utils/persian_digits.dart';
 import '../../data/db/app_database.dart';
 import '../../data/foods/food.dart';
 import '../../data/logs/custom_meal_repository.dart';
+import '../../core/analytics/analytics.dart';
 import 'logging_labels.dart';
 import '../monetization/ad_coordinator.dart';
 import '../../data/foods/food_repository.dart';
@@ -244,6 +245,7 @@ class _FoodSearchScreenState extends ConsumerState<FoodSearchScreen> {
           mealType: meal,
         );
     ref.read(selectedDayProvider.notifier).select(day);
+    await ref.read(analyticsProvider).track(AnalyticsEvent.logFood);
     await ref.read(adCoordinatorProvider).afterLogSaved();
     messenger.showSnackBar(
       SnackBar(content: Text(t.customMealLogged(toPersianDigits('$n')))),

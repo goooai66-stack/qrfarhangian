@@ -20,18 +20,28 @@ class WaterCard extends StatelessWidget {
           children: [
             const Icon(Icons.water_drop_outlined, color: Colors.lightBlue),
             const SizedBox(width: 8),
-            Text(t.water, style: Theme.of(context).textTheme.titleMedium),
-            const Spacer(),
+            Expanded(
+              child: Text(
+                t.water,
+                style: Theme.of(context).textTheme.titleMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             IconButton(
               key: const Key('water-minus'),
               tooltip: t.waterRemove,
               onPressed: glasses > 0 ? () => onChanged(glasses - 1) : null,
               icon: const Icon(Icons.remove_circle_outline),
             ),
-            Text(
-              t.waterGlasses(toPersianDigits('$glasses')),
-              key: const Key('water-count'),
-              style: Theme.of(context).textTheme.titleMedium,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  t.waterGlasses(toPersianDigits('$glasses')),
+                  key: const Key('water-count'),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
             ),
             IconButton(
               key: const Key('water-plus'),

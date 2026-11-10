@@ -1,6 +1,9 @@
 /// تنظیمات زمان ساخت (`--dart-define`). کلید هوش مصنوعی اینجا نیست و نباید باشد؛
 /// اپ فقط آدرس سرور واسط خودمان را می‌داند.
 abstract final class AppConfig {
+  /// نسخه‌ی اپ؛ باید با `version` در pubspec.yaml یکی باشد (تست بررسی می‌کند).
+  static const version = '1.0.0';
+
   /// آدرس سرور واسط. پیش‌فرض: میزبان رایانه از دید شبیه‌ساز اندروید.
   /// انتشار: `--dart-define=API_BASE_URL=https://api.example.com`
   static const apiBaseUrl = String.fromEnvironment(

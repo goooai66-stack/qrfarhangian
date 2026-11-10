@@ -38,28 +38,33 @@ class CalorieRing extends StatelessWidget {
               track: cs.surfaceContainerHighest,
               color: over ? BrandColors.orange : cs.primary,
             ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    remaining == null
-                        ? formatPersianNumber(consumed)
-                        : formatPersianNumber(remaining.abs()),
-                    key: const Key('ring-value'),
-                    style: tt.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+            child: Padding(
+              // داخل حلقه؛ با فونت بزرگ سیستم کوچک می‌شود، بیرون نمی‌زند.
+              padding: const EdgeInsets.all(22),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      remaining == null
+                          ? formatPersianNumber(consumed)
+                          : formatPersianNumber(remaining.abs()),
+                      key: const Key('ring-value'),
+                      style: tt.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  Text(
-                    remaining == null
-                        ? t.kcalConsumed
-                        : over
-                        ? t.kcalConsumed
-                        : t.kcalRemaining,
-                    style: tt.bodyMedium,
-                  ),
-                ],
+                    Text(
+                      remaining == null
+                          ? t.kcalConsumed
+                          : over
+                          ? t.kcalConsumed
+                          : t.kcalRemaining,
+                      style: tt.bodyMedium,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

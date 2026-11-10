@@ -242,7 +242,7 @@ class WeightProjectionChart extends StatelessWidget {
             horizontalLines: [
               HorizontalLine(
                 y: goalKg,
-                color: BrandColors.orange,
+                color: BrandColors.orangeDeep,
                 strokeWidth: 1.5,
                 dashArray: [6, 4],
               ),

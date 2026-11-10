@@ -93,7 +93,7 @@ class ApiClient {
   Future<String> _ensureToken({bool force = false}) async {
     if (!force) {
       _token ??= await db.getSetting(_tokenKey);
-      if (_token != null) return _token!;
+      if (_token != null && _token!.isNotEmpty) return _token!;
     }
     final deviceId = await _deviceId();
     final res = await _send(
@@ -181,6 +181,27 @@ class ApiClient {
           body: jsonEncode(body),
         ),
       );
+
+  Future<Map<String, dynamic>> sendEvents(List<Map<String, Object>> events) =>
+      _authed(
+        (t) => _http.post(
+          _uri('/events'),
+          headers: _json(t),
+          body: jsonEncode({'events': events}),
+        ),
+      );
+
+  /// «حذف همه‌ی داده‌ها»: داده‌های این دستگاه روی سرور.
+  Future<void> deleteDevice() async {
+    await _authed(
+      (t) => _http.delete(
+        _uri('/device'),
+        headers: {'Authorization': 'Bearer $t'},
+      ),
+    );
+    _token = null;
+    await db.setSetting(_tokenKey, '');
+  }
 
   /// عکس فشرده ← JSON نتیجه (بخش ۸-۲).
   Future<Map<String, dynamic>> scan(List<int> jpeg) => _authed((t) async {

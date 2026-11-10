@@ -2331,6 +2331,108 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'ممنون! برای بهتر شدن تشخیص استفاده می‌شود.'**
   String get wrongDetectionThanks;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'درباره‌ی کالری‌لنز'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In fa, this message translates to:
+  /// **'نسخه‌ی {version}'**
+  String aboutVersion(String version);
+
+  /// No description provided for @aboutTagline.
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری‌شمار عکسی غذاهای ایرانی'**
+  String get aboutTagline;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'حریم خصوصی'**
+  String get privacyTitle;
+
+  /// No description provided for @disclaimerTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'سلب مسئولیت پزشکی'**
+  String get disclaimerTitle;
+
+  /// متن کامل سلب مسئولیت (بخش ۶-۵)
+  ///
+  /// In fa, this message translates to:
+  /// **'کالری‌لنز ابزاری برای آگاهی از تغذیه است و جایگزین پزشک، متخصص تغذیه یا مشاوره‌ی درمانی نیست.\n\n• همه‌ی اعداد (کالری، درشت‌مغذی‌ها، وزن هدف و زمان رسیدن به آن) تخمینی‌اند. تشخیص غذا از عکس یا جمله ممکن است اشتباه باشد؛ همیشه نتیجه را بررسی کن.\n• محاسبه‌ی کالری روزانه با فرمول عمومی Mifflin-St Jeor انجام می‌شود و شرایط خاص بدن تو را در نظر نمی‌گیرد.\n• کالری روزانه هرگز کمتر از ۱۲۰۰ (زن) و ۱۵۰۰ (مرد) پیشنهاد نمی‌شود.\n• برای زیر ۱۸ سال، دوران بارداری و شیردهی، و کسانی که بیماری (مثل دیابت، بیماری قلبی یا کلیوی) یا سابقه‌ی اختلال خوردن دارند، پیش از هر تغییر در رژیم غذایی حتماً با پزشک مشورت کن.\n• اگر هنگام رژیم احساس ضعف، سرگیجه یا مشکل دیگری داشتی، رژیم را متوقف کن و به پزشک مراجعه کن.'**
+  String get disclaimerBody;
+
+  /// متن حریم خصوصی؛ پیش از انتشار جاهای [ ] را پر کنید
+  ///
+  /// In fa, this message translates to:
+  /// **'ما به حریم خصوصی تو احترام می‌گذاریم. خلاصه: بیشتر داده‌هایت فقط روی گوشی خودت است.\n\n۱. داده‌هایی که فقط روی گوشی می‌مانند\nپروفایل (سن، قد، وزن، هدف)، غذاهای ثبت‌شده، وزن‌ها، آب، یادآورها، عکس‌های غذا (برای نمایش کوچک کنار ثبت‌ها) و عکس‌های «قبل و بعد». عکس‌های قبل و بعد هرگز آپلود نمی‌شوند.\n\n۲. داده‌هایی که به سرور ما فرستاده می‌شود\n• شناسه‌ی تصادفی دستگاه: هنگام اولین استفاده ساخته می‌شود و به نام، شماره یا ایمیل تو ربطی ندارد.\n• عکس غذا هنگام اسکن: برای تشخیص فرستاده می‌شود و ذخیره نمی‌شود. فقط نتیجه‌ی تشخیص (بدون عکس) تا ۷ روز برای سرعت بیشتر نگه داشته می‌شود.\n• متن جمله در ثبت صوتی یا متنی: صدا روی گوشی به متن تبدیل می‌شود و فقط متن به سرور می‌آید. سرویس گفتار گوشی (معمولاً Google) ممکن است صدا را طبق سیاست خودش پردازش کند.\n• گزارش «تشخیص اشتباه بود»: فهرست اصلاح‌شده‌ی غذاها و توضیح تو، بدون عکس.\n• تعداد استفاده‌ی روزانه (برای سهمیه)، کد دعوت و اطلاعات خرید اشتراک (برای اعتبارسنجی در فروشگاه).\n• آمار ناشناس استفاده (مثل «یک اسکن انجام شد»)، بدون هیچ داده‌ی شخصی یا غذایی. می‌توانی آن را در همین صفحه خاموش کنی.\n\n۳. سرویس‌های دیگر\n• تشخیص غذا و فهم جمله را یک سرویس هوش مصنوعی ([نام ارائه‌دهنده]) انجام می‌دهد؛ عکس یا متن فقط برای همین کار به آن فرستاده می‌شود.\n• پرداخت از طریق کافه‌بازار یا مایکت انجام می‌شود؛ ما اطلاعات کارت بانکی تو را نمی‌بینیم.\n• در نسخه‌ی رایگان، تبلیغات از طریق تپسل نمایش داده می‌شود که ممکن است شناسه‌ی تبلیغاتی گوشی را طبق سیاست خودش استفاده کند.\n\n۴. حذف داده‌ها\nبا «حذف همه‌ی داده‌ها» در تنظیمات، همه‌ی داده‌های روی گوشی و داده‌های این دستگاه روی سرور پاک می‌شود. فقط سابقه‌ی خرید اشتراک (بدون ارتباط با دستگاه) برای امکان «بازیابی خرید» باقی می‌ماند.\n\n۵. کودکان\nبرای کاربران زیر ۱۸ سال، هدف کاهش وزن غیرفعال است و فقط «تغذیه‌ی سالم» پیشنهاد می‌شود.\n\n۶. تماس\nپرسش یا درخواست: [ایمیل یا آیدی پشتیبانی]'**
+  String get privacyBody;
+
+  /// No description provided for @licenses.
+  ///
+  /// In fa, this message translates to:
+  /// **'مجوزهای نرم‌افزار'**
+  String get licenses;
+
+  /// No description provided for @analyticsToggle.
+  ///
+  /// In fa, this message translates to:
+  /// **'ارسال آمار ناشناس استفاده'**
+  String get analyticsToggle;
+
+  /// No description provided for @analyticsToggleDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'فقط شمارش رویدادها (مثل «یک اسکن»)، بدون داده‌ی شخصی؛ برای بهتر شدن اپ'**
+  String get analyticsToggleDesc;
+
+  /// No description provided for @deleteAllData.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف همه‌ی داده‌ها'**
+  String get deleteAllData;
+
+  /// No description provided for @deleteAllDesc.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه‌ی ثبت‌ها، وزن‌ها، عکس‌ها و تنظیمات روی گوشی، و داده‌های این دستگاه روی سرور پاک می‌شود. این کار برگشت‌پذیر نیست.'**
+  String get deleteAllDesc;
+
+  /// No description provided for @deleteAllConfirm.
+  ///
+  /// In fa, this message translates to:
+  /// **'برای تأیید، کلمه‌ی «حذف» را بنویس:'**
+  String get deleteAllConfirm;
+
+  /// No description provided for @deleteAllWord.
+  ///
+  /// In fa, this message translates to:
+  /// **'حذف'**
+  String get deleteAllWord;
+
+  /// No description provided for @deleteAllDone.
+  ///
+  /// In fa, this message translates to:
+  /// **'همه‌ی داده‌ها پاک شد.'**
+  String get deleteAllDone;
+
+  /// No description provided for @deleteAllServerFailed.
+  ///
+  /// In fa, this message translates to:
+  /// **'داده‌های گوشی پاک شد، ولی اتصال به سرور برقرار نشد؛ داده‌های این دستگاه روی سرور (فقط آمار استفاده) باقی ماند.'**
+  String get deleteAllServerFailed;
+
+  /// No description provided for @openSettingsInfo.
+  ///
+  /// In fa, this message translates to:
+  /// **'درباره، حریم خصوصی و داده‌ها'**
+  String get openSettingsInfo;
 }
 
 class _AppLocalizationsDelegate

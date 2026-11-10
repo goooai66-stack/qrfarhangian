@@ -49,7 +49,7 @@ class ShareCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
-            colors: [BrandColors.green, Color(0xFF1E7A40)],
+            colors: [BrandColors.greenDeep, BrandColors.greenDarker],
           ),
         ),
         child: Padding(
@@ -123,7 +123,7 @@ class _Logo extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: const BoxDecoration(
-          color: BrandColors.orange,
+          color: BrandColors.orangeDeep,
           shape: BoxShape.circle,
         ),
         child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),

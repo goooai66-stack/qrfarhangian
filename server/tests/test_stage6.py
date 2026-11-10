@@ -109,3 +109,49 @@ def test_feedback_scan_stored(client):
     assert json.loads(row["corrected_json"])[0]["food_id"] == "kateh"
     big = [{"x": "y" * 1000}] * 30
     assert client.post("/feedback/scan", headers=h, json={"original": big, "corrected": []}).status_code == 413
+
+
+def test_delete_device_removes_server_data(client):
+    from .conftest import scan
+
+    h = register(client)
+    assert scan(client, h).status_code == 200
+    client.post("/feedback/scan", headers=h, json={"original": [], "corrected": []})
+    client.post("/purchase/verify", headers=h, json={"store": "bazaar", "product_id": "premium_yearly", "purchase_token": "test-x"})
+    assert client.delete("/device", headers=h).json() == {"ok": True}
+    # توکن دیگر معتبر نیست.
+    assert client.get("/quota", headers=h).status_code == 401
+    db = client.app.state.db
+    assert db._conn.execute("SELECT COUNT(*) FROM usage").fetchone()[0] == 0
+    assert db._conn.execute("SELECT COUNT(*) FROM scan_feedback").fetchone()[0] == 0
+    assert db._conn.execute("SELECT device_id FROM scan_log").fetchone()[0] == "deleted"
+    # خرید می‌ماند تا بعد از نصب دوباره بازیابی شود.
+    h2 = register(client, "device_bbbbbbbbbbbbbbbb")
+    r = client.post("/purchase/verify", headers=h2, json={"store": "bazaar", "product_id": "premium_yearly", "purchase_token": "test-x"})
+    assert r.json()["premium"] is True
+
+
+def test_events_whitelist_and_stats(make_client):
+    import datetime
+
+    c = make_client(admin_token="secret")
+    h = register(c)
+    day = datetime.date.today().isoformat()
+    r = c.post(
+        "/events",
+        headers=h,
+        json={
+            "events": [
+                {"name": "scan", "day": day, "count": 3},
+                {"name": "log_food", "day": day, "count": 2},
+                {"name": "my_secret_meal", "day": day, "count": 1},
+                {"name": "scan", "day": "not-a-day", "count": 1},
+            ]
+        },
+    )
+    assert r.json() == {"accepted": 2}
+    c.post("/events", headers=h, json={"events": [{"name": "scan", "day": day, "count": 1}]})
+    stats = c.get("/admin/events", headers={"X-Admin-Token": "secret"}).json()["events"]
+    scan = next(e for e in stats if e["name"] == "scan")
+    assert (scan["total"], scan["devices"]) == (4, 1)
+    assert c.get("/admin/events").status_code == 404

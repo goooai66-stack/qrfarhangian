@@ -63,6 +63,13 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// «حذف همه‌ی داده‌ها» (بخش ۴-۷): همه‌ی جدول‌ها خالی می‌شوند.
+  Future<void> wipeAll() => transaction(() async {
+    for (final t in allTables) {
+      await delete(t).go();
+    }
+  });
+
   // ---- تنظیمات کلید-مقدار ----
 
   Future<String?> getSetting(String key) async {

@@ -4,6 +4,7 @@ import 'package:calorie_lens/app/app.dart';
 import 'package:calorie_lens/app/providers.dart';
 import 'package:calorie_lens/data/db/app_database.dart';
 import 'package:calorie_lens/core/ads/ad_service.dart';
+import 'package:calorie_lens/core/analytics/analytics.dart';
 import 'package:calorie_lens/core/billing/billing_service.dart';
 import 'package:calorie_lens/core/platform/home_widget_service.dart';
 import 'package:calorie_lens/core/platform/speech_service.dart';
@@ -38,6 +39,7 @@ Future<void> pumpApp(
   FakeTextParser? textParser,
   FakeSpeechService? speech,
   FakeCommunityApi? community,
+  FakeEventSender? events,
 }) async {
   final foodRepo = foods ?? loadAppFoods();
   RatingPromptGate.checkedThisSession = false;
