@@ -46,6 +46,15 @@ CREATE TABLE IF NOT EXISTS scan_feedback (
   note TEXT,
   created_at INTEGER NOT NULL
 );
+-- پنل مدیریت: رمز (هش)، تنظیمات ذخیره‌شده و نشست‌ها
+CREATE TABLE IF NOT EXISTS admin_kv (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  token_hash TEXT PRIMARY KEY,
+  expires_at INTEGER NOT NULL
+);
 CREATE TABLE IF NOT EXISTS events (
   day TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -363,6 +372,50 @@ class Database:
                 (limit,),
             ).fetchall()
         return [dict(r) for r in rows]
+
+    # ---- پنل مدیریت ----
+
+    def admin_get(self, key: str) -> str | None:
+        with self._lock:
+            r = self._conn.execute("SELECT value FROM admin_kv WHERE key = ?", (key,)).fetchone()
+        return r["value"] if r else None
+
+    def admin_set(self, key: str, value: str) -> None:
+        with self._lock:
+            self._conn.execute(
+                "INSERT INTO admin_kv (key, value) VALUES (?, ?) "
+                "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (key, value),
+            )
+
+    def admin_session_create(self, ttl_seconds: int) -> str:
+        """توکن نشست؛ فقط هش آن ذخیره می‌شود."""
+        token = secrets.token_urlsafe(32)
+        now = int(time.time())
+        with self._lock:
+            self._conn.execute("DELETE FROM admin_sessions WHERE expires_at <= ?", (now,))
+            self._conn.execute(
+                "INSERT INTO admin_sessions (token_hash, expires_at) VALUES (?, ?)",
+                (hashlib.sha256(token.encode()).hexdigest(), now + ttl_seconds),
+            )
+        return token
+
+    def admin_session_valid(self, token: str) -> bool:
+        with self._lock:
+            r = self._conn.execute(
+                "SELECT 1 FROM admin_sessions WHERE token_hash = ? AND expires_at > ?",
+                (hashlib.sha256(token.encode()).hexdigest(), int(time.time())),
+            ).fetchone()
+        return r is not None
+
+    def admin_sessions_clear(self) -> None:
+        with self._lock:
+            self._conn.execute("DELETE FROM admin_sessions")
+
+    def totals(self) -> dict:
+        with self._lock:
+            devices = self._conn.execute("SELECT COUNT(*) FROM devices").fetchone()[0]
+        return {"devices": devices}
 
     # ---- آنالیتیکس بی‌نام (بخش ۱۱) ----
 

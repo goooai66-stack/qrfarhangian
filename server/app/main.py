@@ -14,7 +14,7 @@ import time
 import uuid
 
 from fastapi import Depends, FastAPI, File, Header, Request, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 from .billing.verifiers import (
@@ -25,6 +25,8 @@ from .billing.verifiers import (
     VerifierUnavailable,
     parse_product_days,
 )
+from . import admin
+from .admin_page import ADMIN_HTML
 from .config import Settings
 from .db import Database
 from .foods import FoodDB
@@ -59,6 +61,24 @@ def _image_type(data: bytes) -> str | None:
 
 class DeviceIn(BaseModel):
     device_id: str
+
+
+class AdminSetupIn(BaseModel):
+    setup_code: str
+    password: str
+
+
+class AdminLoginIn(BaseModel):
+    password: str
+
+
+class AdminPasswordIn(BaseModel):
+    current: str
+    new: str
+
+
+class AdminSettingsIn(BaseModel):
+    values: dict[str, str | int | float]
 
 
 class RewardIn(BaseModel):
@@ -116,14 +136,25 @@ def create_app(
     purchase_verifier=None,
 ) -> FastAPI:
     s = settings or Settings.from_env()
+    db = Database(s.db_path, s.quota_timezone)
+    # تنظیمات ذخیره‌شده در پنل مدیریت بر متغیرهای محیطی مقدم است.
+    s = admin.apply_overrides(s, admin.load_overrides(db))
     problems = s.problems()
     if problems and s.production:
         raise RuntimeError("تنظیمات ناامن برای production:\n- " + "\n- ".join(problems))
     for msg in problems:
         log.warning("تنظیمات: %s", msg)
     foods = FoodDB.load(s.foods_path)
-    db = Database(s.db_path, s.quota_timezone)
-    vision = provider or build_provider(s)
+
+    def prepare(v: VisionProvider) -> VisionProvider:
+        if v.name == "fake":
+            # توسعه: جمله‌ها با تجزیه‌گر قاعده‌محور (بدون کلید API).
+            if getattr(v, "text_parser", None) is None and getattr(v, "text_result", None) is None:
+                v.text_parser = KeywordTextParser(foods)
+            log.warning("VISION_PROVIDER=fake — پاسخ‌ها ساختگی‌اند؛ فقط برای توسعه.")
+        return v
+
+    vision = prepare(provider or build_provider(s))
     system_prompt = build_system_prompt(foods)
     voice_prompt = build_voice_prompt(foods)
     product_days = parse_product_days(s.product_days)
@@ -135,11 +166,7 @@ def create_app(
     rewards = TrustingRewardVerifier() if s.reward_verifier == "trusting" else None
     scan_limiter = RateLimiter(s.scans_per_minute, 60)
     register_limiter = RateLimiter(s.device_registrations_per_hour_per_ip, 3600)
-    if vision.name == "fake":
-        # توسعه: جمله‌ها با تجزیه‌گر قاعده‌محور (بدون کلید API).
-        if getattr(vision, "text_parser", None) is None and getattr(vision, "text_result", None) is None:
-            vision.text_parser = KeywordTextParser(foods)
-        log.warning("VISION_PROVIDER=fake — پاسخ‌ها ساختگی‌اند؛ فقط برای توسعه.")
+    login_limiter = RateLimiter(8, 900)  # ورود مدیر: ۸ تلاش در ۱۵ دقیقه از هر IP
 
     # در production مستندات خودکار API (فهرست همه‌ی مسیرها) منتشر نمی‌شود.
     hidden = {"docs_url": None, "redoc_url": None, "openapi_url": None} if s.production else {}
@@ -153,12 +180,161 @@ def create_app(
         res.headers["X-Content-Type-Options"] = "nosniff"
         res.headers["Cache-Control"] = "no-store"
         res.headers["Referrer-Policy"] = "no-referrer"
+        res.headers["X-Frame-Options"] = "DENY"
         return res
 
-    def require_admin(token: str | None) -> None:
-        # مقایسه‌ی زمان‌ثابت؛ بدون توکن پیکربندی‌شده، /admin وجود ندارد.
-        if not s.admin_token or not token or not hmac.compare_digest(token.encode(), s.admin_token.encode()):
-            raise ApiError(404, "not_found", "not found")
+    def has_session(request: Request) -> bool:
+        token = request.cookies.get(admin.COOKIE)
+        return bool(token) and db.admin_session_valid(token)
+
+    def token_ok(token: str | None) -> bool:
+        # مقایسه‌ی زمان‌ثابت
+        return bool(s.admin_token and token and hmac.compare_digest(token.encode(), s.admin_token.encode()))
+
+    def require_admin(token: str | None, request: Request | None = None) -> None:
+        """گزارش‌ها: با نشست پنل یا هدر X-Admin-Token. بدون هیچ‌کدام، مسیر «وجود ندارد»."""
+        if token_ok(token) or (request is not None and has_session(request)):
+            return
+        raise ApiError(404, "not_found", "not found")
+
+    def require_session(request: Request) -> None:
+        """تغییر تنظیمات: فقط با نشست پنل، و فقط درخواست خود صفحه (ضد CSRF)."""
+        if request.headers.get("x-requested-with") != "cl-admin" or not has_session(request):
+            raise ApiError(401, "unauthorized", "admin login required")
+
+    def client_ip(request: Request) -> str:
+        return request.client.host if request.client else "unknown"
+
+    def apply_settings(new: Settings, rebuild: bool) -> None:
+        """تنظیمات تازه برای همه‌ی درخواست‌های بعدی، بدون ری‌استارت."""
+        nonlocal s, vision
+        if rebuild:
+            vision = prepare(build_provider(new))
+            app.state.provider = vision
+        s = new
+        scan_limiter.limit = new.scans_per_minute
+
+    # ---- پنل مدیریت ----
+
+    @app.get("/admin", include_in_schema=False)
+    async def admin_page():
+        return HTMLResponse(
+            ADMIN_HTML,
+            headers={
+                "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
+                "script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'"
+            },
+        )
+
+    @app.get("/admin/api/state", include_in_schema=False)
+    async def admin_state(request: Request):
+        return {
+            "needs_setup": not admin.password_set(db),
+            "setup_available": bool(s.admin_token),
+            "logged_in": has_session(request),
+        }
+
+    def start_session(response: JSONResponse) -> JSONResponse:
+        response.set_cookie(
+            admin.COOKIE,
+            db.admin_session_create(admin.SESSION_TTL),
+            max_age=admin.SESSION_TTL,
+            httponly=True,
+            samesite="strict",
+            secure=s.production,
+            path="/admin",
+        )
+        return response
+
+    def throttle_login(request: Request) -> None:
+        wait = login_limiter.check(client_ip(request))
+        if wait is not None:
+            raise ApiError(429, "rate_limited", "too many attempts", {"Retry-After": str(int(wait) + 1)})
+
+    @app.post("/admin/api/setup", include_in_schema=False)
+    async def admin_setup(body: AdminSetupIn, request: Request):
+        """اولین بار: مدیر با کد راه‌اندازی (ADMIN_TOKEN سرور) رمز خودش را می‌سازد."""
+        throttle_login(request)
+        if admin.password_set(db):
+            raise ApiError(409, "already_setup", "password already set")
+        if not token_ok(body.setup_code):
+            raise ApiError(403, "bad_setup_code", "setup code is wrong")
+        try:
+            admin.set_password(db, body.password)
+        except admin.AdminError as e:
+            raise ApiError(400, "invalid", " | ".join(e.messages))
+        return start_session(JSONResponse({"ok": True}))
+
+    @app.post("/admin/api/login", include_in_schema=False)
+    async def admin_login(body: AdminLoginIn, request: Request):
+        throttle_login(request)
+        if not admin.check_password(db, body.password):
+            raise ApiError(403, "bad_password", "wrong password")
+        return start_session(JSONResponse({"ok": True}))
+
+    @app.post("/admin/api/logout", include_in_schema=False)
+    async def admin_logout(request: Request):
+        require_session(request)
+        db.admin_sessions_clear()
+        r = JSONResponse({"ok": True})
+        r.delete_cookie(admin.COOKIE, path="/admin")
+        return r
+
+    @app.post("/admin/api/password", include_in_schema=False)
+    async def admin_password(body: AdminPasswordIn, request: Request):
+        require_session(request)
+        throttle_login(request)
+        if not admin.check_password(db, body.current):
+            raise ApiError(403, "bad_password", "wrong password")
+        try:
+            admin.set_password(db, body.new)
+        except admin.AdminError as e:
+            raise ApiError(400, "invalid", " | ".join(e.messages))
+        return start_session(JSONResponse({"ok": True}))
+
+    @app.get("/admin/api/settings", include_in_schema=False)
+    async def admin_settings_get(request: Request):
+        require_session(request)
+        return {
+            "fields": admin.describe(s),
+            "env": s.app_env,
+            "provider": {"name": vision.name, "model": vision.model},
+            "foods": len(foods.foods),
+            "totals": db.totals(),
+            "days": db.stats(14),
+            "events": db.event_stats(14),
+        }
+
+    @app.put("/admin/api/settings", include_in_schema=False)
+    async def admin_settings_put(body: AdminSettingsIn, request: Request):
+        require_session(request)
+        try:
+            new, changes = admin.validate_update(s, body.values)
+            rebuild = bool(changes.keys() & admin.PROVIDER_FIELDS)
+            if rebuild:
+                build_provider(new)  # اگر ساخته نشود، چیزی ذخیره نمی‌شود
+        except admin.AdminError as e:
+            return JSONResponse({"ok": False, "errors": e.messages}, status_code=400)
+        except Exception as e:  # noqa: BLE001 — پیام روشن به مدیر
+            return JSONResponse({"ok": False, "errors": [f"ارائه‌دهنده ساخته نشد: {e}"]}, status_code=400)
+        admin.save_overrides(db, changes)
+        apply_settings(new, rebuild)
+        log.info("admin: settings changed: %s", sorted(changes))
+        return {"ok": True, "changed": sorted(changes), "fields": admin.describe(s)}
+
+    @app.post("/admin/api/test", include_in_schema=False)
+    async def admin_test(request: Request):
+        """یک جمله‌ی آزمایشی به مدل: کلید و نام مدل درست است؟"""
+        require_session(request)
+        started = time.monotonic()
+        try:
+            resp = await vision.parse_text(voice_prompt, "یک لیوان دوغ", VOICE_SCHEMA)
+            parse_model_output(resp.text, allow_meal=True)
+        except ProviderError as e:
+            return {"ok": False, "error": str(e)[:300] or type(e).__name__}
+        except InvalidModelOutput as e:
+            return {"ok": False, "error": f"مدل پاسخ داد ولی قالب خروجی درست نبود: {e}"[:300]}
+        return {"ok": True, "ms": int((time.monotonic() - started) * 1000), "model": vision.model}
 
     @app.exception_handler(ApiError)
     async def _api_error(_: Request, e: ApiError):
@@ -381,13 +557,17 @@ def create_app(
         return {"accepted": len(ok)}
 
     @app.get("/admin/events")
-    async def admin_events(days: int = 30, x_admin_token: str | None = Header(default=None)):
-        require_admin(x_admin_token)
+    async def admin_events(
+        request: Request, days: int = 30, x_admin_token: str | None = Header(default=None)
+    ):
+        require_admin(x_admin_token, request)
         return {"events": db.event_stats(min(max(days, 1), 365))}
 
     @app.get("/admin/feedback")
-    async def admin_feedback(limit: int = 100, x_admin_token: str | None = Header(default=None)):
-        require_admin(x_admin_token)
+    async def admin_feedback(
+        request: Request, limit: int = 100, x_admin_token: str | None = Header(default=None)
+    ):
+        require_admin(x_admin_token, request)
         return {"feedback": db.recent_feedback(min(max(limit, 1), 1000))}
 
     @app.delete("/device")
@@ -427,8 +607,10 @@ def create_app(
         return quota_body(fresh(device))
 
     @app.get("/admin/stats")
-    async def admin_stats(days: int = 30, x_admin_token: str | None = Header(default=None)):
-        require_admin(x_admin_token)
+    async def admin_stats(
+        request: Request, days: int = 30, x_admin_token: str | None = Header(default=None)
+    ):
+        require_admin(x_admin_token, request)
         return {"days": db.stats(min(max(days, 1), 365))}
 
     return app

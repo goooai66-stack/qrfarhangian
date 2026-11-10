@@ -22,10 +22,11 @@ class Settings:
     # development | production — در production تنظیمات ناامن، سرور را بالا نمی‌آورد.
     app_env: str = "development"
 
-    # fake | anthropic | openai_compatible
+    # none (هنوز تنظیم نشده؛ از پنل مدیریت) | fake | anthropic | openai_compatible
     vision_provider: str = "fake"
 
     # Claude (کلید از ANTHROPIC_API_KEY که خود SDK می‌خواند)
+    anthropic_api_key: str = ""  # خالی = SDK از ANTHROPIC_API_KEY می‌خواند
     anthropic_model: str = "claude-opus-5-5"
     anthropic_effort: str = "low"
 
@@ -83,7 +84,7 @@ class Settings:
         p: list[str] = []
         if self.app_env not in ("development", "production"):
             p.append(f"APP_ENV={self.app_env!r} نامعتبر است (development یا production)")
-        if self.vision_provider not in ("fake", "anthropic", "openai_compatible"):
+        if self.vision_provider not in ("none", "fake", "anthropic", "openai_compatible"):
             p.append(f"VISION_PROVIDER={self.vision_provider!r} نامعتبر است")
         if self.purchase_verifier not in ("fake", "stores"):
             p.append(f"PURCHASE_VERIFIER={self.purchase_verifier!r} نامعتبر است (fake یا stores)")
@@ -95,7 +96,9 @@ class Settings:
             self.openai_compat_base_url and self.openai_compat_api_key and self.openai_compat_model
         ):
             p.append("OPENAI_COMPAT_BASE_URL، OPENAI_COMPAT_API_KEY و OPENAI_COMPAT_MODEL لازم است")
-        if self.vision_provider == "anthropic" and not os.environ.get("ANTHROPIC_API_KEY"):
+        if self.vision_provider == "anthropic" and not (
+            self.anthropic_api_key or os.environ.get("ANTHROPIC_API_KEY")
+        ):
             p.append("ANTHROPIC_API_KEY تنظیم نشده")
         if self.production:
             if self.vision_provider == "fake":
@@ -113,6 +116,7 @@ class Settings:
             app_env=e.get("APP_ENV", "development"),
             reward_verifier=e.get("REWARD_VERIFIER", "trusting"),
             vision_provider=e.get("VISION_PROVIDER", "fake"),
+            anthropic_api_key=e.get("ANTHROPIC_API_KEY", ""),
             anthropic_model=e.get("ANTHROPIC_MODEL", "claude-opus-5-5"),
             anthropic_effort=e.get("ANTHROPIC_EFFORT", "low"),
             openai_compat_base_url=e.get("OPENAI_COMPAT_BASE_URL", ""),

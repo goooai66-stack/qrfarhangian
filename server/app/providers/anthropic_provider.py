@@ -15,11 +15,11 @@ from .base import ProviderBusy, ProviderError, ProviderRefused, ProviderResponse
 class AnthropicProvider:
     name = "anthropic"
 
-    def __init__(self, model: str, effort: str, timeout: float):
+    def __init__(self, model: str, effort: str, timeout: float, api_key: str = ""):
         self.model = model
         self.effort = effort
         # retry داخلی SDK خاموش: مهلت پاسخ به کاربر کوتاه است.
-        self._client = anthropic.AsyncAnthropic(timeout=timeout, max_retries=0)
+        self._client = anthropic.AsyncAnthropic(api_key=api_key or None, timeout=timeout, max_retries=0)
 
     async def recognize(self, image, media_type, system_prompt, user_text, schema) -> ProviderResponse:
         content = [
