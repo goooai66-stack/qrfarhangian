@@ -61,9 +61,44 @@ final billingServiceProvider = Provider<BillingService>(
       ? FakeBillingService(storeId: _storeId)
       : UnavailableBillingService(_storeId),
 );
+const serverUrlKey = 'server_url';
+
+/// آدرس ذخیره‌شده در اپ؛ در main از دیتابیس خوانده و override می‌شود.
+final initialServerUrlProvider = Provider<String?>((ref) => null);
+
+/// آدرس سرور: ثابتِ زمان ساخت، وگرنه آنچه در اپ وارد شده.
+class ServerUrlNotifier extends Notifier<String> {
+  @override
+  String build() {
+    if (!AppConfig.serverConfigurable) return AppConfig.apiBaseUrl;
+    return ref.read(initialServerUrlProvider) ??
+        (kDebugMode ? AppConfig.emulatorServer : '');
+  }
+
+  /// [url] باید از قبل با [ApiClient.normalizeUrl] مرتب شده باشد.
+  Future<void> set(String url) async {
+    final db = ref.read(databaseProvider);
+    await db.setSetting(serverUrlKey, url);
+    // توکن دستگاه مال سرور قبلی است.
+    await db.setSetting('api_token', '');
+    state = url;
+  }
+}
+
+final serverUrlProvider = NotifierProvider<ServerUrlNotifier, String>(
+  ServerUrlNotifier.new,
+);
+
+/// بررسی آدرس پیش از ذخیره (در تست جایگزین می‌شود).
+final serverProbeProvider = Provider<Future<bool> Function(String)>(
+  (ref) => ApiClient.probe,
+);
+
 final apiClientProvider = Provider<ApiClient>(
-  (ref) =>
-      ApiClient(baseUrl: AppConfig.apiBaseUrl, db: ref.watch(databaseProvider)),
+  (ref) => ApiClient(
+    baseUrl: ref.watch(serverUrlProvider),
+    db: ref.watch(databaseProvider),
+  ),
 );
 
 /// تشخیص غذا: ابری از طریق سرور واسط؛ یا جعلی با `FAKE_SCAN=true`.

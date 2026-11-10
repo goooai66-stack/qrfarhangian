@@ -68,6 +68,45 @@ class ApiClient {
     this.timeout = const Duration(seconds: 25),
   }) : _http = httpClient ?? http.Client();
 
+  /// آدرس وارد‌شده را مرتب می‌کند؛ null یعنی نامعتبر.
+  /// فقط https پذیرفته می‌شود (http فقط با [allowHttp] برای توسعه).
+  static String? normalizeUrl(String input, {bool allowHttp = false}) {
+    var v = input.trim();
+    if (v.isEmpty) return null;
+    if (!v.contains('://')) v = 'https://$v';
+    final u = Uri.tryParse(v);
+    if (u == null || u.hasQuery || u.hasFragment || u.userInfo.isNotEmpty) {
+      return null;
+    }
+    if (!RegExp(r'^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$')
+        .hasMatch(u.host)) {
+      return null;
+    }
+    if (u.scheme != 'https' && !(allowHttp && u.scheme == 'http')) return null;
+    final port = u.hasPort ? ':${u.port}' : '';
+    final path = u.path.replaceAll(RegExp(r'/+$'), '');
+    return '${u.scheme}://${u.host.toLowerCase()}$port$path';
+  }
+
+  /// آیا این آدرس واقعاً سرور کالری‌لنز است؟ (`GET /health`)
+  static Future<bool> probe(
+    String baseUrl, {
+    http.Client? client,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final c = client ?? http.Client();
+    try {
+      final res = await c.get(Uri.parse('$baseUrl/health')).timeout(timeout);
+      if (res.statusCode != 200) return false;
+      final body = jsonDecode(utf8.decode(res.bodyBytes));
+      return body is Map && body['ok'] == true && body.containsKey('foods');
+    } catch (_) {
+      return false;
+    } finally {
+      if (client == null) c.close();
+    }
+  }
+
   static const _tokenKey = 'api_token';
   static const _deviceKey = 'device_id';
 
@@ -230,6 +269,8 @@ class ApiClient {
     Future<http.Response> Function() call, {
     bool allow401 = false,
   }) async {
+    // هنوز آدرس سروری وارد نشده: مثل بی‌اینترنتی رفتار می‌کنیم (صف آفلاین).
+    if (baseUrl.isEmpty) throw ApiException(ApiErrorKind.offline, 'no server');
     final http.Response res;
     try {
       res = await call().timeout(timeout);

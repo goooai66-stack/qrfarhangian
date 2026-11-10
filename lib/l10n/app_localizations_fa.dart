@@ -1314,4 +1314,30 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get openSettingsInfo => 'درباره، حریم خصوصی و داده‌ها';
+
+  @override
+  String get serverUrlTitle => 'آدرس سرور';
+
+  @override
+  String get serverUrlNotSet => 'وارد نشده؛ اسکن و ثبت صوتی کار نمی‌کند';
+
+  @override
+  String get serverUrlHint => 'آدرسی که مدیر اپ به تو داده، مثل api.example.ir';
+
+  @override
+  String get serverUrlInvalid =>
+      'آدرس درست نیست. باید یک آدرس امن (https) باشد.';
+
+  @override
+  String get serverUrlUnreachable =>
+      'به این آدرس وصل نشدم یا سرور کالری‌لنز نیست. آدرس و اینترنت را بررسی کن.';
+
+  @override
+  String get serverUrlSaved => 'به سرور وصل شد و ذخیره شد.';
+
+  @override
+  String get serverUrlCheck => 'بررسی و ذخیره';
+
+  @override
+  String get serverUrlChecking => 'در حال بررسی…';
 }

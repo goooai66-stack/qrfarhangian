@@ -18,11 +18,13 @@ Future<void> main() async {
   final db = AppDatabase();
   // یک کوئری سبک: اگر پروفایل هست، آنبوردینگ تکرار نمی‌شود.
   final done = await ProfileRepository(db).hasProfile();
+  final serverUrl = await db.getSetting(serverUrlKey);
   runApp(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
         initialOnboardingDoneProvider.overrideWithValue(done),
+        initialServerUrlProvider.overrideWithValue(serverUrl),
       ],
       child: const CalorieLensApp(),
     ),

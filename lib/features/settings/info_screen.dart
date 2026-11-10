@@ -6,6 +6,10 @@ import '../../app/providers.dart';
 import '../../core/platform/home_widget_service.dart';
 import '../../core/reminders/reminder_plan.dart';
 import '../../core/utils/persian_digits.dart';
+import '../../data/api/api_client.dart';
+
+import 'package:flutter/foundation.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../home/rating_prompt.dart';
 
@@ -42,6 +46,91 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
       ),
     ),
   );
+
+  /// وارد کردن آدرس سرور: فقط https، و فقط اگر واقعاً سرور کالری‌لنز جواب بدهد.
+  Future<void> _editServer() async {
+    final t = AppLocalizations.of(context);
+    final c = TextEditingController(text: ref.read(serverUrlProvider));
+    String? error;
+    var checking = false;
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (d) => StatefulBuilder(
+        builder: (d, setState) => AlertDialog(
+          title: Text(t.serverUrlTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(t.serverUrlHint),
+              const SizedBox(height: 8),
+              TextField(
+                key: const Key('server-url-input'),
+                controller: c,
+                textDirection: TextDirection.ltr,
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                enabled: !checking,
+                decoration: InputDecoration(
+                  hintText: 'https://',
+                  errorText: error,
+                  errorMaxLines: 3,
+                ),
+              ),
+              if (checking)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(t.serverUrlChecking),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: checking ? null : () => Navigator.pop(d, false),
+              child: Text(t.cancel),
+            ),
+            FilledButton(
+              key: const Key('server-url-save'),
+              onPressed: checking
+                  ? null
+                  : () async {
+                      final url = ApiClient.normalizeUrl(
+                        c.text,
+                        allowHttp: kDebugMode,
+                      );
+                      if (url == null) {
+                        setState(() => error = t.serverUrlInvalid);
+                        return;
+                      }
+                      setState(() {
+                        error = null;
+                        checking = true;
+                      });
+                      final ok = await ref.read(serverProbeProvider)(url);
+                      if (!d.mounted) return;
+                      if (!ok) {
+                        setState(() {
+                          checking = false;
+                          error = t.serverUrlUnreachable;
+                        });
+                        return;
+                      }
+                      await ref.read(serverUrlProvider.notifier).set(url);
+                      if (d.mounted) Navigator.pop(d, true);
+                    },
+              child: Text(t.serverUrlCheck),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (saved == true && mounted) {
+      // سهمیه و وضعیت کاربر از سرور تازه خوانده شود.
+      ref.invalidate(entitlementProvider);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.serverUrlSaved)));
+    }
+  }
 
   Future<void> _deleteAll() async {
     final t = AppLocalizations.of(context);
@@ -118,6 +207,24 @@ class _InfoScreenState extends ConsumerState<InfoScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          if (AppConfig.serverConfigurable)
+            Builder(
+              builder: (context) {
+                final url = ref.watch(serverUrlProvider);
+                return ListTile(
+                  key: const Key('server-url'),
+                  leading: const Icon(Icons.dns_outlined),
+                  title: Text(t.serverUrlTitle),
+                  subtitle: Text(
+                    url.isEmpty ? t.serverUrlNotSet : url,
+                    textDirection: url.isEmpty ? null : TextDirection.ltr,
+                    textAlign: TextAlign.start,
+                  ),
+                  trailing: const Icon(Icons.edit_outlined),
+                  onTap: _editServer,
+                );
+              },
+            ),
           ListTile(
             key: const Key('open-disclaimer'),
             leading: const Icon(Icons.health_and_safety_outlined),
@@ -190,7 +297,12 @@ Future<bool> wipeAllData(WidgetRef ref) async {
   try {
     await ref.read(photoStoreProvider).deleteAll();
   } catch (_) {}
-  await ref.read(databaseProvider).wipeAll();
+  // آدرس سروری که کاربر وارد کرده داده‌ی شخصی نیست؛ بدون آن اپ بعد از حذف
+  // به سرور وصل نمی‌شود.
+  final db = ref.read(databaseProvider);
+  final server = await db.getSetting(serverUrlKey);
+  await db.wipeAll();
+  if (server != null) await db.setSetting(serverUrlKey, server);
   try {
     await ref
         .read(homeWidgetServiceProvider)

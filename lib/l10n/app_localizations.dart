@@ -2451,6 +2451,54 @@ abstract class AppLocalizations {
   /// In fa, this message translates to:
   /// **'درباره، حریم خصوصی و داده‌ها'**
   String get openSettingsInfo;
+
+  /// No description provided for @serverUrlTitle.
+  ///
+  /// In fa, this message translates to:
+  /// **'آدرس سرور'**
+  String get serverUrlTitle;
+
+  /// No description provided for @serverUrlNotSet.
+  ///
+  /// In fa, this message translates to:
+  /// **'وارد نشده؛ اسکن و ثبت صوتی کار نمی‌کند'**
+  String get serverUrlNotSet;
+
+  /// No description provided for @serverUrlHint.
+  ///
+  /// In fa, this message translates to:
+  /// **'آدرسی که مدیر اپ به تو داده، مثل api.example.ir'**
+  String get serverUrlHint;
+
+  /// No description provided for @serverUrlInvalid.
+  ///
+  /// In fa, this message translates to:
+  /// **'آدرس درست نیست. باید یک آدرس امن (https) باشد.'**
+  String get serverUrlInvalid;
+
+  /// No description provided for @serverUrlUnreachable.
+  ///
+  /// In fa, this message translates to:
+  /// **'به این آدرس وصل نشدم یا سرور کالری‌لنز نیست. آدرس و اینترنت را بررسی کن.'**
+  String get serverUrlUnreachable;
+
+  /// No description provided for @serverUrlSaved.
+  ///
+  /// In fa, this message translates to:
+  /// **'به سرور وصل شد و ذخیره شد.'**
+  String get serverUrlSaved;
+
+  /// No description provided for @serverUrlCheck.
+  ///
+  /// In fa, this message translates to:
+  /// **'بررسی و ذخیره'**
+  String get serverUrlCheck;
+
+  /// No description provided for @serverUrlChecking.
+  ///
+  /// In fa, this message translates to:
+  /// **'در حال بررسی…'**
+  String get serverUrlChecking;
 }
 
 class _AppLocalizationsDelegate

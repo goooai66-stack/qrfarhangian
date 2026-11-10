@@ -794,5 +794,13 @@
   "deleteAllWord": "حذف",
   "deleteAllDone": "همه‌ی داده‌ها پاک شد.",
   "deleteAllServerFailed": "داده‌های گوشی پاک شد، ولی اتصال به سرور برقرار نشد؛ داده‌های این دستگاه روی سرور (فقط آمار استفاده) باقی ماند.",
-  "openSettingsInfo": "درباره، حریم خصوصی و داده‌ها"
+  "openSettingsInfo": "درباره، حریم خصوصی و داده‌ها",
+  "serverUrlTitle": "آدرس سرور",
+  "serverUrlNotSet": "وارد نشده؛ اسکن و ثبت صوتی کار نمی‌کند",
+  "serverUrlHint": "آدرسی که مدیر اپ به تو داده، مثل api.example.ir",
+  "serverUrlInvalid": "آدرس درست نیست. باید یک آدرس امن (https) باشد.",
+  "serverUrlUnreachable": "به این آدرس وصل نشدم یا سرور کالری‌لنز نیست. آدرس و اینترنت را بررسی کن.",
+  "serverUrlSaved": "به سرور وصل شد و ذخیره شد.",
+  "serverUrlCheck": "بررسی و ذخیره",
+  "serverUrlChecking": "در حال بررسی…"
 }
