@@ -1,0 +1,27 @@
+Yunus: the story of Dhun-Nun (یونس، داستان ذوالنون)
+=====================================================
+
+Quran text
+  Arabic, Uthmani script, Hafs narration (ar-uthmani-hafs), retrieved from quran.ai (data from quran.com).
+  Verses: As-Saffat 37:139–148, Al-Anbiya 21:87–88, Yunus 10:98 (part).
+
+Persian translation
+  Dr. Hussein Taji Kal Dari (Tagi), reviewed edition persian_tagi from quranenc.com,
+  retrieved via github.com/fawazahmed0/quran-api (edition fas-drhussientagi).
+  Used verbatim. One bracketed explanatory note in 37:143 ("[as in Surah Al-Anbiya, verse 87]") was left out.
+  The two short Persian scene lines ("Beside the Tigris…", "Yunus called…") are not Quran text.
+
+Fonts (SIL Open Font License 1.1, from github.com/google/fonts)
+  Amiri Quran: Khaled Hosny
+  Vazirmatn: Saber Rastikerdar
+
+Picture
+  Everything drawn in code (Canvas2D), no images, no stock footage, no video model.
+  No person is depicted in any form.
+
+Sound
+  All sound synthesized in code (numpy): wind, rain, sea, crickets, birds, whale, paper and light foley.
+  No music and no voice.
+
+Tools
+  Lemo-Opuscar library (MIT): render, mux and helper tools; style "Paper-cut Lightbox".
