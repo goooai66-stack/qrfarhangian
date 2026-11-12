@@ -4,7 +4,7 @@ import numpy as np
 import soundfile as sf
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.environ.get('LIB', os.path.expanduser('~/lemo-opuscar')), 'core', 'audio'))
-from sfx import SR, t_, env_exp, bp, lp, hp, noise, norm, brown, creak, whoosh, thump, roar, ding, add, limit
+from sfx import SR, t_, env_exp, bp, lp, hp, noise, norm, brown, creak, whoosh, thump, roar, ding, pop, add, limit
 
 E = json.load(open(os.path.join(HERE, 'events.json')))
 DUR = E['dur']; EV = E['ev']
@@ -87,7 +87,7 @@ def bed(id, d):
 for e in EV:
     if e['type'] != 'bed': continue
     d = e['b'] - e['a']; x = bed(e['id'], d)
-    fa = .5 if e['id'] in ('under',) else 1.5; fb = .08 if e['id'] in ('under', 'evening', 'room') and e['b'] in (114.6, 268.6) else 1.4
+    fa = .5 if e['id'] in ('under',) else 1.5; fb = .08 if e['id'] in ('under', 'evening') else 1.2
     if e['id'] == 'belly': fb = 1.8
     x = np.stack([fade(x[:, 0].copy(), fa, fb), fade(x[:, 1].copy(), fa, fb)], 1)
     put(x, e['a'])
@@ -156,7 +156,7 @@ def lampoff(v):
 
 G = {'tap': .06, 'chime': .025, 'gull': .05, 'creak': .07, 'thunder': .36, 'crash': .22, 'flip': .09, 'splash': .3, 'submerge': .3,
      'whale': .2, 'jawopen': .1, 'jaw': .36, 'swell': .25, 'rise': .2, 'breach': .28, 'fluke': .12, 'leaf': .07, 'bird': .035,
-     'strip': .1, 'spark': .05, 'paper': .05, 'lampoff': .35}
+     'strip': .1, 'plop': .06, 'cut': .05, 'spark': .05, 'paper': .05, 'lampoff': .35}
 for e in EV:
     ty, t, v, pan = e['type'], e['t'], e.get('v', 1), e.get('pan', 0)
     if ty == 'bed': continue
@@ -184,6 +184,8 @@ for e in EV:
     elif ty == 'spark': put(shimmer(1), t, g, 0)
     elif ty == 'paper': put(rustle(.4), t, g, 0)
     elif ty == 'lampoff': put(lampoff(1), t, g, 0)
+    elif ty == 'plop': put(lp(pop(1), 1800), t, g, pan); put(bp(noise(.25), 800, 5000) * env_exp(.25, .06), t + .05, g * .5, pan)
+    elif ty == 'cut': put(rustle(.16), t, g, pan); put(tap(1), t + .1, g * .5, pan)
 
 buf = buf[:int(DUR * SR)]
 for c in range(2): buf[:, c] = limit(buf[:, c], .9)

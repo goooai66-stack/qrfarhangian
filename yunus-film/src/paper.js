@@ -112,11 +112,12 @@ export function put(ctx, S, x, y, o = {}) {
 }
 
 // camera: a parallax transform for a layer at depth p (0 = sky, 1 = front)
+export const SHOT = { x: 0, y: 0, s: 1 };
 export function camAt(ctx, cam, p) {
-  const s = 1 + (cam.s - 1) * (0.35 + 0.65 * p);
+  const s = (1 + (cam.s - 1) * (0.35 + 0.65 * p)) * SHOT.s;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.translate(W / 2, H / 2); if (cam.r) ctx.rotate(cam.r * (.5 + .5 * p)); ctx.scale(s, s);
-  ctx.translate(-W / 2 - cam.x * (.25 + .75 * p), -H / 2 - cam.y * (.25 + .75 * p));
+  ctx.translate(-W / 2 - (cam.x + SHOT.x) * (.25 + .75 * p), -H / 2 - (cam.y + SHOT.y) * (.25 + .75 * p));
 }
 
 // vignette overlay

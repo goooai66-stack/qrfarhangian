@@ -7,6 +7,8 @@ export const EV = [];
 const ev = (t, type, o = {}) => EV.push({ t: +t.toFixed(3), type, ...o });
 const flick = (t, i = 0) => 1 + .06 * Math.sin(7.3 * t + i) * Math.sin(3.1 * t + i * .7);
 const drift = t => ({ x: Math.sin(t * .7) * 1.6 + Math.sin(t * 1.9) * .7, y: Math.cos(t * .6) * 1.2 });
+function birdShape(ctx, x, y, s, f, col) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.fillStyle = col;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-18, -14 - f * 18, -38, -4 - f * 26); ctx.quadraticCurveTo(-18, -4, 0, 6); ctx.quadraticCurveTo(18, -4, 38, -4 - f * 26); ctx.quadraticCurveTo(18, -14 - f * 18, 0, 0); ctx.fill(); ctx.restore(); }
 
 // ---------------------------------------------------------------- moon
 let _moon;
@@ -95,10 +97,15 @@ export function buildCity() {
     for (let k = 0; k < w; k += 9 + rr() * 14) { const hh = 40 + rr() * 110, lean = (rr() - .5) * 30; x.beginPath(); x.moveTo(k - 4, 350); x.lineTo(k + lean, 350 - hh); x.lineTo(k + 4, 350); x.fill(); }
     [560 - X0 - 500, 1820 - X0, 2850].forEach((px, i) => palm(x, px, 380, 300 + i * 20, i === 1 ? -70 : 60, 70 + i));
   }, { trans: 0, rim: .55 });
+  const wisp = sheet(900, 200, '#33457e', (x) => { const q = mulberry(21); for (let k = 0; k < 9; k++) { x.beginPath(); x.ellipse(120 + k * 80, 100 + (q() - .5) * 40, 110 + q() * 60, 28 + q() * 22, 0, 0, 7); x.fill(); } }, { trans: .35, light: [450, 100, 500], lightCol: '255,214,150', rim: .3, shadow: false });
+  const boat = sheet(220, 120, '#0a0f26', (x) => { x.beginPath(); x.moveTo(0, 70); x.quadraticCurveTo(110, 130, 220, 70); x.lineTo(200, 66); x.quadraticCurveTo(110, 100, 20, 66); x.fill(); x.fillRect(104, 6, 6, 70); x.beginPath(); x.moveTo(110, 8); x.lineTo(170, 60); x.lineTo(110, 60); x.fill(); }, { trans: 0, rim: .6 });
+  const SHOOT = [16, 22.5, 29, 35.5, 41, 236.5, 241.8, 246.5, 250.5].map((k, i) => ({ k, x: 500 + ((i * 617) % 1200), y: 60 + ((i * 211) % 220) }));
+  const flock = Array.from({ length: 7 }, (_, i) => ({ dx: -i * 70 - (i % 2) * 30, dy: (i % 3) * 34 - 20 + i * 8, ph: i * 1.3 }));
+  [222, 225.3, 228.4, 230.6].forEach(k => ev(k + .2, 'thunder', { v: .3 }));
   const wins = [...farW.map(w => ({ ...w, L: 'far' })), ...nearW.map(w => ({ ...w, L: 'near' }))];
   // light state, S1: most lit, then go out one by one (the city turns away); S8: light up again
   const rr = mulberry(55);
-  wins.forEach((w, i) => { w.i = i; w.lit0 = rr() < .78; w.off = w.lit0 && rr() < .88 ? 33.0 + rr() * 5.8 : 1e9; });
+  wins.forEach((w, i) => { w.i = i; w.lit0 = rr() < .78; w.off = w.lit0 && rr() < .88 ? 15.5 + clamp((w.x - 300) / 2500) * 22 + rr() * 4.5 : 1e9; });
   const keep = wins.filter(w => w.lit0 && w.off > 1e8);
   const offs = wins.filter(w => w.off < 1e8).sort((a, b) => a.off - b.off);
   offs.forEach((w, k) => { if (k % 4 === 0) ev(w.off, 'tap', { v: .5 + (k % 3) * .15, pan: (w.x + X0 - 960) / 1400 }); });
@@ -135,10 +142,16 @@ export function buildCity() {
     camAt(ctx, cam, .02);
     for (const s of stars) { const a = (.5 + .5 * Math.sin(t * 1.3 + s.ph)) * .8 * lightK * (o.starA ?? 1); ctx.fillStyle = `rgba(255,236,200,${a})`; ctx.fillRect(s.x, s.y, s.s, s.s); }
     camAt(ctx, cam, .05); moon(ctx, 1120, 300, 62, (o.moonA ?? 1) * lightK);
+    camAt(ctx, cam, .08);
+    for (let i = 0; i < 2; i++) { const wx = 2300 - ((t * 38 + i * 1500) % 3300); put(ctx, wisp, wx, 190 + i * 150, { light: .8 * lightK, alpha: .85, shadow: false }); }
+    for (const s of SHOOT) { const u = (t - s.k) / .7; if (u < 0 || u > 1) continue; const hx = s.x - u * 420, hy = s.y + u * 170; const g = ctx.createLinearGradient(hx, hy, hx + 170, hy - 69); g.addColorStop(0, `rgba(255,244,214,${.95 * Math.sin(Math.PI * u)})`); g.addColorStop(1, 'rgba(255,244,214,0)'); ctx.strokeStyle = g; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + 170, hy - 69); ctx.stroke(); }
+    const fb = mode === 'city' ? (t - 13.5) / 7 : (t - 244) / 8;
+    if (fb > 0 && fb < 1) for (const b of flock) birdShape(ctx, (mode === 'city' ? lerp(-100, 2100, fb) : lerp(2100, -100, fb)) + b.dx, 250 + b.dy + Math.sin(t * 1.3 + b.ph) * 12, .8, Math.sin(t * 8 + b.ph) * .5, '#1b2650');
     if (o.cloud != null) {
       const k = o.cloud; camAt(ctx, cam, .1);
       put(ctx, cl, -1050 - k * 1300, -170 - k * 60, { light: .9 * lightK, sd: [14, 20] });
       put(ctx, cr, 900 + k * 1300, -210 - k * 60, { light: .9 * lightK, sd: [14, 20] });
+      for (const q of [222, 225.3, 228.4, 230.6]) { const u = t - q; if (u > 0 && u < .5) glow(ctx, 600 + (q * 37 % 700), 250, 560, .55 * Math.exp(-u * 7), '255,90,60'); }
     }
     camAt(ctx, cam, .15); put(ctx, hills, X0, 470, { light: lightK, sd: [8, 10] });
     camAt(ctx, cam, .35); put(ctx, far, X0, 460, { light: lightK, sd: [8, 12] });
@@ -148,6 +161,8 @@ export function buildCity() {
     camAt(ctx, cam, .72); put(ctx, river, X0, 860, { light: lightK, sd: [8, 10] });
     // moon reflection: broken lit strips on the river
     for (let i = 0; i < 7; i++) { const yy = 905 + i * 22, ww = 120 - i * 12 + Math.sin(t * 1.7 + i) * 18; ctx.fillStyle = `rgba(255,224,170,${.35 * lightK * (o.moonA ?? 1)})`; ctx.fillRect(1150 + Math.sin(t * .9 + i * 1.3) * 10 - ww / 2, yy, ww, 4); }
+    { const bx = mode === 'city' ? -300 + (t - 13) * 62 : 2300 - (t - 218) * 50;
+      put(ctx, boat, bx, 850 + Math.sin(t * 1.4) * 3, { rot: Math.sin(t * 1.1) * .03, px: 110, py: 60, sd: [6, 8] }); glow(ctx, bx - 8, 800, 60, .6 * lightK * flick(t, 3), '255,180,90'); ctx.fillStyle = `rgba(255,190,110,${lightK})`; ctx.fillRect(bx - 12, 794, 8, 10); }
     camAt(ctx, cam, 1); put(ctx, front, X0, 640, { light: 0, sd: [12, 16], sa: .6 });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   };
@@ -181,6 +196,9 @@ function drawShip(ctx, S, x, y, rot, o = {}) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
   put(ctx, S.sail, -490 + 296, -560 + 82, { light: o.sailLight ?? .8, sd: [10, 12], sa: .4, sx: 1, sy: 1 });
   put(ctx, S.body, -490, -560, { light: 0, sd: [12, 16] });
+  const ft = o.t ?? 0; ctx.fillStyle = '#c8442e'; ctx.beginPath(); ctx.moveTo(4, -524);
+  for (let k = 0; k <= 6; k++) ctx.lineTo(4 + k * 16, -524 + Math.sin(ft * 9 - k * .9) * (2 + k * 1.6) + k * 1.2);
+  for (let k = 6; k >= 0; k--) ctx.lineTo(4 + k * 16, -500 - k * 2.6 + Math.sin(ft * 9 - k * .9) * (2 + k * 1.6)); ctx.fill();
   ctx.restore();
 }
 
@@ -193,27 +211,29 @@ export function buildHarbour() {
   const pier = sheet(1100, 420, '#6b3b40', x => { x.fillRect(0, 120, 760, 26); for (let k = 20; k < 760; k += 90) x.fillRect(k, 120, 22, 300); x.fillRect(700, 60, 28, 360); x.fillRect(0, 160, 760, 10); x.beginPath(); x.arc(714, 52, 18, 0, 7); x.fill(); }, { trans: .15, light: [200, -100, 800] });
   const ship = shipSheets('#2e1822', '#5a3442', .75, [200, 120, 420]);
   const waves = sheet(3800, 320, '#150b10', (x, w, h) => { x.beginPath(); x.moveTo(0, h); x.lineTo(0, 80); for (let k = 0; k <= w; k += 110) { x.quadraticCurveTo(k + 30, 40, k + 55, 70); x.quadraticCurveTo(k + 80, 95, k + 110, 80); } x.lineTo(w, h); x.fill(); }, { trans: 0, rim: .7 });
-  const birds = [{ x0: -200, y: 260, v: 70, ph: 0, s: 1 }, { x0: -380, y: 320, v: 64, ph: 1.7, s: .8 }, { x0: -520, y: 230, v: 76, ph: 3.1, s: .7 }];
+  const birds = [{ x0: -200, y: 260, v: 70, ph: 0, s: 1 }, { x0: -380, y: 320, v: 64, ph: 1.7, s: .8 }, { x0: -520, y: 230, v: 76, ph: 3.1, s: .7 }, { x0: 300, y: 180, v: 90, ph: 2.2, s: .6 }, { x0: 60, y: 380, v: 110, ph: .8, s: .9 }, { x0: 700, y: 300, v: 60, ph: 4, s: .55 }];
+  for (let i = 0; i < 7; i++) ev(46.2 + i * 2.3 + .85, 'plop', { v: .5, pan: (i % 3 - 1) * .5 });
   ev(45.5, 'gull', { pan: -.4 }); ev(50.8, 'gull', { pan: .2 }); ev(55.4, 'gull', { pan: .5 });
   ev(47, 'creak', { v: .5 }); ev(52.5, 'creak', { v: .45 }); ev(58, 'creak', { v: .5 });
   return function draw(ctx, t) {
     const lt = t - 43.5, d = drift(t);
     const cam = { x: lt * 26 + d.x, y: d.y, s: 1.02 };
-    const dim = 1 - .55 * ss(seg(t, 58.5, 63));
+    const dim = 1 - .55 * ss(seg(t, 58.5, 63)), sunY = sunS[1] + 110 * seg(t, 45, 63);
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#20100c'; ctx.fillRect(0, 0, W, H);
     camAt(ctx, cam, 0); put(ctx, sky, -700, -220, { light: dim, shadow: false });
-    glow(ctx, sunS[0], sunS[1], 520, .5 * dim, '255,214,150'); glow(ctx, sunS[0], sunS[1], 130, .9 * dim, '255,244,214');
-    ctx.fillStyle = `rgba(255,246,222,${dim})`; ctx.beginPath(); ctx.arc(sunS[0], sunS[1], 62, 0, 7); ctx.fill();
+    glow(ctx, sunS[0], sunY, 520, .5 * dim, '255,214,150'); glow(ctx, sunS[0], sunY, 130, .9 * dim, '255,244,214');
+    ctx.fillStyle = `rgba(255,246,222,${dim})`; ctx.beginPath(); ctx.arc(sunS[0], sunY, 62, 0, 7); ctx.fill();
     camAt(ctx, cam, .18); put(ctx, head, -700, 400, { light: dim });
     camAt(ctx, cam, .3); put(ctx, sea, -700, 560, { light: dim });
     for (let i = 0; i < 8; i++) { const ww = 240 - i * 22 + Math.sin(t * 1.4 + i) * 30; ctx.fillStyle = `rgba(255,232,190,${.45 * dim})`; ctx.fillRect(sunS[0] + Math.sin(t + i) * 14 - ww / 2 + cam.x * .3 * .0, 612 + i * 26, ww, 5); }
+    for (let i = 0; i < 7; i++) { const k = 46.2 + i * 2.3, u = (t - k) / .9; if (u < 0 || u > 1) continue; const fx = 300 + ((i * 531) % 1300) + cam.x * .5, fy = 650 + (i % 3) * 40; ctx.save(); ctx.translate(fx + u * 90, fy - Math.sin(Math.PI * u) * 120); ctx.rotate(-1 + u * 2); ctx.fillStyle = '#5a2e30'; ctx.beginPath(); ctx.ellipse(0, 0, 26, 9, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-40, -12); ctx.lineTo(-40, 12); ctx.fill(); ctx.restore(); }
     camAt(ctx, cam, .25);
     for (const b of birds) { const bx = b.x0 + (t - 43.5) * b.v, by = b.y + Math.sin(t * .8 + b.ph) * 14, f = Math.sin(t * 7 + b.ph) * .5; ctx.save(); ctx.translate(bx, by); ctx.scale(b.s, b.s); ctx.fillStyle = '#5a2e30';
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-18, -14 - f * 18, -38, -4 - f * 26); ctx.quadraticCurveTo(-18, -4, 0, 6); ctx.quadraticCurveTo(18, -4, 38, -4 - f * 26); ctx.quadraticCurveTo(18, -14 - f * 18, 0, 0); ctx.fill(); ctx.restore(); }
     camAt(ctx, cam, .5); put(ctx, pier, -260, 560, { light: dim });
     const sp = .25 + .75 * .7;
     camAt(ctx, cam, .7);
-    drawShip(ctx, ship, 1180 + cam.x * sp, 880 + Math.sin(t * 1.1) * 7, Math.sin(t * .9) * .025, { sailLight: dim });
+    drawShip(ctx, ship, 1180 + cam.x * sp + 380 * ss(seg(t, 55, 63)), 880 + Math.sin(t * 1.1) * 7, Math.sin(t * .9) * .025, { sailLight: dim, t });
     camAt(ctx, cam, 1); put(ctx, waves, -800 + Math.sin(t * .7) * 30, 820 + Math.sin(t * 1.2) * 6, { light: 0, sd: [10, 14] });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   };
@@ -240,9 +260,10 @@ export function buildStorm() {
   rx.strokeStyle = 'rgba(170,180,225,.33)'; rx.lineCap = 'round';
   for (let i = 0; i < 420; i++) { const px = r() * 1200, py = r() * 900, l = 30 + r() * 60; rx.lineWidth = .8 + r() * 1.4; rx.beginPath(); rx.moveTo(px, py); rx.lineTo(px - l * .32, py + l); rx.stroke(); }
   const bolts = LIGHTNING.map((k, i) => { const q = mulberry(300 + i), pts = []; let x = 300 + q() * 1300, y = -20; pts.push([x, y]); while (y < 560) { y += 40 + q() * 50; x += (q() - .5) * 120; pts.push([x, y]); } return { k, pts }; });
-  LIGHTNING.forEach((k, i) => ev(k + .25 + i * .07, 'thunder', { v: .8 + (i % 2) * .2, pan: (bolts[i].pts[0][0] - 960) / 1400 }));
+  LIGHTNING.forEach((k, i) => ev(k + .2, 'thunder', { v: k > 86 && k < 100 ? .45 : .7 + (i % 2) * .2, pan: (bolts[i].pts[0][0] - 960) / 1400 }));
   [64.2, 68.4, 72.6, 76.4, 79.8].forEach(k => ev(k, 'crash', { v: .7 }));
   [65, 71, 75.5, 81.5].forEach(k => ev(k, 'creak', { v: .9 }));
+  const JET = [67.5, 70.6, 74.8, 78.2]; JET.forEach(k => ev(k + 1.0, 'splash', { v: .4 }));
   return function draw(ctx, t, o = {}) {
     const f = flashAt(t), dy = o.dy || 0;
     const shake = { x: Math.sin(t * .43) * 40 + Math.sin(t * 2.3) * 6, y: Math.sin(t * .61) * 12 + Math.sin(t * 3.1) * 3 + dy, s: 1.05, r: Math.sin(t * .9) * .012 };
@@ -257,7 +278,8 @@ export function buildStorm() {
     camAt(ctx, shake, .5); put(ctx, wm, -900 + Math.sin(t * .45 + 1) * 110, 560 + Math.sin(t * .8 + 1) * 26, { light: Math.min(1, L * .8), sd: [12, 16] });
     camAt(ctx, shake, .65);
     const sx = o.shipX ?? 1120, rot = Math.sin(t * 1.25) * .13 + Math.sin(t * 2.7) * .04, heave = Math.sin(t * 1.25 + .6) * 34;
-    drawShip(ctx, ship, sx, 860 + heave, rot, { sailLight: Math.min(1, .2 + f) });
+    drawShip(ctx, ship, sx, 860 + heave, rot, { sailLight: Math.min(1, .2 + f), t });
+    for (const k of JET) { const u = (t - k) / 1.1; if (u < 0 || u > 1) continue; const jx = sx - 120 - u * 260, jy = 800 + heave - Math.sin(Math.PI * u * .8) * 170 + u * 220; ctx.save(); ctx.translate(jx, jy); ctx.rotate(-u * 5); ctx.fillStyle = '#0f0d18'; ctx.beginPath(); ctx.ellipse(0, 0, 22, 34, 0, 0, 7); ctx.fill(); ctx.fillRect(-8, -46, 16, 16); ctx.restore(); }
     if (o.after) o.after(ctx, t);
     camAt(ctx, shake, 1); put(ctx, wn, -1000 + Math.sin(t * .55 + 2) * 160, 720 + Math.sin(t * .95 + 2) * 40, { light: 0, sd: [14, 18], sa: .6 });
     // rain (screen space), and the flash on the air itself
@@ -276,9 +298,11 @@ export function buildLots() {
   const nails = mulberry(2);
   const back = sheet(190, 270, '#2b1a10', x => { x.beginPath(); x.roundRect(0, 0, 190, 270, 14); x.fill(); cutWith(x, c => { c.lineWidth = 3; c.beginPath(); c.roundRect(14, 14, 162, 242, 9); c.stroke(); }); }, { trans: 0, rim: .7 });
   const face = sheet(190, 270, '#cdb68a', x => { x.beginPath(); x.roundRect(0, 0, 190, 270, 14); x.fill(); }, { trans: .6, light: [95, 135, 220], lightCol: '255,200,120', rim: .6 });
+  const faceDim = sheet(190, 270, '#6f5c40', x => { x.beginPath(); x.roundRect(0, 0, 190, 270, 14); x.fill(); }, { trans: 0, rim: .5 });
   const pos = [[680, 470], [960, 470], [1240, 470]];
   FLIPS.forEach((k, i) => { ev(k, 'flip', { v: .8, pan: (pos[i][0] - 960) / 1200 }); });
   ev(FLIPS[2] + .45, 'chime', { v: .5 });
+  [0, 1, 2].forEach(i => ev(84.7 + i * .45, 'tap', { v: 1.2 })); ev(85.9, 'paper', { v: 1 }); ev(86.9, 'paper', { v: 1 });
   const rain = mulberry(5), drops = Array.from({ length: 30 }, () => ({ x: rain() * W, y: rain() * H, ph: rain() * 3 }));
   return function draw(ctx, t) {
     const d = drift(t), rock = Math.sin(t * 1.25) * .025;
@@ -287,9 +311,11 @@ export function buildLots() {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#120a06'; ctx.fillRect(0, 0, W, H);
     camAt(ctx, cam, .2); put(ctx, deck, -190, -160, { light: clamp(.55 + .25 * Math.sin(t * 1.6) + f * .4), shadow: false });
     camAt(ctx, cam, .6);
-    pos.forEach(([px, py], i) => {
+    pos.forEach(([px0, py0], i) => {
+      const inn = eo(seg(t, 84.1 + i * .45, 84.7 + i * .45)), sh = ss(seg(t, 85.9, 86.8)) - ss(seg(t, 86.9, 87.8));
+      const px = px0 + (i === 0 ? 560 : i === 2 ? -560 : 0) * sh, py = py0 - (1 - inn) * 900 + (i === 1 ? 0 : Math.sin(Math.PI * sh) * (i ? 80 : -80));
       const u = seg(t, FLIPS[i], FLIPS[i] + .55), c = Math.cos(Math.PI * eio(u)), lift = Math.sin(Math.PI * u) * 40;
-      const S = c >= 0 ? back : face, sx = Math.max(.02, Math.abs(c));
+      const S = c >= 0 ? back : i === 2 ? face : faceDim, sx = Math.max(.02, Math.abs(c));
       put(ctx, S, px, py - lift, { px: 95, py: 135, sx, sy: 1 + lift * .002, light: i === 2 && c < 0 ? .4 + .6 * seg(t, FLIPS[2] + .4, FLIPS[2] + 1.4) : .25, sd: [10 + lift * .6, 14 + lift * .8], sa: .6 });
       if (i === 2 && c < 0) { const g = seg(t, FLIPS[2] + .4, FLIPS[2] + 1.6); glow(ctx, px, py - lift, 330, .55 * g * flick(t), '255,186,90'); }
     });
@@ -321,6 +347,8 @@ function buildUnder(pal) {
     if (o.mid) o.mid(ctx);
     camAt(ctx, cam, .55); put(ctx, kelp, -640, 380, { light: L, rot: Math.sin(t * .5) * .004, sd: [12, 16] });
     camAt(ctx, cam, .6);
+    for (let sI = 0; sI < 2; sI++) { const dir = sI ? 1 : -1, base = ((t * (90 + sI * 40) + sI * 1700) % 3400); for (let i = 0; i < 12; i++) { const fx = (dir < 0 ? 2500 - base : -700 + base) + ((i * 97) % 260) * dir, fy = 300 + sI * 260 + ((i * 53) % 150) + Math.sin(t * 2 + i) * 10; ctx.fillStyle = pal.mid; ctx.globalAlpha = .9 * L; ctx.beginPath(); ctx.ellipse(fx, fy, 22, 8, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.moveTo(fx - dir * 18, fy); ctx.lineTo(fx - dir * 36, fy - 10 + Math.sin(t * 14 + i) * 3); ctx.lineTo(fx - dir * 36, fy + 10 + Math.sin(t * 14 + i) * 3); ctx.fill(); ctx.globalAlpha = 1; } }
+    if (o.jelly) for (let i = 0; i < 4; i++) { const jx = 300 + i * 430 + Math.sin(t * .6 + i) * 40, jy = 900 - ((t * (40 + i * 9) + i * 300) % 1500), pu = .85 + .15 * Math.sin(t * 3 + i * 2); ctx.save(); ctx.translate(jx, jy); ctx.globalAlpha = .55; ctx.fillStyle = 'rgb(255,236,190)'; ctx.beginPath(); ctx.ellipse(0, 0, 44 * pu, 32 / pu, 0, Math.PI, 0); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = 'rgb(255,236,190)'; for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(k * 14, 0); ctx.quadraticCurveTo(k * 14 + Math.sin(t * 3 + k + i) * 10, 40, k * 12, 80 * pu); ctx.stroke(); } ctx.restore(); glow(ctx, jx, jy, 90, .25, '255,226,160'); }
     for (const b of bubbles) { const y = 1300 - ((t * b.sp + b.ph) % 2100); ctx.strokeStyle = `rgba(220,245,240,${.45 * L})`; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(b.x + Math.sin(t * 2 + b.ph) * 8, y, b.r, 0, 7); ctx.stroke(); }
     if (o.front) o.front(ctx);
     camAt(ctx, cam, 1); put(ctx, rocksN, -700, 800, { light: 0, sd: [14, 18], sa: .6 });
@@ -424,6 +452,9 @@ export function buildDark() {
     const after = seg(t, 145, 151) * (1 - .4 * seg(t, 152, 156));
     const grow = ss(seg(t, 163.5, 170.5));
     if (after > 0) glow(ctx, 960, 480, 760, .16 * after * flick(t), '255,190,100');
+    // lights rising in the dark after the call: more and more of them
+    const mk = seg(t, 141, 166);
+    if (mk > 0) for (let i = 0; i < 46; i++) { if (i / 46 > mk * 1.15) break; const life = 5 + (i % 5), a = ((t * 1.0 + i * 1.37) % life) / life, mx = 160 + ((i * 397) % 1600) + Math.sin(t * .8 + i) * 30, my = 1040 - a * 1000; glow(ctx, mx, my, 14 + (i % 4) * 7, .6 * Math.sin(Math.PI * a), '255,206,130'); }
     if (grow > 0) {
       glow(ctx, 960, 470, 300 + 1600 * grow, .65 * grow, '255,200,120');
       ctx.globalAlpha = grow * .9; ctx.fillStyle = 'rgb(120,170,150)'; ctx.globalCompositeOperation = 'soft-light'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
@@ -439,7 +470,7 @@ export function buildRise() {
     const u = seg(t, 169, 187), d = drift(t);
     const cam = { x: d.x + u * 160, y: d.y + lerp(420, -260, eio(u)), s: 1.02 };
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#0c3238'; ctx.fillRect(0, 0, W, H);
-    under(ctx, t, cam, { light: 1, shaft: .16, front: c => {
+    under(ctx, t, cam, { light: 1, shaft: .16, jelly: true, front: c => {
       camAt(c, cam, .45);
       const k = eio(seg(t, 169.5, 186.5)), wx = lerp(300, 1950, k), wy = lerp(640, -160, k);
       drawWhale(c, Wh, wx, wy, .55, -.3 + Math.sin(t * .8) * .02, .02, { eye: .3 });
@@ -480,14 +511,14 @@ export function buildShore() {
   const birds = [{ x0: 2100, y: 300, v: -90, ph: 0 }, { x0: 2260, y: 340, v: -84, ph: 2 }];
   ev(205.5, 'bird', { pan: .5 }); ev(210.5, 'bird', { pan: -.2 });
   return function draw(ctx, t) {
-    const d = drift(t), z = ss(seg(t, 195, 219.5));
+    const d = drift(t), z = ss(seg(t, 195, 219.5)), sunY = sun[1] + 70 - 130 * seg(t, 186, 219);
     const cam = { x: d.x - 90 * z, y: d.y - 30 * z, s: 1 + .1 * z };
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#e8c08a'; ctx.fillRect(0, 0, W, H);
     camAt(ctx, cam, 0); put(ctx, sky, -540, -220, { light: .95, shadow: false });
-    glow(ctx, sun[0], sun[1], 600, .32, '255,214,150');
-    ctx.fillStyle = '#fffbf2'; ctx.beginPath(); ctx.arc(sun[0], sun[1], 58, 0, 7); ctx.fill(); glow(ctx, sun[0], sun[1], 120, .25, '255,236,200');
+    glow(ctx, sun[0], sunY, 600, .32, '255,214,150');
+    ctx.fillStyle = '#fffbf2'; ctx.beginPath(); ctx.arc(sun[0], sunY, 58, 0, 7); ctx.fill(); glow(ctx, sun[0], sunY, 120, .25, '255,236,200');
     camAt(ctx, cam, .08);
-    for (const b of birds) { if (t < 203) continue; const bx = b.x0 + (t - 203) * b.v, by = b.y + Math.sin(t + b.ph) * 10, f = Math.sin(t * 6.5 + b.ph) * .5; ctx.save(); ctx.translate(bx, by); ctx.fillStyle = '#9a6a4c';
+    for (const b of birds) { if (t < 189) continue; const bx = b.x0 + (t - 189) * b.v, by = b.y + Math.sin(t + b.ph) * 10, f = Math.sin(t * 6.5 + b.ph) * .5; ctx.save(); ctx.translate(bx, by); ctx.fillStyle = '#9a6a4c';
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-14, -10 - f * 14, -30, -3 - f * 20); ctx.quadraticCurveTo(-14, -3, 0, 5); ctx.quadraticCurveTo(14, -3, 30, -3 - f * 20); ctx.quadraticCurveTo(14, -10 - f * 14, 0, 0); ctx.fill(); ctx.restore(); }
     camAt(ctx, cam, .15); put(ctx, seaF, -540, 540, { light: .9 });
     for (let i = 0; i < 6; i++) { const ww = 200 - i * 22 + Math.sin(t * 1.3 + i) * 26; ctx.fillStyle = 'rgba(255,246,222,.55)'; ctx.fillRect(sun[0] - ww / 2 + Math.sin(t + i) * 10, 578 + i * 16, ww, 4); }
@@ -513,6 +544,9 @@ export function buildShore() {
     }
     for (const l of leaves) { const u = seg(t, l.t, l.t + .7); if (u <= 0) continue; const s = l.s * back(u, 1.6); put(ctx, l.S, l.x, l.y, { px: 110, py: 190, sx: s, sy: s, rot: l.rot + Math.sin(t * .9 + l.u * 9) * .03, light: .9, sd: [10, 14], sa: .45 }); }
     for (const fl of flowers) { const u = seg(t, fl.t, fl.t + .6); if (u <= 0) continue; ctx.save(); ctx.translate(fl.x, fl.y); ctx.scale(back(u), back(u)); ctx.fillStyle = '#e9b949'; for (let k = 0; k < 5; k++) { ctx.rotate(Math.PI * 2 / 5); ctx.beginPath(); ctx.ellipse(0, -16, 9, 16, 0, 0, 7); ctx.fill(); } ctx.fillStyle = '#b07a20'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, 7); ctx.fill(); ctx.restore(); glow(ctx, fl.x, fl.y, 60, .3 * u, '255,220,120'); }
+    for (const [gx, gy, k] of [[830, 590, 209.6], [1085, 640, 211]]) { const u = ss(seg(t, k, k + 2.2)); if (u <= 0) continue; ctx.save(); ctx.translate(gx, gy); ctx.strokeStyle = '#33531f'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(0, 0); ctx.stroke(); ctx.fillStyle = '#a9b85a'; ctx.beginPath(); ctx.ellipse(0, 34 * u, 24 * u + 2, 40 * u + 2, 0, 0, 7); ctx.fill(); ctx.fillStyle = 'rgba(255,255,220,.25)'; ctx.beginPath(); ctx.ellipse(-8 * u, 26 * u, 6 * u, 18 * u, 0, 0, 7); ctx.fill(); ctx.restore(); }
+    for (let i = 0; i < 2; i++) { const u = t - 206.5 - i * 1.2; if (u < 0) continue; const bx = 900 + Math.sin(u * 1.1 + i * 2) * 260, by = 520 + Math.sin(u * 1.7 + i) * 90 - Math.min(60, u * 10), f = Math.abs(Math.sin(t * 13 + i)); ctx.save(); ctx.translate(bx, by); ctx.fillStyle = i ? '#f2e2b0' : '#e9b949'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(sd * 9 * f, -3, 11 * f + 1, 13, sd * .4, 0, 7); ctx.fill(); } ctx.restore(); }
+    { const u = seg(t, 199.5, 211); if (u > 0 && u < 1) { const cx = lerp(1750, 1280, u) + Math.sin(t * 3) * 6; ctx.save(); ctx.translate(cx, 885); ctx.fillStyle = '#c8442e'; ctx.strokeStyle = '#c8442e'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(0, 0, 24, 15, 0, 0, 7); ctx.fill(); for (let k = 0; k < 3; k++) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sd * 16, 4); ctx.lineTo(sd * (30 + k * 5), 14 + Math.sin(t * 16 + k * 2 + sd) * 6); ctx.stroke(); } ctx.beginPath(); ctx.arc(-30, -14, 8, 0, 7); ctx.arc(30, -14, 8, 0, 7); ctx.fill(); ctx.restore(); } }
     camAt(ctx, cam, 1); put(ctx, front, -640, 760, { light: 0, sd: [12, 16], sa: .55 });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   };
