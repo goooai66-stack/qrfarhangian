@@ -123,7 +123,29 @@ function errText(r) {
 }
 async function busy(btn, fn) { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } }
 
-let fields = [];
+let fields = [], presets = [], preset = 'none';
+// هر سرویس فقط خانه‌های خودش را نشان می‌دهد.
+function applyPreset(id, fill) {
+  const p = presets.find((x) => x.id === id);
+  const el = (n) => $('form').querySelector('[data-name=' + n + ']');
+  const show = (n, on) => { const e = el(n); if (e) e.parentElement.hidden = !on; };
+  if (!p) return;  // حالت توسعه (fake): همه‌ی خانه‌ها دیده می‌شوند
+  const compat = p.provider === 'openai_compatible', claude = p.provider === 'anthropic';
+  el('vision_provider').value = p.provider;
+  show('vision_provider', false);
+  show('openai_compat_base_url', compat && p.base_url === null);
+  show('openai_compat_api_key', compat);
+  show('openai_compat_model', compat);
+  show('anthropic_api_key', claude);
+  show('anthropic_model', claude);
+  show('provider_timeout_seconds', p.provider !== 'none');
+  if (fill && compat && p.base_url !== null) el('openai_compat_base_url').value = p.base_url;
+  if (fill && compat && p.base_url === null && presets.some((x) => x.base_url === el('openai_compat_base_url').value)) {
+    el('openai_compat_base_url').value = '';
+  }
+  const hint = (claude ? el('anthropic_model') : el('openai_compat_model')).parentElement.querySelector('.hint');
+  if (hint && p.model_hint) hint.textContent = 'باید ورودی تصویر داشته باشد؛ ' + p.model_hint;
+}
 function renderForm() {
   const form = $('form'); form.textContent = '';
   const groups = {};
@@ -131,6 +153,17 @@ function renderForm() {
   for (const [name, list] of Object.entries(groups)) {
     const card = document.createElement('section'); card.className = 'card';
     const h = document.createElement('h2'); h.textContent = name; card.append(h);
+    if (list.some((f) => f.name === 'vision_provider')) {
+      const label = document.createElement('label'); label.textContent = 'سرویس هوش مصنوعی ';
+      const sel = document.createElement('select'); sel.id = 'preset';
+      const all = presets.some((x) => x.id === preset) ? presets : presets.concat([{id: preset, label: preset + ' (توسعه)'}]);
+      for (const x of all) { const o = document.createElement('option'); o.value = x.id; o.textContent = x.label; sel.append(o); }
+      sel.value = preset;
+      sel.onchange = () => applyPreset(sel.value, true);
+      const hint = document.createElement('span'); hint.className = 'hint';
+      hint.textContent = 'با عوض کردن سرویس، کلید همان سرویس را هم وارد کن.';
+      label.append(sel, hint); card.append(label);
+    }
     for (const f of list) {
       const label = document.createElement('label'); label.textContent = f.label + ' ';
       let input;
@@ -152,6 +185,7 @@ function renderForm() {
     }
     form.append(card);
   }
+  applyPreset(preset, false);
 }
 function renderStatus(d) {
   const s = $('status'); s.textContent = '';
@@ -180,7 +214,7 @@ function renderStatus(d) {
 async function loadPanel() {
   const r = await api('GET', 'settings');
   if (!r.ok) return start();
-  fields = r.data.fields; renderForm(); renderStatus(r.data);
+  fields = r.data.fields; presets = r.data.presets; preset = r.data.preset; renderForm(); renderStatus(r.data);
   $('setup').hidden = $('login').hidden = true; $('panel').hidden = false;
 }
 async function start() {

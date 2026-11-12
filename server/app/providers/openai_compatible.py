@@ -35,6 +35,8 @@ class OpenAICompatibleProvider:
         self._client = httpx.AsyncClient(timeout=timeout)
         # بعضی مدل‌ها json_schema را نمی‌پذیرند؛ بعد از اولین رد، json_object.
         self._schema_supported = True
+        # مدل‌های جدیدتر OpenAI به‌جای max_tokens، max_completion_tokens می‌خواهند.
+        self._tokens_key = "max_tokens"
 
     def _body(self, data_url: str | None, system_prompt: str, user_text: str, schema: dict, strict: bool) -> dict:
         if strict:
@@ -60,7 +62,7 @@ class OpenAICompatibleProvider:
                 },
             ],
             "response_format": response_format,
-            "max_tokens": 2000,
+            self._tokens_key: 2000,
         }
 
     async def _post(self, body: dict) -> httpx.Response:
@@ -80,6 +82,9 @@ class OpenAICompatibleProvider:
 
     async def _complete(self, data_url, system_prompt, user_text, schema) -> ProviderResponse:
         r = await self._post(self._body(data_url, system_prompt, user_text, schema, self._schema_supported))
+        if r.status_code == 400 and self._tokens_key == "max_tokens" and "max_completion_tokens" in r.text:
+            self._tokens_key = "max_completion_tokens"
+            r = await self._post(self._body(data_url, system_prompt, user_text, schema, self._schema_supported))
         if r.status_code == 400 and self._schema_supported:
             # احتمالاً json_schema پشتیبانی نمی‌شود ← یک‌بار با json_object.
             self._schema_supported = False

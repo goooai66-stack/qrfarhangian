@@ -190,3 +190,44 @@ def test_forgotten_password_reset_keeps_settings(tmp_path):
     assert c.get("/admin/api/state").json()["needs_setup"] is True
     assert c.post("/admin/api/setup", json={"setup_code": CODE, "password": "a-new-password-1"}).status_code == 200
     assert admin.load_overrides(c.app.state.db) == {"free_scans_per_day": 7}
+
+
+def test_presets_cover_major_providers_and_detect_current(tmp_path):
+    c = make(tmp_path)
+    setup(c)
+    body = c.get("/admin/api/settings", headers=XH).json()
+    ids = {p["id"] for p in body["presets"]}
+    assert {"openrouter", "openai", "anthropic", "gemini", "custom", "none"} <= ids
+    for p in body["presets"]:
+        assert p["base_url"] in (None, "") or p["base_url"].startswith("https://")
+    c.put("/admin/api/settings", headers=XH, json={"values": {
+        "vision_provider": "openai_compatible", "openai_compat_base_url": "https://api.openai.com/v1/",
+        "openai_compat_api_key": "sk-openai-12345678", "openai_compat_model": "some-vision-model"}})
+    assert c.get("/admin/api/settings", headers=XH).json()["preset"] == "openai"
+    # سرویس ناشناخته (مثلاً یک درگاه دیگر) ← «سرویس دیگر»
+    r = c.put("/admin/api/settings", headers=XH, json={"values": {
+        "openai_compat_base_url": "https://gateway.example.ir/v1", "openai_compat_api_key": "another-key-1234"}})
+    assert r.status_code == 200
+    assert c.get("/admin/api/settings", headers=XH).json()["preset"] == "custom"
+
+
+def test_key_is_not_reused_for_a_different_service(tmp_path):
+    c = make(tmp_path)
+    setup(c)
+    first = {"vision_provider": "openai_compatible", "openai_compat_base_url": "https://openrouter.ai/api/v1",
+             "openai_compat_api_key": "sk-or-secret-12345678", "openai_compat_model": "m"}
+    assert c.put("/admin/api/settings", headers=XH, json={"values": first}).status_code == 200
+    # عوض کردن آدرس بدون کلید تازه: کلید OpenRouter نباید به سرویس دیگر برود.
+    r = c.put("/admin/api/settings", headers=XH, json={"values": {"openai_compat_base_url": "https://api.openai.com/v1"}})
+    assert r.status_code == 400 and "کلید" in r.json()["errors"][0]
+    assert c.app.state.provider._url.startswith("https://openrouter.ai/")
+
+
+def test_switch_to_claude_with_key_from_panel(tmp_path):
+    c = make(tmp_path)
+    setup(c)
+    r = c.put("/admin/api/settings", headers=XH, json={"values": {
+        "vision_provider": "anthropic", "anthropic_api_key": "sk-ant-secret-12345678", "anthropic_model": "claude-haiku-5-5"}})
+    assert r.status_code == 200, r.text
+    assert "sk-ant-secret" not in r.text
+    assert c.app.state.provider.name == "anthropic" and c.app.state.provider.model == "claude-haiku-5-5"

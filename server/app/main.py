@@ -297,6 +297,8 @@ def create_app(
         require_session(request)
         return {
             "fields": admin.describe(s),
+            "presets": list(admin.PRESETS),
+            "preset": admin.preset_of(s),
             "env": s.app_env,
             "provider": {"name": vision.name, "model": vision.model},
             "foods": len(foods.foods),

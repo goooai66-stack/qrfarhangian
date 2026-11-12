@@ -184,3 +184,21 @@ def test_openai_parse_text_has_no_image():
 
     run(openai_with(handler).parse_text("SYS", "یه دوغ", OUTPUT_SCHEMA))
     assert seen["body"]["messages"][1]["content"] == [{"type": "text", "text": "یه دوغ"}]
+
+
+def test_openai_newer_models_switch_to_max_completion_tokens():
+    seen = []
+
+    def handler(req: httpx.Request):
+        body = json.loads(req.content)
+        seen.append("max_completion_tokens" in body)
+        if "max_tokens" in body:
+            return httpx.Response(400, json={"error": {"message": "Unsupported parameter: 'max_tokens'. Use 'max_completion_tokens' instead."}})
+        return httpx.Response(200, json={"choices": [{"message": {"content": RESULT}}], "usage": {}})
+
+    p = openai_with(handler)
+    assert run(p.recognize(IMG, "image/jpeg", "sys", "user", OUTPUT_SCHEMA)).text == RESULT
+    run(p.recognize(IMG, "image/jpeg", "sys", "user", OUTPUT_SCHEMA))
+    # بار اول رد و اصلاح؛ بعد از آن مستقیم با کلید درست، و قالب خروجی دست‌نخورده.
+    assert seen == [False, True, True]
+    assert p._schema_supported is True

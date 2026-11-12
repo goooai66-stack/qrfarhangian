@@ -40,9 +40,9 @@ FIELDS: tuple[Field, ...] = (
     Field("vision_provider", "choice", "ارائه‌دهنده‌ی هوش مصنوعی", "هوش مصنوعی",
           "openai_compatible برای OpenRouter و سرویس‌های مشابه؛ none یعنی اسکن خاموش",
           choices=("none", "openai_compatible", "anthropic", "fake")),
-    Field("openai_compat_base_url", "str", "آدرس API", "هوش مصنوعی", "OpenRouter: https://openrouter.ai/api/v1"),
+    Field("openai_compat_base_url", "str", "آدرس API", "هوش مصنوعی", "با انتخاب سرویس خودکار پر می‌شود"),
     Field("openai_compat_api_key", "secret", "کلید API", "هوش مصنوعی", "خالی بگذار تا کلید فعلی بماند"),
-    Field("openai_compat_model", "str", "نام مدل", "هوش مصنوعی", "مدلی با ورودی تصویر، مثلاً google/gemini-2.5-flash"),
+    Field("openai_compat_model", "str", "نام مدل", "هوش مصنوعی", "باید مدلی با ورودی تصویر باشد"),
     Field("anthropic_api_key", "secret", "کلید Anthropic", "هوش مصنوعی", "فقط اگر ارائه‌دهنده anthropic است"),
     Field("anthropic_model", "str", "مدل Anthropic", "هوش مصنوعی"),
     Field("provider_timeout_seconds", "float", "مهلت پاسخ مدل (ثانیه)", "هوش مصنوعی", min=3, max=120),
@@ -56,6 +56,41 @@ FIELDS: tuple[Field, ...] = (
     Field("rewards_per_day", "int", "حداکثر ویدیوی جایزه در روز", "سهمیه", max=100),
     Field("cache_ttl_days", "int", "نگه‌داری نتیجه‌ی اسکن تکراری (روز)", "سهمیه", max=365),
 )
+# سرویس‌های آماده برای فرم پنل. همه جز Claude با یک آداپتر (سازگار با OpenAI) کار می‌کنند؛
+# هر سرویس دیگری با همین قالب، از گزینه‌ی «سرویس دیگر» و آدرس خودش وصل می‌شود.
+PRESETS: tuple[dict, ...] = (
+    {"id": "openrouter", "label": "OpenRouter", "provider": "openai_compatible",
+     "base_url": "https://openrouter.ai/api/v1", "model_hint": "مثل google/gemini-2.5-flash"},
+    {"id": "openai", "label": "OpenAI (ChatGPT)", "provider": "openai_compatible",
+     "base_url": "https://api.openai.com/v1", "model_hint": "مثل gpt-4o-mini"},
+    {"id": "anthropic", "label": "Anthropic (Claude)", "provider": "anthropic",
+     "base_url": "", "model_hint": "مثل claude-haiku-5-5"},
+    {"id": "gemini", "label": "Google Gemini", "provider": "openai_compatible",
+     "base_url": "https://generativelanguage.googleapis.com/v1beta/openai", "model_hint": "مثل gemini-2.5-flash"},
+    {"id": "xai", "label": "xAI (Grok)", "provider": "openai_compatible",
+     "base_url": "https://api.x.ai/v1", "model_hint": "یک مدل Grok با ورودی تصویر"},
+    {"id": "mistral", "label": "Mistral", "provider": "openai_compatible",
+     "base_url": "https://api.mistral.ai/v1", "model_hint": "یک مدل Pixtral (ورودی تصویر)"},
+    {"id": "groq", "label": "Groq", "provider": "openai_compatible",
+     "base_url": "https://api.groq.com/openai/v1", "model_hint": "یک مدل با ورودی تصویر"},
+    {"id": "together", "label": "Together AI", "provider": "openai_compatible",
+     "base_url": "https://api.together.xyz/v1", "model_hint": "یک مدل با ورودی تصویر"},
+    {"id": "custom", "label": "سرویس دیگر (سازگار با OpenAI؛ مثل 9Router یا درگاه‌های داخلی)",
+     "provider": "openai_compatible", "base_url": None,
+     "model_hint": "نام مدل را از پنل همان سرویس بردار"},
+    {"id": "none", "label": "خاموش (اسکن و ثبت صوتی کار نمی‌کند)", "provider": "none",
+     "base_url": "", "model_hint": ""},
+)
+
+
+def preset_of(s: Settings) -> str:
+    """کدام سرویس آماده با تنظیمات فعلی می‌خواند (برای انتخاب پیش‌فرض فرم)."""
+    if s.vision_provider in ("none", "anthropic", "fake"):
+        return s.vision_provider
+    url = s.openai_compat_base_url.rstrip("/")
+    return next((p["id"] for p in PRESETS if p["base_url"] and p["base_url"] == url), "custom")
+
+
 _BY_NAME = {f.name: f for f in FIELDS}
 PROVIDER_FIELDS = {f.name for f in FIELDS if f.group == "هوش مصنوعی"}
 
@@ -163,6 +198,10 @@ def validate_update(current: Settings, incoming: dict) -> tuple[Settings, dict]:
     if errors:
         raise AdminError(errors)
     candidate = dataclasses.replace(current, **changes)
+    # کلید یک سرویس هرگز بی‌خبر به سرویس دیگری فرستاده نمی‌شود.
+    moved = candidate.openai_compat_base_url.rstrip("/") != current.openai_compat_base_url.rstrip("/")
+    if moved and current.openai_compat_api_key and "openai_compat_api_key" not in changes:
+        errors.append("آدرس API عوض شده؛ کلید همین سرویس جدید را هم وارد کن")
     url = candidate.openai_compat_base_url
     if url and not url.startswith(("https://", "http://localhost", "http://127.0.0.1")):
         errors.append("آدرس API باید با https:// شروع شود")
