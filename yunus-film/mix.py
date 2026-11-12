@@ -154,8 +154,8 @@ def lampoff(v):
     d = .12; x = hp(noise(d), 2000) * env_exp(d, .006) + np.sin(2 * np.pi * 1800 * t_(d)) * env_exp(d, .01)
     return norm(x) * v
 
-G = {'tap': .06, 'chime': .025, 'gull': .05, 'creak': .07, 'thunder': .55, 'crash': .22, 'flip': .09, 'splash': .4, 'submerge': .3,
-     'whale': .2, 'jawopen': .1, 'jaw': .5, 'swell': .25, 'rise': .2, 'breach': .28, 'fluke': .12, 'leaf': .07, 'bird': .035,
+G = {'tap': .06, 'chime': .025, 'gull': .05, 'creak': .07, 'thunder': .36, 'crash': .22, 'flip': .09, 'splash': .3, 'submerge': .3,
+     'whale': .2, 'jawopen': .1, 'jaw': .36, 'swell': .25, 'rise': .2, 'breach': .28, 'fluke': .12, 'leaf': .07, 'bird': .035,
      'strip': .1, 'spark': .05, 'paper': .05, 'lampoff': .35}
 for e in EV:
     ty, t, v, pan = e['type'], e['t'], e.get('v', 1), e.get('pan', 0)
