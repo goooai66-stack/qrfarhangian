@@ -177,3 +177,16 @@ def test_connection_test_and_reports_with_session(tmp_path):
     assert c.post("/admin/api/test", headers=XH).json()["ok"] is True  # ارائه‌دهنده‌ی fake
     assert c.get("/admin/stats").status_code == 200  # با نشست پنل
     assert make(tmp_path).get("/admin/stats").status_code == 404  # بدون نشست
+
+
+def test_forgotten_password_reset_keeps_settings(tmp_path):
+    from app.reset_admin import reset
+
+    c = make(tmp_path)
+    setup(c)
+    c.put("/admin/api/settings", headers=XH, json={"values": {"free_scans_per_day": 7}})
+    reset(c.app.state.db)
+    assert c.get("/admin/api/settings", headers=XH).status_code == 401  # نشست باطل شد
+    assert c.get("/admin/api/state").json()["needs_setup"] is True
+    assert c.post("/admin/api/setup", json={"setup_code": CODE, "password": "a-new-password-1"}).status_code == 200
+    assert admin.load_overrides(c.app.state.db) == {"free_scans_per_day": 7}
