@@ -1,0 +1,296 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/providers.dart';
+import '../../app/router.dart';
+import '../../core/nutrition/serving.dart';
+import '../../core/utils/jalali_date.dart';
+import '../../core/utils/persian_digits.dart';
+import '../../data/db/app_database.dart';
+import '../../l10n/app_localizations.dart';
+import '../logging/log_food_sheet.dart';
+import '../monetization/paywall_screen.dart';
+import 'calorie_ring.dart';
+import 'rating_prompt.dart';
+import 'date_strip.dart';
+import 'macro_bars.dart';
+import 'meal_section.dart';
+import 'water_card.dart';
+import '../../l10n/date_names.dart';
+import '../common/persian_counter.dart';
+
+/// تب «امروز»: داشبورد روزانه (بخش ۴-۳).
+class TodayScreen extends ConsumerWidget {
+  const TodayScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final day = ref.watch(selectedDayProvider);
+    final ramadan = ref.watch(ramadanProvider);
+    final today = dateOnly(DateTime.now());
+    final logs = ref.watch(dayLogsProvider(day)).value ?? const <FoodLog>[];
+    final goal = ref.watch(goalOnProvider(day)).value;
+    final water = ref.watch(waterProvider(day)).value ?? 0;
+    final foods = ref.watch(foodRepositoryProvider).value;
+    final totals = DayTotals.sum([
+      for (final l in logs)
+        Nutrients(kcal: l.kcal, protein: l.protein, carbs: l.carbs, fat: l.fat),
+    ]);
+    final over = goal == null ? 0 : totals.kcal.round() - goal.kcal;
+
+    // «+» هر وعده مستقیم جستجو را باز می‌کند (ثبت با جستجو = ۳ لمس).
+    void openSearch(MealType meal) =>
+        context.push(Routes.searchFor(meal: meal, day: day));
+
+    void openLog(FoodLog l) {
+      final food = l.foodId == null ? null : foods?.byId(l.foodId!);
+      if (food != null) {
+        context.push(Routes.editLog(foodId: food.id, logId: l.id));
+      } else {
+        _confirmDelete(context, ref, l);
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          day == today ? t.tabToday : t.formatDateWithWeekday(day),
+          key: const Key('today-title'),
+        ),
+        actions: [
+          if (day != today)
+            TextButton(
+              onPressed: () => ref.read(selectedDayProvider.notifier).today(),
+              child: Text(t.goToToday),
+            ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 4, 12, 96),
+        children: [
+          const RatingPromptGate(),
+          const SoftPaywallGate(),
+          DateStrip(
+            selected: day,
+            today: today,
+            onSelect: ref.read(selectedDayProvider.notifier).select,
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  CalorieRing(consumed: totals.kcal, goal: goal?.kcal),
+                  const SizedBox(height: 8),
+                  Text(
+                    goal == null
+                        ? t.noGoal
+                        : '${t.kcalConsumed} ${formatPersianNumber(totals.kcal)}'
+                              ' · ${t.kcalGoal} ${formatPersianNumber(goal.kcal)}',
+                  ),
+                  if (over > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        t.kcalOver(formatPersianNumber(over)),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (totals.incompleteCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        t.incompleteItems(
+                          toPersianDigits('${totals.incompleteCount}'),
+                        ),
+                        key: const Key('incomplete-note'),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  MacroBars(
+                    protein: totals.protein,
+                    carbs: totals.carbs,
+                    fat: totals.fat,
+                    proteinGoal: goal?.proteinG,
+                    carbsGoal: goal?.carbsG,
+                    fatGoal: goal?.fatG,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          _PendingScansBanner(),
+          WaterCard(
+            glasses: water,
+            onChanged: (n) =>
+                ref.read(foodLogRepositoryProvider).setWater(dayKey(day), n),
+          ),
+          for (final m in MealType.values)
+            if (!(ramadan &&
+                m == MealType.lunch &&
+                !logs.any((l) => l.mealType == m)))
+              MealSection(
+                meal: m,
+                ramadan: ramadan,
+                logs: [
+                  for (final l in logs)
+                    if (l.mealType == m) l,
+                ],
+                foodOf: (id) => id == null ? null : foods?.byId(id),
+                onAdd: () => openSearch(m),
+                onTapItem: openLog,
+                onSaveCustom:
+                    logs.any((l) => l.mealType == m && l.foodId != null)
+                    ? () => _saveCustomMeal(context, ref, [
+                        for (final l in logs)
+                          if (l.mealType == m) l,
+                      ])
+                    : null,
+                onCopyYesterday: () => _copyYesterday(context, ref, day, m),
+              ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        key: const Key('fab-log'),
+        onPressed: () => showLogFoodSheet(
+          context,
+          meal: day == today
+              ? defaultMealForTime(DateTime.now(), ramadan: ramadan)
+              : (ramadan ? MealType.dinner : MealType.lunch),
+          day: day,
+        ),
+        icon: const Icon(Icons.add),
+        label: Text(t.logFood),
+      ),
+    );
+  }
+
+  Future<void> _saveCustomMeal(
+    BuildContext context,
+    WidgetRef ref,
+    List<FoodLog> logs,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final c = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(t.customMealName),
+        content: TextField(
+          key: const Key('custom-meal-name'),
+          controller: c,
+          autofocus: true,
+          maxLength: 40,
+          buildCounter: persianCounter,
+          decoration: InputDecoration(hintText: t.customMealNameHint),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(t.cancel)),
+          FilledButton(
+            key: const Key('custom-meal-save'),
+            onPressed: () => Navigator.pop(d, c.text.trim()),
+            child: Text(t.save),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    await ref.read(customMealRepositoryProvider).createFromLogs(name, logs);
+    messenger.showSnackBar(SnackBar(content: Text(t.customMealSaved(name))));
+  }
+
+  Future<void> _copyYesterday(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime day,
+    MealType meal,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final n = await ref
+        .read(foodLogRepositoryProvider)
+        .copyMeal(
+          fromDay: dayKey(DateTime(day.year, day.month, day.day - 1)),
+          toDay: dayKey(day),
+          meal: meal,
+        );
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          n == 0
+              ? t.nothingYesterday
+              : t.copiedYesterday(formatPersianNumber(n)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    FoodLog l,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        content: Text('${t.foodNotFound}\n${t.deleteConfirm}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: Text(t.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: Text(t.deleteItem),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await ref.read(foodLogRepositoryProvider).delete(l.id);
+  }
+}
+
+/// اسکن‌های صف آفلاین: «آماده‌ی بررسی» یا «در صف».
+class _PendingScansBanner extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = AppLocalizations.of(context);
+    final all = ref.watch(pendingScansProvider).value ?? const [];
+    final ready = [
+      for (final p in all)
+        if (p.status == PendingScanStatus.done) p,
+    ];
+    final queued = all.where((p) => p.status == PendingScanStatus.queued);
+    if (ready.isEmpty && queued.isEmpty) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      key: const Key('pending-banner'),
+      color: ready.isEmpty ? cs.surfaceContainerHighest : cs.tertiaryContainer,
+      child: ListTile(
+        leading: Icon(
+          ready.isEmpty ? Icons.cloud_upload_outlined : Icons.photo_camera,
+        ),
+        title: Text(
+          ready.isEmpty
+              ? t.pendingQueued(toPersianDigits('${queued.length}'))
+              : t.pendingReady(toPersianDigits('${ready.length}')),
+        ),
+        trailing: ready.isEmpty
+            ? null
+            : FilledButton.tonal(
+                key: const Key('pending-review'),
+                onPressed: () =>
+                    context.push(Routes.reviewPending(ready.first.id)),
+                child: Text(t.review),
+              ),
+      ),
+    );
+  }
+}

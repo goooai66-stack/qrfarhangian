@@ -1,0 +1,6 @@
+# سرور واسط کالری‌لنز — هر پکیج برای چیست:
+fastapi==0.162.2           # وب‌فریم‌ورک
+uvicorn[standard]==0.54.0  # اجرای سرور
+python-multipart==0.0.33   # دریافت عکس (multipart/form-data)
+httpx==0.28.1              # آداپتر OpenAI-compatible
+anthropic==2.6.0           # آداپتر Claude (SDK رسمی)
