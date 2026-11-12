@@ -27,12 +27,28 @@ void main() {
         if (gram.isNotEmpty) expect(gram.single.grams, 1, reason: f.id);
       }
     });
-    test('داده‌ی نمونه: ۲۰ آیتم، بدون عدد ساختگی', () {
-      // وقتی فایل واقعی جایگزین شد، این تست را حذف یا به‌روز کنید.
-      if (repo.foods.length != 20) return;
+    test('پایگاه واقعی: همه عدد دارند و کالری با درشت‌مغذی‌ها می‌خواند', () {
+      expect(repo.foods.length, greaterThanOrEqualTo(150));
       for (final f in repo.foods) {
-        expect(f.hasNutrition, isFalse, reason: f.id);
-        expect(f.verified, isFalse);
+        expect(f.hasNutrition, isTrue, reason: f.id);
+        final n = f.per100g;
+        final macro = 4 * n.protein! + 4 * n.carbs! + 9 * n.fat!;
+        expect(
+          (macro - n.kcal!).abs(),
+          lessThanOrEqualTo(n.kcal! * 0.2 < 25 ? 25 : n.kcal! * 0.2),
+          reason: '${f.id}: کالری با درشت‌مغذی‌ها نمی‌خواند',
+        );
+        for (final u in f.units) {
+          expect(u.grams, isNotNull, reason: '${f.id}/${u.unit}');
+          expect(u.grams!, greaterThan(0), reason: '${f.id}/${u.unit}');
+        }
+      }
+    });
+    test('عدد تخمینی هرگز «تأییدشده» نشان داده نمی‌شود', () {
+      for (final f in repo.foods) {
+        if (f.source?.contains('تخمین') ?? true) {
+          expect(f.verified, isFalse, reason: f.id);
+        }
       }
     });
     test('شناسه‌ی تکراری رد می‌شود', () {

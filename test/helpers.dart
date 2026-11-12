@@ -102,9 +102,10 @@ Future<void> disposeApp(WidgetTester tester) async {
   await tester.pump(Duration.zero);
 }
 
-/// پایگاه غذای واقعی اپ (assets/data/foods.json) از روی دیسک.
+/// داده‌ی نمونه‌ی ثابت برای تست‌های رابط کاربری: ۲۰ غذا با مقادیر خالی
+/// (مسیر «داده ناقص»). پایگاه واقعی اپ در test/data/foods سنجیده می‌شود.
 FoodRepository loadAppFoods() => FoodRepository.fromJsonString(
-  File(FoodRepository.assetPath).readAsStringSync(),
+  File('test/fixtures/foods_sample.json').readAsStringSync(),
 );
 
 /// تا وقتی [finder] پیدا شود پمپ می‌کند (برای صفحه‌هایی با انیمیشن بی‌پایان

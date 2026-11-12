@@ -7,9 +7,9 @@ from app.normalize import levenshtein, normalize
 from app.prompt import build_system_prompt
 from app.ratelimit import RateLimiter
 
-from .conftest import fake_json
+from .conftest import SAMPLE_FOODS, fake_json
 
-DB = FoodDB.load(Settings().foods_path)
+DB = FoodDB.load(SAMPLE_FOODS)
 
 
 def test_normalize_matches_app():
@@ -66,3 +66,21 @@ def test_rate_limiter_window():
     assert rl.check("a", 1) is None
     assert rl.check("a", 2) == pytest.approx(58)
     assert rl.check("a", 61) is None
+
+
+def test_real_food_database_loads_and_is_complete():
+    """پایگاه واقعی اپ: همه‌ی غذاها عدد دارند و کالری با درشت‌مغذی‌ها می‌خواند."""
+    import json
+
+    real = FoodDB.load(Settings().foods_path)
+    assert len(real.foods) >= 150
+    rows = json.loads(Settings().foods_path.read_text(encoding="utf-8"))
+    for f in rows:
+        n = f["per_100g"]
+        assert all(n[k] is not None and n[k] >= 0 for k in ("kcal", "protein", "carbs", "fat")), f["id"]
+        macro = 4 * n["protein"] + 4 * n["carbs"] + 9 * n["fat"]
+        assert abs(macro - n["kcal"]) <= max(25, 0.2 * n["kcal"]), f["id"]
+        assert all(u["grams"] and u["grams"] > 0 for u in f["units"]), f["id"]
+        # تا وقتی با منبع سنجیده نشده، باید «تقریبی» بماند.
+        assert f["verified"] is False or "تخمین" not in f["source"], f["id"]
+    assert "chelo: چلو" in build_system_prompt(real)

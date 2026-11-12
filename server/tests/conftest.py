@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 import json
 import struct
 import zlib
@@ -11,6 +12,9 @@ from app.main import create_app
 from app.providers.fake import FakeProvider
 
 # یک JPEG معتبر کوچک نیاز نیست؛ سرور فقط امضای فایل را بررسی می‌کند.
+# داده‌ی نمونه‌ی ثابت (۲۰ غذا با مقادیر خالی): تست‌ها به پایگاه واقعی وابسته نیستند.
+SAMPLE_FOODS = Path(__file__).resolve().parents[2] / "test" / "fixtures" / "foods_sample.json"
+
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 200
 
 
@@ -25,6 +29,7 @@ def png_bytes() -> bytes:
 @pytest.fixture
 def make_client(tmp_path):
     def _make(provider=None, **overrides):
+        overrides.setdefault("foods_path", SAMPLE_FOODS)
         s = Settings(db_path=str(tmp_path / "test.db"), **overrides)
         app = create_app(s, provider or FakeProvider())
         return TestClient(app)
